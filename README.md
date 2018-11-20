@@ -25,7 +25,7 @@ on lxplus:
     cd RecoBTag/DeepFlavour/data/
     wget http://home.fnal.gov/~verzetti//DeepFlavour/training/DeepFlavourNoSL.json
     cd -
-    git clone git@github.com:manuelfs/babymaker
+    git clone git@github.com:richstu/babymaker
     cd babymaker
     ./compile.sh
     ./scripts/cmsrun.sh <inputfile> <nevents=1000> <outname>
@@ -37,11 +37,11 @@ in the `babymaker` folder.
 #### CMSSW 9 Update
 Setup for running on 2017 re-reco data with tag 17Nov2017:
 
-    cmsrel CMSSW_9_4_0
-    cd CMSSW_9_4_0/src
+    cmsrel CMSSW_9_4_9
+    cd CMSSW_9_4_9/src
     cmsenv
 	git cms-merge-topic cms-met:METFixEE2017_949_v2
-    git clone git@github.com:manuelfs/babymaker
+    git clone git@github.com:richstu/babymaker
     cd babymaker
     ./compile.sh
 
@@ -60,7 +60,7 @@ Setup for running on 2018 data and DeepAK8:
     	cp NNKit/misc/lib/libmxnet_predict.so $CMSSW_BASE/external/$SCRAM_ARCH/lib/libmxnet_predict.so
     	# compile
     	scram b -j16
-    git clone git@github.com:manuelfs/babymaker
+    git clone git@github.com:richstu/babymaker
     cd babymaker
     ./compile.sh
 

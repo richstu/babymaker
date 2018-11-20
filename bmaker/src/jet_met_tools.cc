@@ -877,7 +877,9 @@ jet_met_tools::jet_met_tools(TString ijecName, bool doSys, bool fastSim, TString
               <<basename.c_str()<<"_Uncertainty_AK4PFchs.txt"<<endl<<endl;
     jecUncProvider.reset(new JetCorrectionUncertainty(basename+"_Uncertainty_AK4PFchs.txt"));
   }
-
+  // only add b-tagging weights if requested
+  string scaleFactorFile(getenv("CMSSW_BASE"));
+  string scaleFactorFile_deep(getenv("CMSSW_BASE"));
   // set btag working points
   TString cmssw(getenv("CMSSW_VERSION"));
   if(cmssw.Contains("CMSSW_7_4")){
@@ -889,25 +891,26 @@ jet_met_tools::jet_met_tools(TString ijecName, bool doSys, bool fastSim, TString
     CSVLoose  = 0.5426;
     CSVMedium = 0.8484;
     CSVTight  = 0.9535;
+    scaleFactorFile+="/src/babymaker/bmaker/data/CSVv2_Moriond17_B_H.csv";//CSVv2Moriond17_2017_1_26_BtoH.csv";//CSVv2Moriond17_comb.csv";
     DeepCSVLoose  = 0.2219;
     DeepCSVMedium = 0.6324;
     DeepCSVTight  = 0.8958;
+    scaleFactorFile_deep+="/src/babymaker/bmaker/data/DeepCSV_Moriond17_B_H.csv";//CSVv2Moriond17_2017_1_26_BtoH.csv";//DeepCSVMoriond17_comb.csv";
   }
   else if (cmssw.Contains("CMSSW_9") || cmssw.Contains("CMSSW_10")){
     CSVLoose  = 0.5803;
     CSVMedium = 0.8838;
     CSVTight  = 0.9693;
+    scaleFactorFile+="/src/babymaker/bmaker/data/CSVv2_94XSF_V2_B_F.csv";
     DeepCSVLoose  = 0.1522;
     DeepCSVMedium = 0.4941;
     DeepCSVTight  = 0.8001;
-    DeepFlavourLoose  = 0.0574;
-    DeepFlavourMedium = 0.4318;
-    DeepFlavourTight  = 0.9068;
+    scaleFactorFile_deep+="/src/babymaker/bmaker/data/DeepCSV_94XSF_V3_B_F.csv";
+    DeepFlavourLoose  = 0.0521;
+    DeepFlavourMedium = 0.3033;
+    DeepFlavourTight  = 0.7489;
   }
 
-  // only add b-tagging weights if requested
-  string scaleFactorFile(getenv("CMSSW_BASE"));
-  scaleFactorFile+="/src/babymaker/bmaker/data/CSVv2_Moriond17_B_H.csv";//CSVv2Moriond17_2017_1_26_BtoH.csv";//CSVv2Moriond17_comb.csv";
   calib_full_.reset(new BTagCalibration("csvv2", scaleFactorFile));
   for(const auto &op: op_pts_){
     readers_full_[op] = MakeUnique<BTagCalibrationReader>(op, "central", vector<string>{"up", "down"});
@@ -915,8 +918,6 @@ jet_met_tools::jet_met_tools(TString ijecName, bool doSys, bool fastSim, TString
     readers_full_.at(op)->load(*calib_full_, BTagEntry::FLAV_C, "comb");
     readers_full_.at(op)->load(*calib_full_, BTagEntry::FLAV_B, "comb");
   }
-  string scaleFactorFile_deep(getenv("CMSSW_BASE"));
-  scaleFactorFile_deep+="/src/babymaker/bmaker/data/DeepCSV_Moriond17_B_H.csv";//CSVv2Moriond17_2017_1_26_BtoH.csv";//DeepCSVMoriond17_comb.csv";
   calib_deep_full_.reset(new BTagCalibration("csvv2_deep", scaleFactorFile_deep));
   for(const auto &op: op_pts_){
     readers_deep_full_[op] = MakeUnique<BTagCalibrationReader>(op, "central", vector<string>{"up", "down"});
