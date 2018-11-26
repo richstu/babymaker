@@ -2173,7 +2173,7 @@ bmaker_full::bmaker_full(const edm::ParameterSet& iConfig):
   time(&startTime);
 
 
-  lepTool    = new lepton_tools();
+  lepTool    = new lepton_tools(outname);
   jetTool    = new jet_met_tools(jec_label, doSystematics, isFastSim, outname);
   photonTool = new photon_tools();
   mcTool     = new mc_tools();

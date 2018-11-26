@@ -22,8 +22,10 @@
 class lepton_tools{
 
 public:
-  lepton_tools();
+  lepton_tools(TString outname);
   ~lepton_tools();
+
+//   static TString OutName;
 
   ///////////////// LEPTON CUTS ///////////////////////
   const float SignalLeptonPtCut  = 20.0;
@@ -93,8 +95,9 @@ public:
   std::set<unsigned> badGlobalMuonSelector(edm::Handle<reco::VertexCollection> vtx, 
                                          edm::Handle<pat::MuonCollection> muons, bool selectClones);
 private:
-  static const TH2F sf_full_muon_medium, sf_full_muon_iso,sf_full_muon_vtx, sf_full_electron_medium, sf_full_electron_iso, sf_full_electron_tracking;
-  static const TH2D  sf_fast_muon_medium, sf_fast_muon_iso, sf_fast_electron_mediumiso; //sf_full_muon_tracking
+  static const TH2F sf_2016_full_muon_medium, sf_2016_full_muon_iso,sf_2016_full_muon_vtx, sf_2016_full_electron_medium, sf_2016_full_electron_iso, sf_2016_full_electron_tracking;
+  static const TH2F sf_2017_full_muon_medium, sf_2017_full_muon_iso, sf_2017_full_electron_medium, sf_2017_full_electron_iso;
+  static const TH2D sf_fast_muon_medium, sf_fast_muon_iso, sf_fast_electron_mediumiso; //sf_full_muon_tracking
 
   static std::pair<double, double> getScaleFactor(const reco::Muon &lep);
   static std::pair<double, double> getScaleFactor(const pat::Electron &lep);

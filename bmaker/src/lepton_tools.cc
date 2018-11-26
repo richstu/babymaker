@@ -26,6 +26,8 @@
 using namespace std;
 using namespace utilities;
 
+static TString OutName;
+
 namespace{
   template<typename T>
     T GetSF(const string &file_name, const string &item_name){
@@ -155,36 +157,28 @@ namespace{
 }
 
 //////////////////// Scale Factor loading
-
 //https://twiki.cern.ch/twiki/bin/view/CMS/SUSLeptonSF#Muons_AN1
-const TH2F lepton_tools::sf_full_muon_medium = GetSF<TH2F>("TnP_NUM_MediumID_DENOM_generalTracks_VAR_map_pt_eta.root",
-                                                           "SF");
-const TH2F lepton_tools::sf_full_muon_iso = GetSF<TH2F>("TnP_NUM_MiniIsoTight_DENOM_MediumID_VAR_map_pt_eta.root",
-                                                        "SF");
-
-const TH2F lepton_tools::sf_full_muon_vtx = GetSF<TH2F>("TnP_NUM_MediumIP2D_DENOM_LooseID_VAR_map_pt_eta.root",
-                                                        "SF");
-
-
 //Need to add muon tracking SF if it becomes available
 //const TH2D lepton_tools::sf_full_muon_tracking = GraphToHist(GetSF<TGraphAsymmErrors>("sf_full_muon_tracking.root",
 //                                                                                  "ratio_eta"));
-
 //https://twiki.cern.ch/twiki/bin/view/CMS/SUSLeptonSF#Electrons_AN1
-const TH2F lepton_tools::sf_full_electron_medium = GetSF<TH2F>("sf_full_electron_ID_and_iso_25_01_2017.root",
-                                                               "GsfElectronToCutBasedSpring15M");
-const TH2F lepton_tools::sf_full_electron_iso = GetSF<TH2F>("sf_full_electron_ID_and_iso_25_01_2017.root",
-                                                            "MVAVLooseElectronToMini");
-const TH2F lepton_tools::sf_full_electron_tracking = GetSF<TH2F>("egammaEffi_EGM2D.root",
-                                                                 "EGamma_SF2D");
+const TH2F lepton_tools::sf_2016_full_electron_medium   = GetSF<TH2F>("sf_full_electron_ID_and_iso_25_01_2017.root", "GsfElectronToCutBasedSpring15M");
+const TH2F lepton_tools::sf_2016_full_electron_iso      = GetSF<TH2F>("sf_full_electron_ID_and_iso_25_01_2017.root","MVAVLooseElectronToMini");
+const TH2F lepton_tools::sf_2016_full_electron_tracking = GetSF<TH2F>("egammaEffi_EGM2D.root","EGamma_SF2D");
 
+const TH2F lepton_tools::sf_2016_full_muon_medium = GetSF<TH2F>("TnP_NUM_MediumID_DENOM_generalTracks_VAR_map_pt_eta.root", "SF");
+const TH2F lepton_tools::sf_2016_full_muon_iso    = GetSF<TH2F>("TnP_NUM_MiniIsoTight_DENOM_MediumID_VAR_map_pt_eta.root", "SF");
+const TH2F lepton_tools::sf_2016_full_muon_vtx    = GetSF<TH2F>("TnP_NUM_MediumIP2D_DENOM_LooseID_VAR_map_pt_eta.root", "SF");
 
-const TH2D lepton_tools::sf_fast_muon_medium = GetSF<TH2D>("sf_fast_muon_medium.root",
-                                                           "histo2D");
-const TH2D lepton_tools::sf_fast_muon_iso = GetSF<TH2D>("sf_fast_muon_iso.root",
-                                                        "histo2D");
-const TH2D lepton_tools::sf_fast_electron_mediumiso = GetSF<TH2D>("sf_fast_electron_mediumiso.root",
-                                                                  "histo2D");
+const TH2F lepton_tools::sf_2017_full_electron_medium = GetSF<TH2F>("ElectronScaleFactors_Run2017.root", "Run2017_CutBasedMediumNoIso94XV1");
+const TH2F lepton_tools::sf_2017_full_electron_iso    = GetSF<TH2F>("ElectronScaleFactors_Run2017.root", "Run2017_CutBasedMediumNoIso94XV1");
+
+const TH2F lepton_tools::sf_2017_full_muon_medium = GetSF<TH2F>("Muon_Run2017_SF_ID.root", "NUM_MediumID_DEN_genTracks_pt_abseta");
+const TH2F lepton_tools::sf_2017_full_muon_iso    = GetSF<TH2F>("Muon_MinIso02_wrtMediumID_SF_Run2017.root","TnP_MC_NUM_MiniIso02Cut_DEN_MediumID_PAR_pt_eta");
+
+const TH2D lepton_tools::sf_fast_muon_medium        = GetSF<TH2D>("sf_fast_muon_medium.root", "histo2D");
+const TH2D lepton_tools::sf_fast_muon_iso           = GetSF<TH2D>("sf_fast_muon_iso.root", "histo2D");
+const TH2D lepton_tools::sf_fast_electron_mediumiso = GetSF<TH2D>("sf_fast_electron_mediumiso.root", "histo2D");
 
 //////////////////// Muons
 bool lepton_tools::isSignalMuon(const pat::Muon &lep, edm::Handle<reco::VertexCollection> vtx, double lepIso){
@@ -459,15 +453,19 @@ pair<double, double> lepton_tools::getScaleFactor(const reco::Muon &lep){
   double pt = lep.pt();
   double eta = lep.eta();
   double abseta = fabs(eta);
-  vector<pair<double, double> > sfs{
-    GetSF(sf_full_muon_medium, pt, abseta, false),
-      make_pair(1., 0.03),//Systematic uncertainty
-      GetSF(sf_full_muon_iso, pt, abseta, false),
-      make_pair(1., 0.03),//Systematic uncertainty
-      GetSF(sf_full_muon_vtx, pt, abseta, false),
-      make_pair(1., 0.03)//Systematic uncertainty
-      //GetSF(sf_full_muon_tracking, pt, eta)//Asymmetric in eta
-      };
+  vector<pair<double, double> > sfs;
+  if(OutName.Contains("2016")) {
+  	sfs = {GetSF(sf_2016_full_muon_medium, pt, abseta, false), make_pair(1., 0.03),//Systematic uncertainty
+           GetSF(sf_2016_full_muon_iso,    pt, abseta, false), make_pair(1., 0.03),//Systematic uncertainty
+           GetSF(sf_2016_full_muon_vtx,    pt, abseta, false), make_pair(1., 0.03) //Systematic uncertainty
+         //GetSF(sf_full_muon_tracking, pt, eta)//Asymmetric in eta
+          };
+  }
+  else if(OutName.Contains("2017")) {
+  	sfs = {GetSF(sf_2017_full_muon_medium, pt, abseta, false), make_pair(1., 0.03),//Systematic uncertainty
+           GetSF(sf_2017_full_muon_iso,    pt, abseta, false), make_pair(1., 0.03) //Systematic uncertainty
+          };
+  }
   return accumulate(sfs.cbegin(), sfs.cend(), make_pair(1., 0.), MergeSF);
 }
 
@@ -480,13 +478,21 @@ pair<double, double> lepton_tools::getScaleFactor(const pat::Electron &lep){
   double pt = lep.superCluster()->energy()*sin(lep.superClusterPosition().theta());
   double eta = lep.superCluster()->eta();
   double abseta = fabs(eta);
-  vector<pair<double, double> > sfs{
-    GetSF(sf_full_electron_medium, pt, abseta),
-      GetSF(sf_full_electron_iso, pt, abseta),
-      GetSF(sf_full_electron_tracking, eta, pt),//Axes swapped, asymmetric in eta
-      //make_pair(1., pt<20. ? 0.03 : 0.)//Systematic uncertainty
-      make_pair(1., pt<20. || pt >80. ? 0.01 : 0.)//Systematic uncertainty
-      };
+  vector<pair<double, double> > sfs;
+  if(OutName.Contains("2016")) {
+  	sfs = {GetSF(sf_2016_full_electron_medium,  pt, abseta, false), make_pair(1., 0.03),//Systematic uncertainty
+           GetSF(sf_2016_full_electron_iso,     pt, abseta, false), make_pair(1., 0.03),//Systematic uncertainty
+           GetSF(sf_2016_full_electron_tracking,pt, abseta, false), make_pair(1., 0.03),//Systematic uncertainty
+           make_pair(1., pt<20. || pt >80. ? 0.01 : 0.)//Systematic uncertainty
+         //GetSF(sf_full_muon_tracking, pt, eta)//Asymmetric in eta
+          };
+  }
+  else if(OutName.Contains("2017")) {
+  	sfs = {GetSF(sf_2017_full_electron_medium, pt, abseta, false), make_pair(1., 0.03),//Systematic uncertainty
+           GetSF(sf_2017_full_electron_iso,    pt, abseta, false), make_pair(1., 0.03),//Systematic uncertainty
+           make_pair(1., pt<20. || pt >80. ? 0.01 : 0.)//Systematic uncertainty
+          };
+  }
   return accumulate(sfs.cbegin(), sfs.cend(), make_pair(1., 0.), MergeSF);
 }
 
@@ -746,8 +752,12 @@ set<unsigned> lepton_tools::badGlobalMuonSelector(edm::Handle<reco::VertexCollec
 }
 
 
-lepton_tools::lepton_tools(){
-}
+
+lepton_tools::lepton_tools(TString outname){
+//   lepton_tools::OutName(outname){
+  OutName = outname;
+  if(OutName.Contains("2017")) cout << "Using 2017 SFs" << endl;
+  }
 
 lepton_tools::~lepton_tools(){
 }
