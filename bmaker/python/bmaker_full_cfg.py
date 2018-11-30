@@ -50,10 +50,11 @@ else: fastsim = False
     
 ## JECs must be undone and reapplied when rerunning b-tagging
 ## => if doJEC = False, DeepCSV discriminator will not be included
-doJEC = False
+doJEC = True
 
-#if doJEC: jets_label = "updatedPatJetsTransientCorrectedUpdatedJEC"
-if doJEC: jets_label = "updatedPatJetsTransientCorrectedDeepFlavour"
+# if doJEC: jets_label = "updatedPatJetsTransientCorrectedUpdatedJEC"
+# if doJEC: jets_label = "updatedPatJetsTransientCorrectedDeepFlavor"
+if doJEC: jets_label = "updatedPatJetsUpdatedJEC"
 else: jets_label = "slimmedJets"
 
 # to apply JECs with txt files in babymaker, 
@@ -74,7 +75,7 @@ elif "RunIISpring16MiniAOD" in outName:
 elif "RunIISummer16MiniAOD" in outName:
   jecLabel = 'Summer16_23Sep2016V3_MC'
 elif "RunIIFall17MiniAODv2" in outName:
-  jecLabel = 'Fall17_17Nov2017_V8_MC'
+  jecLabel = 'Fall17_17Nov2017_V32_MC'
 elif "Run2017" in outName:
   jecLabel = 'Summer16_23Sep2016GV3_DATA'
 
@@ -135,7 +136,7 @@ process.baby_full = cms.EDAnalyzer('bmaker_full',
                                     inputFiles = cms.vstring(options.inputFiles),
                                     json = cms.string(options.json),
                                     jec = cms.string(jecBabyLabel),
-                                    met = cms.InputTag("slimmedMETs"),
+                                    met = cms.InputTag("slimmedMETsModifiedMET"),
                                     met_nohf = cms.InputTag("slimmedMETsNoHF"),
                                     jets = cms.InputTag(jets_label),
                                     nEventsSample = cms.uint32(options.nEventsSample),
@@ -178,6 +179,8 @@ if doJEC:
     ## From https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookJetEnergyCorrections#JecSqliteFile
     process.load("CondCore.DBCommon.CondDBCommon_cfi")
     from CondCore.DBCommon.CondDBSetup_cfi import CondDBSetup
+    jecLabel = 'Fall17_17Nov2017_V32_94X_MC'
+    jecCorrLabel = 'Fall17_17Nov2017_V32_94X_MC'
     process.jec = cms.ESSource("PoolDBESSource",CondDBSetup,
                                connect = cms.string('sqlite_fip:babymaker/data/jec/'+jecLabel+'.db'),
                                toGet   = cms.VPSet(
@@ -210,12 +213,14 @@ if doJEC:
     ## If you only want to re-correct and get the proper uncertainties, no reclustering
     runMetCorAndUncFromMiniAOD(process,
                                isData = isData,
-							   fixEE2017 = True,
-							   fixEE2017Params = {'userawPt': True, 'ptThreshold':50.0, 'miniEtaThreshold':2.65, 'maxEtaThreshold':3.139},
-							   postfix = "ModifiedMET"
-							   
+                               fixEE2017 = True,
+                               fixEE2017Params = {'userawPt': True, 'ptThreshold':50.0, 'minEtaThreshold':2.65, 'maxEtaThreshold':3.139},
+                               postfix = "ModifiedMET"
     )
-
+# Include process.dump* in the path to have all the event ojects printed out
 process.dump=cms.EDAnalyzer('EventContentAnalyzer')
-process.p = cms.Path(process.baby_full)
+process.p = cms.Path(process.patJetCorrFactorsUpdatedJEC*
+                     process.updatedPatJetsUpdatedJEC*
+					 process.fullPatMetSequenceModifiedMET*
+					 process.baby_full)
 
