@@ -754,9 +754,7 @@ set<unsigned> lepton_tools::badGlobalMuonSelector(edm::Handle<reco::VertexCollec
 
 
 lepton_tools::lepton_tools(TString outname){
-//   lepton_tools::OutName(outname){
   OutName = outname;
-  if(OutName.Contains("2017")) cout << "Using 2017 SFs" << endl;
   }
 
 lepton_tools::~lepton_tools(){

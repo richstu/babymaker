@@ -199,12 +199,7 @@ if doJEC:
       process,
       jetSource = cms.InputTag('slimmedJets'),
       labelName = 'UpdatedJEC',
-      jetCorrections = ('AK4PFchs', cms.vstring(jecLevels), 'None'),
-      btagDiscriminators = ["pfDeepCSVJetTags:probudsg", 
-                            "pfDeepCSVJetTags:probb", 
-                            "pfDeepCSVJetTags:probc", 
-                            "pfDeepCSVJetTags:probbb", 
-                            "pfDeepCSVJetTags:probcc"]
+      jetCorrections = ('AK4PFchs', cms.vstring(jecLevels), 'None')
     )
 
     ###### Apply new JECs to MET
@@ -217,9 +212,11 @@ if doJEC:
                                fixEE2017Params = {'userawPt': True, 'ptThreshold':50.0, 'minEtaThreshold':2.65, 'maxEtaThreshold':3.139},
                                postfix = "ModifiedMET"
     )
+
 # Include process.dump* in the path to have all the event ojects printed out
 process.dump=cms.EDAnalyzer('EventContentAnalyzer')
-process.p = cms.Path(process.patJetCorrFactorsUpdatedJEC*
+process.p = cms.Path(
+                     process.patJetCorrFactorsUpdatedJEC*
                      process.updatedPatJetsUpdatedJEC*
 					 process.fullPatMetSequenceModifiedMET*
 					 process.baby_full)
