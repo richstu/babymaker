@@ -1313,16 +1313,33 @@ bool bmaker_full::writeTriggers(const edm::TriggerNames &names,
     }
   }
   // OR-ing triggers used in RA4
-  vector<TString> trigs_ra4({"HLT_PFHT500_PFMET100_PFMHT100_IDTight_v","HLT_Mu15_IsoVVVL_PFHT450_v",
-			     "HLT_Ele15_IsoVVVL_PFHT450_v","HLT_PFMET120_PFMHT120_IDTight_v",
-                             "HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_v","HLT_IsoMu24_v","HLT_Mu50_v",
-                             "HLT_Ele115_CaloIdVT_GsfTrkIdT_v","HLT_Ele27_WPTight_Gsf_v",
+  vector<TString> trigs_ra4({"HLT_PFHT500_PFMET100_PFMHT100_IDTight_v",
+                             "HLT_Mu15_IsoVVVL_PFHT450_v",
+                             "HLT_Ele15_IsoVVVL_PFHT450_v",
+                             "HLT_PFMET120_PFMHT120_IDTight_v",
+                             "HLT_PFMET120_PFMHT120_IDTight_PFHT60_v",
+                             "HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_v",
+                             "HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60_v",
+                             "HLT_IsoMu24_v",
+                             "HLT_Mu50_v",
+                             "HLT_Ele115_CaloIdVT_GsfTrkIdT_v",
+                             "HLT_Ele27_WPTight_Gsf_v",
                              "HLT_Ele28_eta2p1_WPTight_Gsf_HT150_v"});
-  vector<TString> trigs_met({"HLT_PFHT500_PFMET100_PFMHT100_IDTight_v","HLT_PFMET120_PFMHT120_IDTight_v",
-		             "HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_v"});
-  vector<TString> trigs_vvvl({"HLT_Mu15_IsoVVVL_PFHT350_v", "HLT_Mu15_IsoVVVL_PFHT400_v", "HLT_Mu50_IsoVVVL_PFHT400_v", 
-  "HLT_Ele15_IsoVVVL_PFHT350_v", "HLT_Ele15_IsoVVVL_PFHT400_v", "HLT_Ele50_IsoVVVL_PFHT400_v"});
-  vector<TString> trigs_lep({"HLT_IsoMu24_v","HLT_Mu50_v","HLT_Ele115_CaloIdVT_GsfTrkIdT_v","HLT_Ele28_eta2p1_WPTight_Gsf_HT150_v"});
+  vector<TString> trigs_met({"HLT_PFHT500_PFMET100_PFMHT100_IDTight_v",
+                             "HLT_PFMET120_PFMHT120_IDTight_v",
+                             "HLT_PFMET120_PFMHT120_IDTight_PFHT60_v",
+		                     "HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_v",
+                             "HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60_v"});
+  vector<TString> trigs_vvvl({"HLT_Mu15_IsoVVVL_PFHT350_v",
+                              "HLT_Mu15_IsoVVVL_PFHT400_v",
+                              "HLT_Mu50_IsoVVVL_PFHT400_v", 
+                              "HLT_Ele15_IsoVVVL_PFHT350_v",
+                              "HLT_Ele15_IsoVVVL_PFHT400_v",
+                              "HLT_Ele50_IsoVVVL_PFHT400_v"});
+  vector<TString> trigs_lep({"HLT_IsoMu24_v",
+                             "HLT_Mu50_v",
+                             "HLT_Ele115_CaloIdVT_GsfTrkIdT_v",
+                             "HLT_Ele28_eta2p1_WPTight_Gsf_HT150_v"});
   baby.trig_ra4() = false;
   baby.trig_met() = false;
   baby.trig_vvvl() = false;
