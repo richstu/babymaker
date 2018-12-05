@@ -344,7 +344,7 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   edm::Handle<GenEventInfoProduct> gen_event_info;
   iEvent.getByToken(tok_generator_, gen_event_info);
   //assuming baby.nisr() is filled
-  writeWeights(sig_leps, gen_event_info, lhe_info);
+  writeWeights(sig_leps, gen_event_info, lhe_info, iEvent);
 
   ////////////////// Filling the tree //////////////////
   baby.Fill();
@@ -2009,12 +2009,12 @@ double bmaker_full::calculateRebalancedMET(unsigned int jetIdx, double mu, doubl
 }
 
 void bmaker_full::writeWeights(const vCands &sig_leps, edm::Handle<GenEventInfoProduct> &gen_event_info, 
-                               edm::Handle<LHEEventProduct> &lhe_info){
+                               edm::Handle<LHEEventProduct> &lhe_info, const edm::Event& iEvent){
   if (debug) cout<<"INFO: Filling weights..."<<endl;
 
   // Initializing weights
   if(isData) {
-    baby.eff_trig() = baby.w_btag() = baby.w_btag_loose() = baby.w_btag_tight() = baby.w_pu() = baby.w_pu() = baby.w_lep() = baby.w_fs_lep() = baby.w_toppt() = 1.;
+    baby.eff_trig() = baby.w_btag() = baby.w_btag_loose() = baby.w_btag_tight() = baby.w_pu() = baby.w_pu() = baby.w_lep() = baby.w_fs_lep() = baby.w_toppt() = baby.w_prefire() = 1.;
     baby.eff_jetid() = baby.w_lumi() = baby.weight() = baby.weight_rpv() = 1.;
     return;
   }
@@ -2050,6 +2050,18 @@ void bmaker_full::writeWeights(const vCands &sig_leps, edm::Handle<GenEventInfoP
     baby.sys_fs_lep()[1] = sf_fs-unc_fs; 
   } else baby.w_fs_lep() = 1.;
 
+  // L1 Prefire weight
+  edm::Handle<double> prefweight;
+  edm::Handle<double> prefweightup, prefweightdown;
+  iEvent.getByToken(tok_prefweight_,     prefweight);
+  iEvent.getByToken(tok_prefweightup_,   prefweightup);
+  iEvent.getByToken(tok_prefweightdown_, prefweightdown);
+  baby.w_prefire() = *prefweight;
+  baby.sys_prefire().resize(2,1.);
+  // prefweightdown(up) is upper(lower) value
+  baby.sys_prefire()[0] = *prefweightdown;
+  baby.sys_prefire()[1] = *prefweightup;
+
   // VVVL trigger efficiency
   baby.eff_trig() = weightTool->triggerEfficiency(baby.nmus(), baby.nels(), baby.met(), baby.sys_trig());
   
@@ -2059,9 +2071,9 @@ void bmaker_full::writeWeights(const vCands &sig_leps, edm::Handle<GenEventInfoP
   ////////////  Total weight  ////////////
   // w_btag calculated in writeJets
   // w_toppt and sys_isr calculated in writeMC
-  baby.weight() = baby.w_lumi() * baby.w_lep() * baby.w_fs_lep() * baby.w_btag() 
+  baby.weight() = baby.w_lumi() * baby.w_lep() * baby.w_fs_lep() * baby.w_btag() * baby.w_prefire()
     * baby.eff_jetid();
-  baby.weight_rpv() = baby.w_lumi() * baby.w_lep() * baby.w_fs_lep() * baby.w_btag()
+  baby.weight_rpv() = baby.w_lumi() * baby.w_lep() * baby.w_fs_lep() * baby.w_btag() * baby.w_prefire()
     * baby.w_pu() * baby.eff_jetid();
 
   /////// Systematics that do not change central value /////////
@@ -2165,7 +2177,10 @@ bmaker_full::bmaker_full(const edm::ParameterSet& iConfig):
   tok_extLHEProducer_(consumes<LHEEventProduct>(edm::InputTag("externalLHEProducer"))),
   tok_source_(consumes<LHEEventProduct>(edm::InputTag("source"))),
   tok_generator_(consumes<GenEventInfoProduct>(edm::InputTag("generator"))),
-  tok_genlumiheader_(consumes<GenLumiInfoHeader,edm::InLumi>(edm::InputTag("generator")))
+  tok_genlumiheader_(consumes<GenLumiInfoHeader,edm::InLumi>(edm::InputTag("generator"))),
+  tok_prefweight_(consumes< double >(edm::InputTag("prefiringweight:NonPrefiringProb"))),
+  tok_prefweightup_(consumes< double >(edm::InputTag("prefiringweight:NonPrefiringProbUp"))),
+  tok_prefweightdown_(consumes< double >(edm::InputTag("prefiringweight:NonPrefiringProbDown")))
 /* DAK8
   tok_deepJetToken_(consumes<edm::View<pat::Jet> >(edm::InputTag("slimmedJetsAK8")))
 */

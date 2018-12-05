@@ -455,6 +455,7 @@ float w_toppt
 float w_isr
 float w_lep
 float w_fs_lep
+float w_prefire
 std::vector<float> w_pdf
 float eff_trig
 float eff_jetid
@@ -518,6 +519,7 @@ std::vector<float> sys_udsghig_deep_proc
 std::vector<float> sys_isr
 std::vector<float> sys_lep
 std::vector<float> sys_fs_lep
+std::vector<float> sys_prefire
 std::vector<float> sys_fs_bctag
 std::vector<float> sys_fs_bctag_deep
 std::vector<float> sys_fs_udsgtag

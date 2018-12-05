@@ -148,7 +148,7 @@ public:
 
   // for filling additional event weights
   void writeWeights(const vCands &sig_leps, edm::Handle<GenEventInfoProduct> &gen_event_info, 
-		    edm::Handle<LHEEventProduct> &lhe_info);
+		    edm::Handle<LHEEventProduct> &lhe_info, const edm::Event& iEvent);
 
   std::vector<TString> trig_name;
 
@@ -210,6 +210,9 @@ private:
   edm::EDGetTokenT<bool> tok_badChCandFilter_;
   edm::EDGetTokenT<bool> tok_badPFMuonFilter_;
   edm::EDGetTokenT<GenLumiInfoHeader> tok_genlumiheader_;
+  edm::EDGetTokenT<double> tok_prefweight_;
+  edm::EDGetTokenT<double> tok_prefweightup_;
+  edm::EDGetTokenT<double> tok_prefweightdown_;
 
 /* DAK8
   edm::EDGetTokenT<edm::View<pat::Jet>> tok_deepJetToken_;
