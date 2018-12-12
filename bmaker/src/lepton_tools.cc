@@ -395,14 +395,26 @@ bool lepton_tools::vertexElectron(const pat::Electron &lep, edm::Handle<reco::Ve
 
 double lepton_tools::getEffAreaElectron(double eta){
   double abseta = fabs(eta);
-  if (abseta < 1) return 0.1752;
-  else if (abseta < 1.479) return 0.1862;
-  else if (abseta < 2.0) return 0.1411;
-  else if (abseta < 2.2) return 0.1534;
-  else if (abseta < 2.3) return 0.1903;
-  else if (abseta < 2.4) return 0.2243;
-  else if (abseta < 2.5) return 0.2687;
-  else return 0;
+  if (outname_lt.Contains("Run2017") || outname_lt.Contains("RunIIFall17") ||
+      outname_lt.Contains("Run2018") || outname_lt.Contains("RunIIAutumn18")) {
+    if (abseta < 1) return 0.1440;
+    else if (abseta < 1.479) return 0.1562;
+    else if (abseta < 2.0) return 0.1032;
+    else if (abseta < 2.2) return 0.0859;
+    else if (abseta < 2.3) return 0.1116;
+    else if (abseta < 2.4) return 0.1321;
+    else if (abseta < 2.5) return 0.1654;
+    else return 0;
+  } else {
+    if (abseta < 1) return 0.1752;
+    else if (abseta < 1.479) return 0.1862;
+    else if (abseta < 2.0) return 0.1411;
+    else if (abseta < 2.2) return 0.1534;
+    else if (abseta < 2.3) return 0.1903;
+    else if (abseta < 2.4) return 0.2243;
+    else if (abseta < 2.5) return 0.2687;
+    else return 0;
+  }
 }
 
 double lepton_tools::getRelIsolation(const pat::Electron &lep, double rho){

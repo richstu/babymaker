@@ -49,6 +49,11 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   baby.lumiblock() = iEvent.luminosityBlock();
   baby.type() = event_tools::type(outname.Data());
 
+  baby.is2016() = false; baby.is2017() = false; baby.is2018() = false; 
+  //ATTN: validate these conditions for FastSim throughout babymaker!
+  if (outname.Contains("Run2016") || outname.Contains("RunIISummer16")) baby.is2016() = true;
+  if (outname.Contains("Run2017") || outname.Contains("RunIIFall17")) baby.is2017() = true;
+  if (outname.Contains("Run2018") || outname.Contains("RunIIAutumn18")) baby.is2018() = true;
   ////////////////////// Trigger /////////////////////
   if (debug) cout<<"INFO: Processing trigger info..."<<endl;
   bool triggerFired;

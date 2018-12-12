@@ -4,6 +4,9 @@ int run
 int lumiblock
 Long64_t event
 int type
+bool is2016
+bool is2017
+bool is2018
 ## stitch is used to stitch an MC sample with its corresponding HT-bin sample
 bool stitch
 bool stitch_met
