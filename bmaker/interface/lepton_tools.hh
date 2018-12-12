@@ -25,8 +25,6 @@ public:
   lepton_tools(TString outname);
   ~lepton_tools();
 
-//   static TString OutName;
-
   ///////////////// LEPTON CUTS ///////////////////////
   const float SignalLeptonPtCut  = 20.0;
   const float VetoLeptonPtCut    = 10.0;

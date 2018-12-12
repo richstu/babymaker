@@ -68,7 +68,8 @@ fi
 ## Scramming CMSSW code
 if [ $# -ne 0 ] && [ "$1" == "clean" ]
 then
-    scram b clean
+    # scram b clean
+    echo "Cleaning only babymaker. To clean CMSSW, run scram b clean"
 else
     scram b -j$(getconf _NPROCESSORS_ONLN)
 fi

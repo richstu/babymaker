@@ -47,14 +47,6 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   baby.run() = iEvent.id().run();
   baby.event() = iEvent.id().event();
   baby.lumiblock() = iEvent.luminosityBlock();
-  // We are applying the golden JSON with lumisToProcess in bmaker_full_cfg.py
-  if(isData){
-    if (debug) cout<<"INFO: Checking JSON..."<<endl;
-    baby.json4p0()  = baby.run() <= 275125;
-    baby.json12p9() = baby.run() <= 276811;
-  } else {
-    baby.json4p0() = baby.json12p9() = true;
-  }
   baby.type() = event_tools::type(outname.Data());
 
   ////////////////////// Trigger /////////////////////
@@ -186,9 +178,6 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   // if (baby.njets()>=4) keep_event = true;
   // if (!keep_event && isData) return;
   if (addBTagWeights) writeBTagWeights(alljets, all_baby_jets, all_baby_jets_idx);
-  writeHiggVars(all_baby_jets, baby.jets_csv(), baby.jets_h1(), baby.jets_h2(), 
-                baby.jets_islep(), baby.nbl(), baby.nbm(), baby.nbt(),
-                baby.hig_am(), baby.hig_dm(), baby.hig_drmax(), baby.hig_bin(), baby.mct());
   writeHiggVars(all_baby_jets, baby.jets_csvd(), baby.jets_h1d(), baby.jets_h2d(), 
                 baby.jets_islep(), baby.nbdl(), baby.nbdm(), baby.nbdt(),
                 baby.higd_am(), baby.higd_dm(), baby.higd_drmax(), baby.higd_bin(), baby.mctd());
@@ -407,7 +396,7 @@ vector<LVector> bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
                             vector<double> &jetsMuonEnergyFrac){
   vector<LVector> all_baby_jets;
   vCands jets_ra2;
-  LVector jetsys_p4, jetsys_nob_p4, jetsys_nobd_p4;
+  LVector jetsys_p4, jetsys_nobd_p4;
   baby.njets() = 0; baby.nbl() = 0; baby.nbm() = 0;  baby.nbt() = 0;
   baby.nbdl() = 0; baby.nbdm() = 0;  baby.nbdt() = 0;
   baby.nbdfl() = 0; baby.nbdfm() = 0;  baby.nbdft() = 0;
@@ -483,7 +472,6 @@ vector<LVector> bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
         baby.st() += jetp4.pt();
         if(csv > jetTool->CSVLoose)  baby.nbl()++;
         if(csv > jetTool->CSVMedium) baby.nbm()++;
-        else jetsys_nob_p4 += jet.p4();
         if(csv > jetTool->CSVTight)  baby.nbt()++;
 
         if(csvd > jetTool->DeepCSVLoose)  baby.nbdl()++;
@@ -585,10 +573,6 @@ vector<LVector> bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
   baby.jetsys_eta() = jetsys_p4.eta();
   baby.jetsys_phi() = jetsys_p4.phi();
   baby.jetsys_m()   = jetsys_p4.mass();
-  baby.jetsys_nob_pt()  = jetsys_nob_p4.pt();
-  baby.jetsys_nob_eta() = jetsys_nob_p4.eta();
-  baby.jetsys_nob_phi() = jetsys_nob_p4.phi();
-  baby.jetsys_nob_m()   = jetsys_nob_p4.mass();
   baby.jetsys_nobd_pt()  = jetsys_nobd_p4.pt();
   baby.jetsys_nobd_eta() = jetsys_nobd_p4.eta();
   baby.jetsys_nobd_phi() = jetsys_nobd_p4.phi();
@@ -604,10 +588,10 @@ void bmaker_full::writeBTagWeights(edm::Handle<pat::JetCollection> alljets,
 		      std::vector<reco::Candidate::LorentzVector>  &all_baby_jets,
 		      std::vector<unsigned> &all_baby_jet_idx){
 
-  baby.w_btag() = baby.w_btag_loose() = baby.w_btag_tight() = baby.w_bhig() = 1.;
+  baby.w_btag() = baby.w_btag_loose() = baby.w_btag_tight() = 1.;
   baby.w_btag_deep() = baby.w_btag_loose_deep() = baby.w_btag_tight_deep() = baby.w_bhig_deep() = 1.;
 
-  baby.w_btag_proc() = baby.w_btag_loose_proc() = baby.w_btag_tight_proc() = baby.w_bhig_proc() = 1.;
+  baby.w_btag_proc() = baby.w_btag_loose_proc() = baby.w_btag_tight_proc() = 1.;
   baby.w_btag_deep_proc() = baby.w_btag_loose_deep_proc() = baby.w_btag_tight_deep_proc() = baby.w_bhig_deep_proc() = 1.;
   if (doSystematics){ 
     baby.sys_bctag().resize(2, 1.); baby.sys_udsgtag().resize(2, 1.);
@@ -616,7 +600,6 @@ void bmaker_full::writeBTagWeights(edm::Handle<pat::JetCollection> alljets,
     baby.sys_bctag_loose_deep().resize(2, 1.); baby.sys_udsgtag_loose_deep().resize(2, 1.);
     baby.sys_bctag_tight().resize(2, 1.); baby.sys_udsgtag_tight().resize(2, 1.);
     baby.sys_bctag_tight_deep().resize(2, 1.); baby.sys_udsgtag_tight_deep().resize(2, 1.);
-    baby.sys_bchig().resize(2, 1.); baby.sys_udsghig().resize(2, 1.);
     baby.sys_bchig_deep().resize(2, 1.); baby.sys_udsghig_deep().resize(2, 1.);
 
     baby.sys_bctag_proc().resize(2, 1.); baby.sys_udsgtag_proc().resize(2, 1.);
@@ -625,12 +608,10 @@ void bmaker_full::writeBTagWeights(edm::Handle<pat::JetCollection> alljets,
     baby.sys_bctag_loose_deep_proc().resize(2, 1.); baby.sys_udsgtag_loose_deep_proc().resize(2, 1.);
     baby.sys_bctag_tight_proc().resize(2, 1.); baby.sys_udsgtag_tight_proc().resize(2, 1.);
     baby.sys_bctag_tight_deep_proc().resize(2, 1.); baby.sys_udsgtag_tight_deep_proc().resize(2, 1.);
-    baby.sys_bchig_proc().resize(2, 1.); baby.sys_udsghig_proc().resize(2, 1.);
     baby.sys_bchig_deep_proc().resize(2, 1.); baby.sys_udsghig_deep_proc().resize(2, 1.);
     if (isFastSim) {
       baby.sys_fs_bctag().resize(2, 1.); baby.sys_fs_udsgtag().resize(2, 1.);
       baby.sys_fs_bctag_deep().resize(2, 1.); baby.sys_fs_udsgtag_deep().resize(2, 1.);
-      baby.sys_fs_bchig().resize(2, 1.); baby.sys_fs_udsghig().resize(2, 1.);
       baby.sys_fs_bchig_deep().resize(2, 1.); baby.sys_fs_udsghig_deep().resize(2, 1.);
     }
   }
@@ -645,7 +626,6 @@ void bmaker_full::writeBTagWeights(edm::Handle<pat::JetCollection> alljets,
       baby.w_btag()       *= jetTool->jetBTagWeight(jet, jetp4, BTagEntry::OP_MEDIUM, ctr, ctr, false);
       baby.w_btag_loose() *= jetTool->jetBTagWeight(jet, jetp4, BTagEntry::OP_LOOSE, ctr, ctr, false);
       baby.w_btag_tight() *= jetTool->jetBTagWeight(jet, jetp4, BTagEntry::OP_TIGHT, ctr, ctr, false);
-      baby.w_bhig() *= jetTool->jetBTagWeight(jet, jetp4, all_ops, ctr, ctr, false);
       // with deepCSV
       baby.w_btag_deep()       *= jetTool->jetBTagWeight(jet, jetp4, BTagEntry::OP_MEDIUM, ctr, ctr, true);
       baby.w_btag_loose_deep() *= jetTool->jetBTagWeight(jet, jetp4, BTagEntry::OP_LOOSE, ctr, ctr, true);
@@ -656,7 +636,6 @@ void bmaker_full::writeBTagWeights(edm::Handle<pat::JetCollection> alljets,
       baby.w_btag_proc()       *= jetTool->jetBTagWeight(jet, jetp4, BTagEntry::OP_MEDIUM, ctr, ctr, false, true);
       baby.w_btag_loose_proc() *= jetTool->jetBTagWeight(jet, jetp4, BTagEntry::OP_LOOSE, ctr, ctr, false, true);
       baby.w_btag_tight_proc() *= jetTool->jetBTagWeight(jet, jetp4, BTagEntry::OP_TIGHT, ctr, ctr, false, true);
-      baby.w_bhig_proc() *= jetTool->jetBTagWeight(jet, jetp4, all_ops, ctr, ctr, false, true);
       // with deepCSV
       baby.w_btag_deep_proc()       *= jetTool->jetBTagWeight(jet, jetp4, BTagEntry::OP_MEDIUM, ctr, ctr, true, true);
       baby.w_btag_loose_deep_proc() *= jetTool->jetBTagWeight(jet, jetp4, BTagEntry::OP_LOOSE, ctr, ctr, true, true);
@@ -689,10 +668,6 @@ void bmaker_full::writeBTagWeights(edm::Handle<pat::JetCollection> alljets,
         baby.sys_bctag_tight_deep()[1]   *= jetTool->jetBTagWeight(jet, jetp4, BTagEntry::OP_TIGHT, vdn, ctr, true);
         baby.sys_udsgtag_tight_deep()[0] *= jetTool->jetBTagWeight(jet, jetp4, BTagEntry::OP_TIGHT, ctr, vup, true);
         baby.sys_udsgtag_tight_deep()[1] *= jetTool->jetBTagWeight(jet, jetp4, BTagEntry::OP_TIGHT, ctr, vdn, true);
-        baby.sys_bchig()[0]   *= jetTool->jetBTagWeight(jet, jetp4, all_ops, vup, ctr, false);
-        baby.sys_bchig()[1]   *= jetTool->jetBTagWeight(jet, jetp4, all_ops, vdn, ctr, false);
-        baby.sys_udsghig()[0] *= jetTool->jetBTagWeight(jet, jetp4, all_ops, ctr, vup, false);
-        baby.sys_udsghig()[1] *= jetTool->jetBTagWeight(jet, jetp4, all_ops, ctr, vdn, false);
         baby.sys_bchig_deep()[0]   *= jetTool->jetBTagWeight(jet, jetp4, all_ops, vup, ctr, true);
         baby.sys_bchig_deep()[1]   *= jetTool->jetBTagWeight(jet, jetp4, all_ops, vdn, ctr, true);
         baby.sys_udsghig_deep()[0] *= jetTool->jetBTagWeight(jet, jetp4, all_ops, ctr, vup, true);
@@ -722,10 +697,6 @@ void bmaker_full::writeBTagWeights(edm::Handle<pat::JetCollection> alljets,
         baby.sys_bctag_tight_deep_proc()[1]   *= jetTool->jetBTagWeight(jet, jetp4, BTagEntry::OP_TIGHT, vdn, ctr, true, true);
         baby.sys_udsgtag_tight_deep_proc()[0] *= jetTool->jetBTagWeight(jet, jetp4, BTagEntry::OP_TIGHT, ctr, vup, true, true);
         baby.sys_udsgtag_tight_deep_proc()[1] *= jetTool->jetBTagWeight(jet, jetp4, BTagEntry::OP_TIGHT, ctr, vdn, true, true);
-        baby.sys_bchig_proc()[0]   *= jetTool->jetBTagWeight(jet, jetp4, all_ops, vup, ctr, false, true);
-        baby.sys_bchig_proc()[1]   *= jetTool->jetBTagWeight(jet, jetp4, all_ops, vdn, ctr, false, true);
-        baby.sys_udsghig_proc()[0] *= jetTool->jetBTagWeight(jet, jetp4, all_ops, ctr, vup, false, true);
-        baby.sys_udsghig_proc()[1] *= jetTool->jetBTagWeight(jet, jetp4, all_ops, ctr, vdn, false, true);
         baby.sys_bchig_deep_proc()[0]   *= jetTool->jetBTagWeight(jet, jetp4, all_ops, vup, ctr, true, true);
         baby.sys_bchig_deep_proc()[1]   *= jetTool->jetBTagWeight(jet, jetp4, all_ops, vdn, ctr, true, true);
         baby.sys_udsghig_deep_proc()[0] *= jetTool->jetBTagWeight(jet, jetp4, all_ops, ctr, vup, true, true);
@@ -740,10 +711,6 @@ void bmaker_full::writeBTagWeights(edm::Handle<pat::JetCollection> alljets,
           baby.sys_fs_bctag_deep()[1]   *= jetTool->jetBTagWeight(jet, jetp4, BTagEntry::OP_MEDIUM, ctr, ctr, vdn, ctr, true);
           baby.sys_fs_udsgtag_deep()[0] *= jetTool->jetBTagWeight(jet, jetp4, BTagEntry::OP_MEDIUM, ctr, ctr, ctr, vup, true);
           baby.sys_fs_udsgtag_deep()[1] *= jetTool->jetBTagWeight(jet, jetp4, BTagEntry::OP_MEDIUM, ctr, ctr, ctr, vdn, true);
-          baby.sys_fs_bchig()[0]   *= jetTool->jetBTagWeight(jet, jetp4, all_ops, ctr, ctr, vup, ctr, false);
-          baby.sys_fs_bchig()[1]   *= jetTool->jetBTagWeight(jet, jetp4, all_ops, ctr, ctr, vdn, ctr, false);
-          baby.sys_fs_udsghig()[0] *= jetTool->jetBTagWeight(jet, jetp4, all_ops, ctr, ctr, ctr, vup, false);
-          baby.sys_fs_udsghig()[1] *= jetTool->jetBTagWeight(jet, jetp4, all_ops, ctr, ctr, ctr, vdn, false);
           baby.sys_fs_bchig_deep()[0]   *= jetTool->jetBTagWeight(jet, jetp4, all_ops, ctr, ctr, vup, ctr, true);
           baby.sys_fs_bchig_deep()[1]   *= jetTool->jetBTagWeight(jet, jetp4, all_ops, ctr, ctr, vdn, ctr, true);
           baby.sys_fs_udsghig_deep()[0] *= jetTool->jetBTagWeight(jet, jetp4, all_ops, ctr, ctr, ctr, vup, true);

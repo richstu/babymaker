@@ -1,11 +1,9 @@
 
-##################   Provenance   #############
+##################   Provenance    #############
 int run
 int lumiblock
 Long64_t event
 int type
-bool json4p0
-bool json12p9
 ## stitch is used to stitch an MC sample with its corresponding HT-bin sample
 bool stitch
 bool stitch_met
@@ -93,10 +91,6 @@ float jetsys_pt
 float jetsys_eta
 float jetsys_phi
 float jetsys_m
-float jetsys_nob_pt
-float jetsys_nob_eta
-float jetsys_nob_phi
-float jetsys_nob_m
 float jetsys_nobd_pt
 float jetsys_nobd_eta
 float jetsys_nobd_phi
@@ -121,9 +115,7 @@ std::vector<int>   jets_fjet12_index
 std::vector<int>   jets_fjet14_index
 std::vector<int>   jets_hflavor
 std::vector<int>   jets_pflavor
-std::vector<bool>  jets_h1
 std::vector<bool>  jets_h1d
-std::vector<bool>  jets_h2
 std::vector<bool>  jets_h2d
 
 # DAK8
@@ -441,7 +433,6 @@ float w_btag_loose
 float w_btag_loose_deep
 float w_btag_tight
 float w_btag_tight_deep
-float w_bhig
 float w_bhig_deep
 float w_btag_proc
 float w_btag_deep_proc
@@ -449,7 +440,6 @@ float w_btag_loose_proc
 float w_btag_loose_deep_proc
 float w_btag_tight_proc
 float w_btag_tight_deep_proc
-float w_bhig_proc
 float w_bhig_deep_proc
 float w_toppt
 float w_isr
@@ -496,9 +486,7 @@ std::vector<float> sys_bctag_tight
 std::vector<float> sys_bctag_tight_deep
 std::vector<float> sys_udsgtag_tight
 std::vector<float> sys_udsgtag_tight_deep
-std::vector<float> sys_bchig
 std::vector<float> sys_bchig_deep
-std::vector<float> sys_udsghig
 std::vector<float> sys_udsghig_deep
 std::vector<float> sys_bctag_proc
 std::vector<float> sys_bctag_deep_proc
@@ -512,9 +500,7 @@ std::vector<float> sys_bctag_tight_proc
 std::vector<float> sys_bctag_tight_deep_proc
 std::vector<float> sys_udsgtag_tight_proc
 std::vector<float> sys_udsgtag_tight_deep_proc
-std::vector<float> sys_bchig_proc
 std::vector<float> sys_bchig_deep_proc
-std::vector<float> sys_udsghig_proc
 std::vector<float> sys_udsghig_deep_proc
 std::vector<float> sys_isr
 std::vector<float> sys_lep
@@ -524,9 +510,7 @@ std::vector<float> sys_fs_bctag
 std::vector<float> sys_fs_bctag_deep
 std::vector<float> sys_fs_udsgtag
 std::vector<float> sys_fs_udsgtag_deep
-std::vector<float> sys_fs_bchig
 std::vector<float> sys_fs_bchig_deep
-std::vector<float> sys_fs_udsghig
 std::vector<float> sys_fs_udsghig_deep
 std::vector<float> sys_trig
 std::vector<float> sys_pu

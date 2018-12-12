@@ -26,7 +26,7 @@
 using namespace std;
 using namespace utilities;
 
-static TString OutName;
+TString outname_lt;
 
 namespace{
   template<typename T>
@@ -243,13 +243,24 @@ bool lepton_tools::vertexMuon(const pat::Muon &lep, edm::Handle<reco::VertexColl
 }
 
 double lepton_tools::getEffAreaMuon(double eta){
+  // values from https://github.com/cms-data/PhysicsTools-NanoAOD/blob/10e7935ba38c2172ebb75979dcc1d8174b0566cd/effAreaMuons_cone03_pfNeuHadronsAndPhotons_94X.txt
   double abseta = fabs(eta);
-  if (abseta < 0.8) return 0.0735;
-  else if (abseta < 1.3) return 0.0619;
-  else if (abseta < 2.0) return 0.0465;
-  else if (abseta < 2.2) return 0.0433;
-  else if (abseta < 2.5) return 0.0577;
-  else return 0;
+  if (outname_lt.Contains("Run2017") || outname_lt.Contains("RunIIFall17") ||
+      outname_lt.Contains("Run2018") || outname_lt.Contains("RunIIAutumn18")) {
+    if (abseta < 0.8) return 0.0566;
+    else if (abseta < 1.3) return 0.0562;
+    else if (abseta < 2.0) return 0.0363;
+    else if (abseta < 2.2) return 0.0119;
+    else if (abseta < 2.4) return 0.0064;
+    else return 0;
+  } else {
+    if (abseta < 0.8) return 0.0735;
+    else if (abseta < 1.3) return 0.0619;
+    else if (abseta < 2.0) return 0.0465;
+    else if (abseta < 2.2) return 0.0433;
+    else if (abseta < 2.4) return 0.0577;
+    else return 0;
+  }
 }
 
 double lepton_tools::getRelIsolation(const pat::Muon &lep, double rho){
@@ -454,14 +465,14 @@ pair<double, double> lepton_tools::getScaleFactor(const reco::Muon &lep){
   double eta = lep.eta();
   double abseta = fabs(eta);
   vector<pair<double, double> > sfs;
-  if(OutName.Contains("2016")) {
+  if(outname_lt.Contains("RunIISummer16")) {
   	sfs = {GetSF(sf_2016_full_muon_medium, pt, abseta, false), make_pair(1., 0.03),//Systematic uncertainty
            GetSF(sf_2016_full_muon_iso,    pt, abseta, false), make_pair(1., 0.03),//Systematic uncertainty
            GetSF(sf_2016_full_muon_vtx,    pt, abseta, false), make_pair(1., 0.03) //Systematic uncertainty
          //GetSF(sf_full_muon_tracking, pt, eta)//Asymmetric in eta
           };
   }
-  else if(OutName.Contains("2017")) {
+  else if(outname_lt.Contains("RunIIFall17") || outname_lt.Contains("RunIIAutumn18")) {
   	sfs = {GetSF(sf_2017_full_muon_medium, pt, abseta, false), make_pair(1., 0.03),//Systematic uncertainty
            GetSF(sf_2017_full_muon_iso,    pt, abseta, false), make_pair(1., 0.03) //Systematic uncertainty
           };
@@ -479,7 +490,7 @@ pair<double, double> lepton_tools::getScaleFactor(const pat::Electron &lep){
   double eta = lep.superCluster()->eta();
   double abseta = fabs(eta);
   vector<pair<double, double> > sfs;
-  if(OutName.Contains("2016")) {
+  if(outname_lt.Contains("RunIISummer16")) {
   	sfs = {GetSF(sf_2016_full_electron_medium,  pt, abseta, false), make_pair(1., 0.03),//Systematic uncertainty
            GetSF(sf_2016_full_electron_iso,     pt, abseta, false), make_pair(1., 0.03),//Systematic uncertainty
            GetSF(sf_2016_full_electron_tracking,pt, abseta, false), make_pair(1., 0.03),//Systematic uncertainty
@@ -487,7 +498,7 @@ pair<double, double> lepton_tools::getScaleFactor(const pat::Electron &lep){
          //GetSF(sf_full_muon_tracking, pt, eta)//Asymmetric in eta
           };
   }
-  else if(OutName.Contains("2017")) {
+  else if(outname_lt.Contains("RunIIFall17") || outname_lt.Contains("RunIIAutumn18")) {
   	sfs = {GetSF(sf_2017_full_electron_medium, pt, abseta, false), make_pair(1., 0.03),//Systematic uncertainty
            GetSF(sf_2017_full_electron_iso,    pt, abseta, false), make_pair(1., 0.03),//Systematic uncertainty
            make_pair(1., pt<20. || pt >80. ? 0.01 : 0.)//Systematic uncertainty
@@ -754,8 +765,8 @@ set<unsigned> lepton_tools::badGlobalMuonSelector(edm::Handle<reco::VertexCollec
 
 
 lepton_tools::lepton_tools(TString outname){
-  OutName = outname;
-  }
+  outname_lt = outname;
+}
 
 lepton_tools::~lepton_tools(){
 }
