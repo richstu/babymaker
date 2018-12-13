@@ -42,6 +42,7 @@ Setup for running on 2017 re-reco data with tag 17Nov2017:
     cmsenv
 	git cms-merge-topic lathomas:L1Prefiring_9_4_9
 	git cms-merge-topic cms-met:METFixEE2017_949_v2
+    git cms-addpkg RecoMET/METFilters
     scram b
     git clone git@github.com:richstu/babymaker
     cd babymaker

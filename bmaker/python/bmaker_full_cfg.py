@@ -152,23 +152,26 @@ process.load("FWCore.MessageService.MessageLogger_cfi")
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(options.nEvents) )
 process.MessageLogger.cerr.FwkReport.reportEvery = 100000
 
-
-if not fastsim:
-    process.load('Configuration.StandardSequences.Services_cff')
-
-    ##_____________Bad charged candidate filter________________||
-    process.load('RecoMET.METFilters.BadChargedCandidateFilter_cfi')
-    process.BadChargedCandidateFilter.muons = cms.InputTag("slimmedMuons")
-    process.BadChargedCandidateFilter.PFCandidates = cms.InputTag("packedPFCandidates")
-    process.BadChargedCandidateFilter.taggingMode = cms.bool(True)
-    process.BadChargedCandidateFilter.debug = cms.bool(False)
-
-    ##_____________Bad muon filter_____________________________||
-    process.load('RecoMET.METFilters.BadPFMuonFilter_cfi')
-    process.BadPFMuonFilter.muons = cms.InputTag("slimmedMuons")
-    process.BadPFMuonFilter.PFCandidates = cms.InputTag("packedPFCandidates")
-    process.BadPFMuonFilter.taggingMode = cms.bool(True)
-    process.BadPFMuonFilter.debug = cms.bool(False)
+# ECAL bad calibration filter update for 2017 and 2018 only
+baddetEcallist = cms.vuint32(
+    [872439604,872422825,872420274,872423218,
+     872423215,872416066,872435036,872439336,
+     872420273,872436907,872420147,872439731,
+     872436657,872420397,872439732,872439339,
+     872439603,872422436,872439861,872437051,
+     872437052,872420649,872422436,872421950,
+     872437185,872422564,872421566,872421695,
+     872421955,872421567,872437184,872421951,
+     872421694,872437056,872437057,872437313]
+     )
+process.ecalBadCalibReducedMINIAODFilter = cms.EDFilter(
+    "EcalBadCalibFilter",
+    EcalRecHitSource = cms.InputTag("reducedEgamma:reducedEERecHits"),
+    ecalMinEt        = cms.double(50.),
+    baddetEcal    = baddetEcallist, 
+    taggingMode = cms.bool(True),
+    debug = cms.bool(False)
+    )
 
 if doJEC:
     process.options = cms.untracked.PSet(
@@ -231,5 +234,6 @@ process.p = cms.Path(
                      process.patJetCorrFactorsUpdatedJEC*
                      process.updatedPatJetsUpdatedJEC*
 					 process.fullPatMetSequenceModifiedMET*
+           process.ecalBadCalibReducedMINIAODFilter*
 					 process.baby_full)
 

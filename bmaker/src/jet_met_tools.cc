@@ -921,6 +921,7 @@ jet_met_tools::jet_met_tools(TString ijecName, bool doSys, bool fastSim, TString
     DeepFlavourLoose  = 0.0521;
     DeepFlavourMedium = 0.3033;
     DeepFlavourTight  = 0.7489;
+    // scaleFactorFile_deepflav+="/src/babymaker/bmaker/data/DeepFlavour_94XSF_V1_B_F.csv"; // to be added
   }
 
   calib_full_.reset(new BTagCalibration("csvv2", scaleFactorFile));

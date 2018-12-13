@@ -245,6 +245,12 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 
   ///////////////////// Filters ///////////////////////
   if (debug) cout<<"INFO: Writing filters..."<<endl; 
+
+  // update ECAL cell bad calibration filter, before filling all the rest
+  edm::Handle< bool > passecalBadCalibFilterUpdate ;
+  iEvent.getByToken(tok_ecalBadCalibFilterUpdate_,passecalBadCalibFilterUpdate);
+  baby.pass_badcalib() =  (*passecalBadCalibFilterUpdate);
+
   edm::Handle<edm::TriggerResults> filterBits;
   iEvent.getByToken(tok_trigResults_pat_,filterBits);    
   //Giovanni filters in reminiaod only available in "PAT"
@@ -1449,43 +1455,47 @@ void bmaker_full::writeFilters(const edm::TriggerNames &fnames,
                                edm::Handle<edm::TriggerResults> filterBits,
                                edm::Handle<reco::VertexCollection> vtx,
                                vector<double> jetsMuonEnergyFrac){
-  baby.pass_goodv() = true; baby.pass_cschalo() = true; baby.pass_eebadsc() = true;
+  baby.pass_goodv() = true; baby.pass_cschalo() = true; baby.pass_cschalo_tight() = true; 
   baby.pass_hbhe() = true; baby.pass_hbheiso() = true; baby.pass_ecaldeadcell() = true; 
-  baby.pass_badpfmu() = true; baby.pass_badchhad() = true; baby.pass_badcalib() = true;
+  baby.pass_badpfmu() = true; baby.pass_badchhad() = true; baby.pass_eebadsc() = true;
   baby.pass_ra2_badmu() = true;
   for (size_t i(0); i < filterBits->size(); ++i) {
     string name = fnames.triggerName(i);
     bool pass = static_cast<bool>(filterBits->accept(i));
     if (name=="Flag_goodVertices") baby.pass_goodv() = pass;
     else if (name=="Flag_globalTightHalo2016Filter")  baby.pass_cschalo() = pass;
+    else if (name=="Flag_globalSuperTightHalo2016Filter")  baby.pass_cschalo_tight() = pass;
     else if (name=="Flag_HBHENoiseFilter") baby.pass_hbhe() = pass; 
     else if (name=="Flag_HBHENoiseIsoFilter") baby.pass_hbheiso() = pass; 
     else if (name=="Flag_EcalDeadCellTriggerPrimitiveFilter") baby.pass_ecaldeadcell() = pass;
     //These filter bad events and must be inverted
     else if (name=="Flag_BadPFMuonFilter") baby.pass_badpfmu() = pass;     
-    else if (name=="BadChargedCandidateFilter") baby.pass_badchhad() = !pass;
-    //    else if (name=="Flag_eeBadScFilter") baby.pass_eebadsc() = pass; // Not recommended
-    else if (name=="Flag_ecalBadCalibFilter") baby.pass_badcalib() = pass;    
+    else if (name=="Flag_BadChargedCandidateFilter") baby.pass_badchhad() = pass;
+    else if (name=="Flag_eeBadScFilter") baby.pass_eebadsc() = pass; 
+    // else if (name=="Flag_ecalBadCalibFilter") baby.pass_badcalib() = pass; //needs to be rerun, filled in main()
   }
 
   baby.pass() = baby.pass_goodv() && baby.pass_ecaldeadcell() && 
                 baby.pass_hbhe() && baby.pass_hbheiso() &&
-                baby.pass_badpfmu() && baby.pass_badchhad() && baby.pass_badcalib() &&
+                baby.pass_badpfmu() && baby.pass_badchhad() && 
                 baby.pass_jets() && baby.pass_fsmet() && baby.pass_fsjets();
 
   baby.pass_ra2() = baby.pass_goodv() &&  baby.pass_ecaldeadcell() &&
                 baby.pass_hbhe() &&  baby.pass_hbheiso() &&     
-                baby.pass_badpfmu() && baby.pass_badchhad() && baby.pass_badcalib() &&
+                baby.pass_badpfmu() && baby.pass_badchhad() && 
                 baby.pass_jets_ra2() && baby.pass_fsmet() && baby.pass_fsjets();
 
   baby.pass_nohf() = baby.pass_goodv() && baby.pass_ecaldeadcell() && 
                 baby.pass_hbhe() && baby.pass_hbheiso() &&
-                baby.pass_badpfmu() && baby.pass_badchhad() && baby.pass_badcalib() &&
+                baby.pass_badpfmu() && baby.pass_badchhad() && 
                 baby.pass_jets_nohf() && baby.pass_fsmet() && baby.pass_fsjets();
 
 
-  //Some filters not recommended for MC
-  //https://twiki.cern.ch/twiki/bin/view/CMS/MissingETOptionalFiltersRun2#Moriond_2017
+  if(!outname.Contains("Run2016") && !outname.Contains("RunIISummer16")){
+                baby.pass() = baby.pass() && baby.pass_badcalib();
+                baby.pass_ra2() = baby.pass_ra2() && baby.pass_badcalib();
+                baby.pass_nohf() = baby.pass_nohf() && baby.pass_badcalib();
+  }
 
   if(isData){ baby.pass() = baby.pass() && baby.pass_eebadsc();
               baby.pass_ra2() = baby.pass_ra2() && baby.pass_eebadsc();
@@ -1493,9 +1503,9 @@ void bmaker_full::writeFilters(const edm::TriggerNames &fnames,
   }
   
   // Suggested only for Data and Fullsim
-  if(!isFastSim){ baby.pass() = baby.pass() && baby.pass_cschalo();
-                  baby.pass_ra2() = baby.pass_ra2() && baby.pass_cschalo();
-                  baby.pass_nohf() = baby.pass_nohf() && baby.pass_cschalo();
+  if(!isFastSim){ baby.pass() = baby.pass() && baby.pass_cschalo_tight();
+                  baby.pass_ra2() = baby.pass_ra2() && baby.pass_cschalo_tight();
+                  baby.pass_nohf() = baby.pass_nohf() && baby.pass_cschalo_tight();
   }
 
 
@@ -2173,7 +2183,8 @@ bmaker_full::bmaker_full(const edm::ParameterSet& iConfig):
   tok_genlumiheader_(consumes<GenLumiInfoHeader,edm::InLumi>(edm::InputTag("generator"))),
   tok_prefweight_(consumes< double >(edm::InputTag("prefiringweight:NonPrefiringProb"))),
   tok_prefweightup_(consumes< double >(edm::InputTag("prefiringweight:NonPrefiringProbUp"))),
-  tok_prefweightdown_(consumes< double >(edm::InputTag("prefiringweight:NonPrefiringProbDown")))
+  tok_prefweightdown_(consumes< double >(edm::InputTag("prefiringweight:NonPrefiringProbDown"))),
+  tok_ecalBadCalibFilterUpdate_(consumes< bool >(edm::InputTag("ecalBadCalibReducedMINIAODFilter")))
 /* DAK8
   tok_deepJetToken_(consumes<edm::View<pat::Jet> >(edm::InputTag("slimmedJetsAK8")))
 */

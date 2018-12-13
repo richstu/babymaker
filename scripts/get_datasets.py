@@ -73,7 +73,7 @@ data_tier = 'MINIAODSIM'
 # ------------- Monte Carlo samples ------------------
 if args.mc:
     for name in names:
-        output = subprocess.check_output(['./dasgoclient', '-query=dataset=/'+name+'*/'+tag+'*/'+data_tier])
+        output = subprocess.check_output(['./dasgoclient', '-query=dataset=/'+name+'*/'+tag+'*/'+data_tier,'status=*'])
         miniAODs = output.split()
         if args.year==2017:
             found = False
@@ -117,6 +117,8 @@ if args.mc:
 
 # ----------------------- Data samples -------------------------
 streams = ['MET', 'SingleElectron', 'SingleMuon', 'JetHT']
+if args.year==2018: 
+    streams = ['MET', 'EGamma', 'SingleMuon', 'JetHT']
 
 tag = ''
 runs = []
@@ -152,8 +154,9 @@ print 'undesired datasets that were accidentally selected or missing items!'
 print 'e.g. MC: same dataset may be available in multiple generators'
 print 'or with special generator options/phase spae, etc.'
 print 'e.g. Data: same dataset may be available in multiple versions.'
-print 'Generally those with different "ver" number are non-overlapping, while'
-print 'those with different "-v" number are repeats. If in doubt, you can check'
+print 'It seems for Re-reco those with different "ver" number are non-overlapping, while'
+print 'those with different "-v" number are repeats. On the contrary, for PromptReco'
+print 'different "-v" are non-overlapping. To be sure, please check'
 print 'run list as follows:'
 print './dasgoclient -query="run dataset=/MET/Run2016B-17Jul2018_ver1-v1/MINIAOD"'
 

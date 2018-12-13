@@ -128,8 +128,26 @@ if doData2017: # updated for Moriond'19
 
 
 
-# if doData2018:
-# waiting for re-reco to finish
+if doData2018:  # updated for Moriond'19, a couple datasets still trickling in, so make sure crab config allows running on incomplete
+  datasets.append(["/MET/Run2018A-17Sep2018-v1/MINIAOD"])
+  datasets.append(["/MET/Run2018B-17Sep2018-v1/MINIAOD"])
+  datasets.append(["/MET/Run2018C-17Sep2018-v1/MINIAOD"])
+  datasets.append(["/MET/Run2018D-PromptReco-v1/MINIAOD"])
+  datasets.append(["/MET/Run2018D-PromptReco-v2/MINIAOD"])
+  datasets.append(["/EGamma/Run2018A-17Sep2018-v2/MINIAOD"])
+  datasets.append(["/EGamma/Run2018B-17Sep2018-v1/MINIAOD"])
+  datasets.append(["/EGamma/Run2018C-17Sep2018-v1/MINIAOD"])
+  datasets.append(["/EGamma/Run2018D-PromptReco-v1/MINIAOD"])
+  datasets.append(["/EGamma/Run2018D-PromptReco-v2/MINIAOD"])
+  datasets.append(["/SingleMuon/Run2018A-17Sep2018-v2/MINIAOD"])
+  datasets.append(["/SingleMuon/Run2018B-17Sep2018-v1/MINIAOD"])
+  datasets.append(["/SingleMuon/Run2018C-17Sep2018-v1/MINIAOD"])
+  datasets.append(["/SingleMuon/Run2018D-PromptReco-v2/MINIAOD"])
+  datasets.append(["/JetHT/Run2018A-17Sep2018-v1/MINIAOD"])
+  datasets.append(["/JetHT/Run2018B-17Sep2018-v1/MINIAOD"])
+  datasets.append(["/JetHT/Run2018C-17Sep2018-v1/MINIAOD"])
+  datasets.append(["/JetHT/Run2018D-PromptReco-v1/MINIAOD"])
+  datasets.append(["/JetHT/Run2018D-PromptReco-v2/MINIAOD"])
 
 
 

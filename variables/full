@@ -348,26 +348,27 @@ std::vector<float> els_vvvl_eta
 std::vector<float> els_vvvl_phi
 
 ###################   Quality   ##################
-bool pass_jets;
-bool pass_jets_tight;
-bool pass_jets_nohf;
-bool pass_jets_ra2;
-bool pass_jets_tight_ra2;
-bool pass_hbhe;
-bool pass_hbheiso;
-bool pass_goodv;
-bool pass_cschalo;
-bool pass_eebadsc;
-bool pass_ecaldeadcell;
-bool pass_fsmet;
-bool pass_fsjets;
-bool pass_badpfmu;
-bool pass_badchhad;
-bool pass;
-bool pass_ra2;
-bool pass_nohf;
-bool pass_ra2_badmu;
-bool pass_badcalib;
+bool pass_jets
+bool pass_jets_tight
+bool pass_jets_nohf
+bool pass_jets_ra2
+bool pass_jets_tight_ra2
+bool pass_hbhe
+bool pass_hbheiso
+bool pass_goodv
+bool pass_cschalo
+bool pass_cschalo_tight
+bool pass_eebadsc
+bool pass_ecaldeadcell
+bool pass_fsmet
+bool pass_fsjets
+bool pass_badpfmu
+bool pass_badchhad
+bool pass
+bool pass_ra2
+bool pass_nohf
+bool pass_ra2_badmu
+bool pass_badcalib
 
 
 ################  Fat Jets   ##################

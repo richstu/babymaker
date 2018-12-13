@@ -214,7 +214,8 @@ private:
   edm::EDGetTokenT<double> tok_prefweight_;
   edm::EDGetTokenT<double> tok_prefweightup_;
   edm::EDGetTokenT<double> tok_prefweightdown_;
-
+  edm::EDGetTokenT<bool> tok_ecalBadCalibFilterUpdate_;
+  
 /* DAK8
   edm::EDGetTokenT<edm::View<pat::Jet>> tok_deepJetToken_;
   std::unique_ptr<FatJetNN> fatjetNN_;
