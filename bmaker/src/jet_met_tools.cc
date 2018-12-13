@@ -134,16 +134,28 @@ bool jet_met_tools::idJet(const pat::Jet &jet, CutLevel cut){
   }
 
   bool passJetID = true;
-  if (eta<=2.7) {
-    if (cut==kLoose) passJetID = NHF<0.99 && NEMF<0.99 && NumConst>1;
-    if (cut==kTight) passJetID = NHF<0.90 && NEMF<0.90 && NumConst>1;
-    if (eta<=2.4){
-      passJetID = passJetID && CHF>0 && CHM>0 && CEMF<0.99;
+  if (cut==kLoose) { // default for 80X
+    if (eta<=2.7) {
+      passJetID = NHF<0.99 && NEMF<0.99 && NumConst>1;
+      if (eta<=2.4){
+        passJetID = passJetID && CHF>0 && CHM>0 && CEMF<0.99;
+      }
+    } else if (eta<=3.0) {
+      passJetID = NHF<0.98 && NEMF>0.01 && NumNeutralParticles>2;
+    } else {
+      passJetID = NEMF<0.90 && NumNeutralParticles>10;
     }
-  } else if (eta<=3.0) {
-    passJetID = NHF<0.98 && NEMF>0.01 && NumNeutralParticles>2;
-  } else {
-    passJetID = NEMF<0.90 && NumNeutralParticles>10;
+  } else if (cut==kTight) { // default for 94X
+    if (eta<=2.7) { 
+      passJetID = NHF<0.90 && NEMF<0.90 && NumConst>1;
+      if (eta<=2.4){
+        passJetID = passJetID && CHF>0 && CHM>0;
+      }
+    } else if (eta<=3.0) {
+      passJetID = NEMF>0.02 && NEMF<0.99 && NumNeutralParticles>2;
+    } else {
+      passJetID = NEMF<0.90 && NHF>0.02 && NumNeutralParticles>10;
+    }    
   }
   return passJetID;
 }

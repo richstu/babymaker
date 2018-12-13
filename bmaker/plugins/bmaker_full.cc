@@ -438,8 +438,8 @@ vector<LVector> bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
     }
 
     bool isLep = jetTool->leptonInJet(jet, sig_leps);
-    bool looseID = jetTool->idJet(jet, jetTool->kLoose);
-    bool tightID = jetTool->idJet(jet, jetTool->kTight);
+    bool looseID = jetTool->idJet(jet, (is80Xreco ? jetTool->kLoose : jetTool->kTight));
+    bool tightID = jetTool->idJet(jet, (is80Xreco ? jetTool->kTight : jetTool->kLoose));
     bool goodPtEta = jetp4.pt() > jetTool->JetPtCut && fabs(jet.eta()) <= jetTool->JetEtaCut;
     if(isFastSim){
       if(jetp4.pt() > 20. && fabs(jet.eta()) < 2.5 && !jetTool->matchesGenJet(jet,genjets) && jet.chargedHadronEnergyFraction() < 0.1) baby.pass_fsjets()=false;
@@ -2187,6 +2187,10 @@ bmaker_full::bmaker_full(const edm::ParameterSet& iConfig):
   mcTool     = new mc_tools();
   weightTool = new weight_tools();
   eventTool  = new event_tools(outname);
+
+
+  is80Xreco = false;
+  if (outname.Contains("Run2016") || outname.Contains("RunIISummer16")) is80Xreco = true;
 /* 
   string deepJetDataPath = "NNKit/data/ak8";
   deepJetR = 0.8;

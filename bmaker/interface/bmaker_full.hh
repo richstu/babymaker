@@ -67,6 +67,7 @@ public:
   TFile *outfile;
   baby_full baby;
   bool isData;
+  bool is80Xreco;
   time_t startTime;
 
   //object classes
