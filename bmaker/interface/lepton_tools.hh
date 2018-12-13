@@ -62,9 +62,9 @@ public:
 //  double getMinIsolation(const pat::PFIsolation &lepiso, double rho) const;
 //  double getMinIsolation(const reco::Candidate* lep, double rho);
 
-  bool isVetoElectron(const pat::Electron &lep, edm::Handle<reco::VertexCollection> vtx, double lepIso);
-  bool isSignalElectron(const pat::Electron &lep, edm::Handle<reco::VertexCollection> vtx, double lepIso);
-  bool idElectron(const pat::Electron &lep, edm::Handle<reco::VertexCollection> vtx, CutLevel threshold, bool doIso=false);
+  bool isVetoElectron(const pat::Electron &lep, edm::Handle<reco::VertexCollection> vtx, double lepIso, double rho);
+  bool isSignalElectron(const pat::Electron &lep, edm::Handle<reco::VertexCollection> vtx, double lepIso, double rho);
+  bool idElectron(const pat::Electron &lep, edm::Handle<reco::VertexCollection> vtx, CutLevel threshold, bool doIso, double rho);
   bool vertexElectron(const pat::Electron &lep, edm::Handle<reco::VertexCollection> vtx, double &dz, double &d0);
   double getEffAreaElectron(double eta);
   double getRelIsolation(const pat::Electron &lep, double rho);
@@ -94,7 +94,7 @@ public:
                                          edm::Handle<pat::MuonCollection> muons, bool selectClones);
 private:
   static const TH2F sf_2016_full_muon_medium, sf_2016_full_muon_iso,sf_2016_full_muon_vtx, sf_2016_full_electron_medium, sf_2016_full_electron_iso, sf_2016_full_electron_tracking;
-  static const TH2F sf_2017_full_muon_medium, sf_2017_full_muon_iso, sf_2017_full_electron_medium, sf_2017_full_electron_iso;
+  static const TH2F sf_2017_full_muon_medium, sf_2017_full_muon_iso, sf_2017_full_electron_reco, sf_2017_full_electron_medium, sf_2017_full_electron_iso;
   static const TH2D sf_fast_muon_medium, sf_fast_muon_iso, sf_fast_electron_mediumiso; //sf_full_muon_tracking
 
   static std::pair<double, double> getScaleFactor(const reco::Muon &lep);

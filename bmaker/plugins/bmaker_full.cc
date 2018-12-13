@@ -96,15 +96,21 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   iEvent.getByToken(tok_rhoFastJet_centralNeutral_, rhoEventCentral_h);
   double rhoEventCentral = static_cast<double>(*rhoEventCentral_h);
 
+  edm::Handle<double> rhoEventAll_h;
+  iEvent.getByToken(tok_rhoFastJet_all_, rhoEventAll_h);
+  
+  double rho_for_leps = static_cast<double>(*rhoEventAll_h);
+  if (outname.Contains("Run2016") || outname.Contains("RunIISummer16")) rho_for_leps = rhoEventCentral;
+
   vCands sig_leps, veto_leps, sig_mus, veto_mus, sig_els, veto_els;
   vCands all_mus, all_els;
   edm::Handle<pat::MuonCollection> allmuons;
   iEvent.getByToken(tok_muons_, allmuons);
-  sig_mus = writeMuons(allmuons, pfcands, vtx, veto_mus, all_mus, rhoEventCentral);
+  sig_mus = writeMuons(allmuons, pfcands, vtx, veto_mus, all_mus, rho_for_leps);
   edm::Handle<pat::ElectronCollection> allelectrons;
   iEvent.getByToken(tok_electrons_, allelectrons);
  
-  sig_els = writeElectrons(allelectrons, pfcands, vtx, veto_els, all_els, rhoEventCentral);
+  sig_els = writeElectrons(allelectrons, pfcands, vtx, veto_els, all_els, rho_for_leps);
   
   writeDiLep(sig_mus, sig_els, veto_mus, veto_els);
 
@@ -123,15 +129,13 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   ///////////////////////////////// Photons ////////////////////////////////
   if (debug) cout<<"INFO: Writing photons..."<<endl;
   vCands photons;
-  edm::Handle<double> rhoEvent_h;
-  iEvent.getByToken(tok_rhoFastJet_all_, rhoEvent_h);
   edm::Handle<reco::BeamSpot> beamspot;
   iEvent.getByToken(tok_offBeamSpot_, beamspot);
   edm::Handle<pat::PhotonCollection> allphotons;
   iEvent.getByToken(tok_photons_, allphotons);
   edm::Handle<vector<reco::Conversion> > conversions;
   iEvent.getByToken(tok_reducedEgamma_conver_, conversions);
-  photons = writePhotons(allphotons, allelectrons, conversions, beamspot, *rhoEvent_h);
+  photons = writePhotons(allphotons, allelectrons, conversions, beamspot, *rhoEventAll_h);
 
   //////////////////////////// MET/JETs with JECs ///////////////////////////
   if (debug) cout<<"INFO: Applying JECs..."<<endl;
@@ -139,7 +143,7 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   iEvent.getByToken(tok_jets_, alljets);
   edm::Handle<edm::View<reco::GenJet> > genjets;
   iEvent.getByToken(tok_genJets_, genjets) ;
-  jetTool->getJetCorrections(genjets, alljets, *rhoEvent_h);
+  jetTool->getJetCorrections(genjets, alljets, *rhoEventAll_h);
 
   /// MET
   if (debug) cout<<"INFO: Writing MET..."<<endl;
@@ -170,7 +174,7 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
     baby.ntks() = tks.size();
 
     // RA4 track veto
-    writeTks(pfcands,vtx,rhoEventCentral);
+    writeTks(pfcands,vtx,rho_for_leps);
   }
 
   /// Jets
@@ -954,7 +958,7 @@ void bmaker_full::writeAk8Jets(edm::Handle<edm::View<pat::Jet>> &ak8jets){
 vCands bmaker_full::writeMuons(edm::Handle<pat::MuonCollection> muons, 
                                edm::Handle<pat::PackedCandidateCollection> pfcands, 
                                edm::Handle<reco::VertexCollection> vtx,
-                               vCands &veto_mus, vCands &all_mus, double rhoEventCentral){
+                               vCands &veto_mus, vCands &all_mus, double rho_for_leps){
   vCands sig_mus; 
   veto_mus.clear(); all_mus.clear();
   baby.nmus() = 0; baby.nvmus() = 0;
@@ -992,13 +996,13 @@ vCands bmaker_full::writeMuons(edm::Handle<pat::MuonCollection> muons,
     bool save_mu = lepTool->isVetoMuon(lep, vtx, -99.) || isBadMu || isBadDuplMu || isBadTrackerMuon || demoted;
     if(!save_mu) continue;
 
-//    double lep_iso(lepTool->getMinIsolation(dynamic_cast<const reco::Candidate *>(&lep), rhoEventCentral));
-//    double lep_iso(lepTool->getMinIsolation(lepiso, rhoEventCentral));
+//    double lep_iso(lepTool->getMinIsolation(dynamic_cast<const reco::Candidate *>(&lep), rho_for_leps));
+//    double lep_iso(lepTool->getMinIsolation(lepiso, rho_for_leps));
 //    const pat::PFIsolation lepiso = lep.miniPFIsolation();
 //    double lep_iso = lepiso.chargedHadronIso() + lepiso.neutralHadronIso() + lepiso.photonIso();
 
-    double lep_iso(lepTool->getPFIsolation(pfcands, dynamic_cast<const reco::Candidate *>(&lep), 0.05, 0.2, 10., rhoEventCentral, false));
-    double lep_reliso(lepTool->getRelIsolation(lep, rhoEventCentral));
+    double lep_iso(lepTool->getPFIsolation(pfcands, dynamic_cast<const reco::Candidate *>(&lep), 0.05, 0.2, 10., rho_for_leps, false));
+    double lep_reliso(lepTool->getRelIsolation(lep, rho_for_leps));
     double dz(0.), d0(0.);
     lepTool->vertexMuon(lep, vtx, dz, d0); // Calculating dz and d0
 
@@ -1058,21 +1062,21 @@ vCands bmaker_full::writeMuons(edm::Handle<pat::MuonCollection> muons,
 vCands bmaker_full::writeElectrons(edm::Handle<pat::ElectronCollection> electrons, 
                                    edm::Handle<pat::PackedCandidateCollection> pfcands, 
                                    edm::Handle<reco::VertexCollection> vtx,
-                                   vCands &veto_els, vCands &all_els, double rhoEventCentral){
+                                   vCands &veto_els, vCands &all_els, double rho_for_leps){
   vCands sig_els; 
   veto_els.clear(); all_els.clear();
   baby.nels() = 0; baby.nvels() = 0;
   for (size_t ilep(0); ilep < electrons->size(); ilep++) {
     const pat::Electron &lep = (*electrons)[ilep];    
-    if(!lepTool->isVetoElectron(lep, vtx, -99.)) continue; // Storing leptons that pass all veto cuts except for iso
+    if(!lepTool->isVetoElectron(lep, vtx, -99., rho_for_leps)) continue; // Storing leptons that pass all veto cuts except for iso
 
-//    double lep_iso(lepTool->getMinIsolation(dynamic_cast<const reco::Candidate *>(&lep), rhoEventCentral));
-//    double lep_iso(lepTool->getMinIsolation(lepiso, rhoEventCentral));
+//    double lep_iso(lepTool->getMinIsolation(dynamic_cast<const reco::Candidate *>(&lep), rho_for_leps));
+//    double lep_iso(lepTool->getMinIsolation(lepiso, rho_for_leps));
 //    const PFIsolation lepiso = lep.miniPFIsolation();
 //    const double lep_iso = lepiso.chargedHadronIso() + lepiso.neutralHadronIso() + lepiso.photonIso();
 
-    double lep_iso(lepTool->getPFIsolation(pfcands, dynamic_cast<const reco::Candidate *>(&lep), 0.05, 0.2, 10., rhoEventCentral, false));
-    double lep_reliso(lepTool->getRelIsolation(lep, rhoEventCentral));
+    double lep_iso(lepTool->getPFIsolation(pfcands, dynamic_cast<const reco::Candidate *>(&lep), 0.05, 0.2, 10., rho_for_leps, false));
+    double lep_reliso(lepTool->getRelIsolation(lep, rho_for_leps));
     double dz(0.), d0(0.);
     lepTool->vertexElectron(lep, vtx, dz, d0); // Calculating dz and d0
 
@@ -1086,9 +1090,9 @@ vCands bmaker_full::writeElectrons(edm::Handle<pat::ElectronCollection> electron
     baby.els_d0().push_back(d0);
     baby.els_ip3d().push_back(lep.ip3d());
     baby.els_charge().push_back(lep.charge());
-    baby.els_sigid().push_back(lepTool->idElectron(lep, vtx, lepTool->kMedium));
+    baby.els_sigid().push_back(lepTool->idElectron(lep, vtx, lepTool->kMedium, false, rho_for_leps));
     baby.els_ispf().push_back(lep.numberOfSourceCandidatePtrs()==2 && abs(lep.sourceCandidatePtr(1)->pdgId())==11);
-    baby.els_tight().push_back(lepTool->idElectron(lep, vtx, lepTool->kTight));
+    baby.els_tight().push_back(lepTool->idElectron(lep, vtx, lepTool->kTight, false, rho_for_leps));
     baby.els_miniso().push_back(lep_iso);
     baby.els_reliso().push_back(lep_reliso);
     baby.els_tm().push_back(false);       // Filled in writeMC
@@ -1114,11 +1118,11 @@ vCands bmaker_full::writeElectrons(edm::Handle<pat::ElectronCollection> electron
     }
     all_els.push_back(dynamic_cast<const reco::Candidate *>(&lep)); // For truth-matching in writeMC
 
-    if(lepTool->isVetoElectron(lep, vtx, lep_iso)){
+    if(lepTool->isVetoElectron(lep, vtx, lep_iso, rho_for_leps)){
       baby.nvels()++;
       veto_els.push_back(dynamic_cast<const reco::Candidate *>(&lep));
     }
-    if(lepTool->isSignalElectron(lep, vtx, lep_iso)) {
+    if(lepTool->isSignalElectron(lep, vtx, lep_iso, rho_for_leps)) {
       baby.nels()++;
       sig_els.push_back(dynamic_cast<const reco::Candidate *>(&lep));
       baby.els_sig().push_back(true); 
@@ -1140,12 +1144,12 @@ void bmaker_full::writeLeptons(vCands &leptons){
   } // Loop over leptons
 }
 
-void bmaker_full::writeTks(edm::Handle<pat::PackedCandidateCollection> pfcands,edm::Handle<reco::VertexCollection> vtx, double rhoEventCentral ){
+void bmaker_full::writeTks(edm::Handle<pat::PackedCandidateCollection> pfcands,edm::Handle<reco::VertexCollection> vtx, double rho_for_leps ){
   if(baby.leps_id().size()>0){    
     vector<float> isos;
     vector<float> relisos;
     vCands ra4tks;
-    ra4tks = lepTool->getRA4IsoTracks(pfcands, baby.met(), baby.met_phi(),rhoEventCentral,isos,relisos,baby.leps_id().at(0));
+    ra4tks = lepTool->getRA4IsoTracks(pfcands, baby.met(), baby.met_phi(),rho_for_leps,isos,relisos,baby.leps_id().at(0));
      
     int nveto=0;
 

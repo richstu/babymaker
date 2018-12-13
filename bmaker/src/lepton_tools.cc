@@ -170,8 +170,9 @@ const TH2F lepton_tools::sf_2016_full_muon_medium = GetSF<TH2F>("TnP_NUM_MediumI
 const TH2F lepton_tools::sf_2016_full_muon_iso    = GetSF<TH2F>("TnP_NUM_MiniIsoTight_DENOM_MediumID_VAR_map_pt_eta.root", "SF");
 const TH2F lepton_tools::sf_2016_full_muon_vtx    = GetSF<TH2F>("TnP_NUM_MediumIP2D_DENOM_LooseID_VAR_map_pt_eta.root", "SF");
 
-const TH2F lepton_tools::sf_2017_full_electron_medium = GetSF<TH2F>("ElectronScaleFactors_Run2017.root", "Run2017_CutBasedMediumNoIso94XV1");
-const TH2F lepton_tools::sf_2017_full_electron_iso    = GetSF<TH2F>("ElectronScaleFactors_Run2017.root", "Run2017_CutBasedMediumNoIso94XV1");
+const TH2F lepton_tools::sf_2017_full_electron_reco = GetSF<TH2F>("egammaEffi_EGM2D_low.root", "EGamma_SF2D");
+const TH2F lepton_tools::sf_2017_full_electron_medium = GetSF<TH2F>("ElectronScaleFactors_Run2017.root", "Run2017_CutBasedMediumNoIso94XV2");
+const TH2F lepton_tools::sf_2017_full_electron_iso    = GetSF<TH2F>("ElectronScaleFactors_Run2017.root", "Run2017_MVAVLooseTightIP2DMini");
 
 const TH2F lepton_tools::sf_2017_full_muon_medium = GetSF<TH2F>("Muon_Run2017_SF_ID.root", "NUM_MediumID_DEN_genTracks_pt_abseta");
 const TH2F lepton_tools::sf_2017_full_muon_iso    = GetSF<TH2F>("Muon_MinIso02_wrtMediumID_SF_Run2017.root","TnP_MC_NUM_MiniIso02Cut_DEN_MediumID_PAR_pt_eta");
@@ -280,90 +281,93 @@ double lepton_tools::getMinIsolation(const reco::Candidate* lep, double rho){
 }
 */
 //////////////////// Electrons
-bool lepton_tools::isSignalElectron(const pat::Electron &lep, edm::Handle<reco::VertexCollection> vtx, double lepIso){
+bool lepton_tools::isSignalElectron(const pat::Electron &lep, edm::Handle<reco::VertexCollection> vtx, double lepIso, double rho){
   // pT, eta cuts
   if(lep.pt() <= SignalLeptonPtCut) return false;
   if(fabs(lep.superCluster()->position().eta()) > ElectronEtaCut) return false;
   // ID cuts (includes dz/dz0 cuts)
-  if(!idElectron(lep, vtx, kMedium)) return false;
+  if(!idElectron(lep, vtx, kMedium, false, rho)) return false;
   // Isolation cuts
   if(lepIso >= 0 && lepIso > ElectronMiniIsoCut) return false;
 
   return true;
 }
 
-bool lepton_tools::isVetoElectron(const pat::Electron &lep, edm::Handle<reco::VertexCollection> vtx, double lepIso){
+bool lepton_tools::isVetoElectron(const pat::Electron &lep, edm::Handle<reco::VertexCollection> vtx, double lepIso, double rho){
   // pT, eta cuts
   if(lep.pt() <= VetoLeptonPtCut) return false;
   if(fabs(lep.superCluster()->position().eta()) > ElectronEtaCut) return false;
   // ID cuts (includes dz/dz0 cuts)
-  if(!idElectron(lep, vtx, kVeto)) return false;
+  if(!idElectron(lep, vtx, kVeto, false, rho)) return false;
   // Isolation cuts
   if(lepIso >= 0 && lepIso > ElectronMiniIsoCut) return false;
 
   return true;
 }
 
-bool lepton_tools::idElectron(const pat::Electron &lep, edm::Handle<reco::VertexCollection> vtx, CutLevel threshold, bool doIso) {
+bool lepton_tools::idElectron(const pat::Electron &lep, edm::Handle<reco::VertexCollection> vtx, CutLevel threshold, bool doIso, double rho) {
 
   bool barrel(lep.isEB());
   double deta_cut, dphi_cut, ieta_cut, hovere_cut, d0_cut, dz_cut,
     ooeminusoop_cut, reliso_cut, misshits_cut;
   bool req_conv_veto;
-  
-  // if(barrel){
-  //   ieta_cut        = chooseVal(threshold       ,0.0115,  0.011,   0.00998, 0.00998);
-  //   deta_cut        = chooseVal(threshold       ,0.00749, 0.00477, 0.00311, 0.00308);
-  //   dphi_cut        = chooseVal(threshold       ,0.228,   0.222,   0.103,   0.0816);
-  //   hovere_cut      = chooseVal(threshold       ,0.356,   0.298,   0.253,   0.0414);
-  //   reliso_cut      = chooseVal(threshold       ,0.175,   0.0994,  0.0695,  0.0588);
-  //   ooeminusoop_cut = chooseVal(threshold       ,0.299,   0.241,   0.134,   0.0129);
-  //   d0_cut          = chooseVal(threshold       ,0.05,    0.05,    0.05,    0.05);
-  //   dz_cut          = chooseVal(threshold       ,0.10 ,   0.10,    0.10,    0.10);
-  //   misshits_cut    = chooseVal(threshold       ,2,   1,   1,   1);
-  //   req_conv_veto   = chooseVal(threshold       ,true           ,  true         ,  true         ,  true );
-  // } else {
-  //   ieta_cut        = chooseVal(threshold       ,0.037,   0.0314,  0.0298,  0.0292);
-  //   deta_cut        = chooseVal(threshold       ,0.00895, 0.00868, 0.00609, 0.00605);
-  //   dphi_cut        = chooseVal(threshold       ,0.213,   0.213,   0.045,   0.0394);
-  //   hovere_cut      = chooseVal(threshold       ,0.211,   0.101,   0.0878,  0.0641);
-  //   reliso_cut      = chooseVal(threshold       ,0.159,   0.107,   0.0821,  0.0571);
-  //   ooeminusoop_cut = chooseVal(threshold       ,0.15,    0.14,    0.13,    0.0129);
-  //   d0_cut          = chooseVal(threshold       ,0.10 ,   0.10,    0.10,    0.10);
-  //   dz_cut          = chooseVal(threshold       ,0.20 ,   0.20,    0.20,    0.20);
-  //   misshits_cut    = chooseVal(threshold       ,3, 1, 1, 1);
-  //   req_conv_veto   = chooseVal(threshold       ,true   ,  true   ,  true   ,  true );
-  // }
-
-  //https://twiki.cern.ch/twiki/bin/viewauth/CMS/CutBasedElectronIdentificationRun2#Working_points_for_Spring15_MC_s
-  // Last updated October 8th
-  if(barrel){
-    ieta_cut        = chooseVal(threshold       ,0.0114,  0.0103,  0.0101,  0.0101);
-    deta_cut        = chooseVal(threshold       ,0.0152,  0.0105,  0.0103,  0.00926);
-    dphi_cut        = chooseVal(threshold       ,0.216,   0.115,   0.0336,  0.0336);
-    hovere_cut      = chooseVal(threshold       ,0.181,   0.104,   0.0876,  0.0597);
-    reliso_cut      = chooseVal(threshold       ,0.126,   0.0893,  0.0766,  0.0354);
-    ooeminusoop_cut = chooseVal(threshold       ,0.207,   0.102,   0.0174,  0.012);
-    d0_cut          = chooseVal(threshold       ,0.0564,  0.0261,  0.0118,  0.0111);
-    dz_cut          = chooseVal(threshold       ,0.472,   0.41,  0.373,   0.0466);
-    misshits_cut    = chooseVal(threshold       ,2,   2,   2,   2);
-    req_conv_veto   = chooseVal(threshold       ,true           ,  true         ,  true         ,  true );
-  } else {
-    ieta_cut        = chooseVal(threshold       ,0.0352 , 0.0301 , 0.0283 , 0.0279);
-    deta_cut        = chooseVal(threshold       ,0.0113 , 0.00814 , 0.00733 , 0.00724);
-    dphi_cut        = chooseVal(threshold       ,0.237 , 0.182 , 0.114 , 0.0918);
-    hovere_cut      = chooseVal(threshold       ,0.116 , 0.0897 , 0.0678 , 0.0615);
-    reliso_cut      = chooseVal(threshold       ,0.144 , 0.121 , 0.0678 , 0.0646);
-    ooeminusoop_cut = chooseVal(threshold       ,0.174 , 0.126 , 0.0898 , 0.00999);
-    d0_cut          = chooseVal(threshold       ,0.222 , 0.118 , 0.0739 , 0.0351);
-    dz_cut          = chooseVal(threshold       ,0.921 , 0.822 , 0.602 , 0.417);
-    misshits_cut    = chooseVal(threshold       ,3, 1, 1, 1);
-    req_conv_veto   = chooseVal(threshold       ,true   ,  true   ,  true   ,  true );
-  }
 
   double dz(0.), d0(0.);
   vertexElectron(lep, vtx, dz, d0);
+  double esc = lep.superCluster()->energy();
 
+  if (outname_lt.Contains("Run2017") || outname_lt.Contains("RunIIFall17") ||
+      outname_lt.Contains("Run2018") || outname_lt.Contains("RunIIAutumn18")) {
+    if(barrel){
+      ieta_cut        = chooseVal(threshold       ,0.0126,  0.0112,  0.0106,  0.0104);
+      deta_cut        = chooseVal(threshold       ,0.00463, 0.00377, 0.0032,  0.00255);
+      dphi_cut        = chooseVal(threshold       ,0.148,   0.0884,  0.0547,  0.022);
+      hovere_cut      = chooseVal(threshold       ,0.05+1.16/esc+0.0324*rho/esc,   0.05+1.16/esc+0.0324*rho/esc,   0.046+1.16/esc+0.0324*rho/esc,  0.026+1.15/esc+0.0324*rho/esc);
+      reliso_cut      = chooseVal(threshold       ,0.198+0.506/lep.pt(),  0.112+0.506/lep.pt(),  0.0478+0.506/lep.pt(),     0.0287+0.506/lep.pt());
+      ooeminusoop_cut = chooseVal(threshold       ,0.209,   0.193,   0.184,   0.159);
+      d0_cut          = chooseVal(threshold       ,0.05,    0.05,    0.05,    0.05);
+      dz_cut          = chooseVal(threshold       ,0.10,    0.10,    0.10,    0.10);
+      misshits_cut    = chooseVal(threshold       ,2,   1,   1,   1);
+      req_conv_veto   = chooseVal(threshold       ,true           ,  true         ,  true         ,  true );
+    } else {
+      ieta_cut        = chooseVal(threshold       ,0.0457,  0.0425,  0.0387,  0.0353);
+      deta_cut        = chooseVal(threshold       ,0.00814, 0.00674, 0.00632, 0.00501);
+      dphi_cut        = chooseVal(threshold       ,0.19,    0.169,   0.0394,  0.0236);
+      hovere_cut      = chooseVal(threshold       ,0.05+2.54/esc+0.183*rho/esc,   0.0441+2.54/esc+0.183*rho/esc,     0.0275+2.52/esc+0.183*rho/esc,     0.0188+2.06/esc+0.183*rho/esc);
+      reliso_cut      = chooseVal(threshold       ,0.203+0.963/lep.pt(),  0.108+0.963/lep.pt(),  0.0658+0.963/lep.pt(),     0.0445+0.963/lep.pt());
+      ooeminusoop_cut = chooseVal(threshold       ,0.132,   0.111,   0.0721,  0.0197);
+      d0_cut          = chooseVal(threshold       ,0.1,     0.1,     0.1,     0.1);
+      dz_cut          = chooseVal(threshold       ,0.2,     0.2,     0.2,     0.2);
+      misshits_cut    = chooseVal(threshold       ,3, 1, 1, 1);
+      req_conv_veto   = chooseVal(threshold       ,true   ,  true   ,  true   ,  true );
+    }
+  } else {
+    //https://twiki.cern.ch/twiki/bin/viewauth/CMS/CutBasedElectronIdentificationRun2#Working_points_for_Spring15_MC_s
+    // Last updated October 8th
+    if(barrel){
+      ieta_cut        = chooseVal(threshold       ,0.0114,  0.0103,  0.0101,  0.0101);
+      deta_cut        = chooseVal(threshold       ,0.0152,  0.0105,  0.0103,  0.00926);
+      dphi_cut        = chooseVal(threshold       ,0.216,   0.115,   0.0336,  0.0336);
+      hovere_cut      = chooseVal(threshold       ,0.181,   0.104,   0.0876,  0.0597);
+      reliso_cut      = chooseVal(threshold       ,0.126,   0.0893,  0.0766,  0.0354);
+      ooeminusoop_cut = chooseVal(threshold       ,0.207,   0.102,   0.0174,  0.012);
+      d0_cut          = chooseVal(threshold       ,0.0564,  0.0261,  0.0118,  0.0111);
+      dz_cut          = chooseVal(threshold       ,0.472,   0.41,  0.373,   0.0466);
+      misshits_cut    = chooseVal(threshold       ,2,   2,   2,   2);
+      req_conv_veto   = chooseVal(threshold       ,true           ,  true         ,  true         ,  true );
+    } else {
+      ieta_cut        = chooseVal(threshold       ,0.0352 , 0.0301 , 0.0283 , 0.0279);
+      deta_cut        = chooseVal(threshold       ,0.0113 , 0.00814 , 0.00733 , 0.00724);
+      dphi_cut        = chooseVal(threshold       ,0.237 , 0.182 , 0.114 , 0.0918);
+      hovere_cut      = chooseVal(threshold       ,0.116 , 0.0897 , 0.0678 , 0.0615);
+      reliso_cut      = chooseVal(threshold       ,0.144 , 0.121 , 0.0678 , 0.0646);
+      ooeminusoop_cut = chooseVal(threshold       ,0.174 , 0.126 , 0.0898 , 0.00999);
+      d0_cut          = chooseVal(threshold       ,0.222 , 0.118 , 0.0739 , 0.0351);
+      dz_cut          = chooseVal(threshold       ,0.921 , 0.822 , 0.602 , 0.417);
+      misshits_cut    = chooseVal(threshold       ,3, 1, 1, 1);
+      req_conv_veto   = chooseVal(threshold       ,true   ,  true   ,  true   ,  true );
+    }
+  }
   int mhits(0);
   if(lep.gsfTrack().isAvailable()){
     mhits = lep.gsfTrack()->hitPattern().numberOfLostHits(reco::HitPattern::MISSING_INNER_HITS);;
@@ -380,6 +384,7 @@ bool lepton_tools::idElectron(const pat::Electron &lep, edm::Handle<reco::Vertex
     && (!doIso || reliso_cut > 0) // To be implemented if we want reliso
     && (!req_conv_veto || lep.passConversionVeto())
     && (misshits_cut >= mhits);
+  
 }
 
 bool lepton_tools::vertexElectron(const pat::Electron &lep, edm::Handle<reco::VertexCollection> vtx, double &dz, double &d0){
@@ -511,8 +516,9 @@ pair<double, double> lepton_tools::getScaleFactor(const pat::Electron &lep){
           };
   }
   else if(outname_lt.Contains("RunIIFall17") || outname_lt.Contains("RunIIAutumn18")) {
-  	sfs = {GetSF(sf_2017_full_electron_medium, pt, abseta, false), make_pair(1., 0.03),//Systematic uncertainty
-           GetSF(sf_2017_full_electron_iso,    pt, abseta, false), make_pair(1., 0.03),//Systematic uncertainty
+  	sfs = {GetSF(sf_2017_full_electron_reco, pt, abseta, false), make_pair(1., 0.),//Systematic uncertainty already folded into the SF error bars
+           GetSF(sf_2017_full_electron_medium, pt, abseta, false), make_pair(1., 0.),
+           GetSF(sf_2017_full_electron_iso,    pt, abseta, false), make_pair(1., 0.),
            make_pair(1., pt<20. || pt >80. ? 0.01 : 0.)//Systematic uncertainty
           };
   }
