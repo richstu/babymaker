@@ -2185,7 +2185,7 @@ bmaker_full::bmaker_full(const edm::ParameterSet& iConfig):
   jetTool    = new jet_met_tools(jec_label, doSystematics, isFastSim, outname);
   photonTool = new photon_tools();
   mcTool     = new mc_tools();
-  weightTool = new weight_tools();
+  weightTool = new weight_tools(outname);
   eventTool  = new event_tools(outname);
 
 

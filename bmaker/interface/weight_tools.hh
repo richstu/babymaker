@@ -12,6 +12,8 @@ private:
   std::vector<double> w_pu_up;
   std::vector<double> w_pu_nom;
   std::vector<double> w_pu_down;
+  std::vector<TString> bad_pu17_datasets;
+  bool bad_pu17;
 
 public:
   // the enum index corresponds to the index of the variation
@@ -34,7 +36,7 @@ public:
   float topPtWeight(float top_pt1,float top_pt2);
   float isrWeight(float isrpt);
   void getPDFWeights(std::vector<float> &sys_pdf, std::vector<float> &w_pdf);
-  weight_tools();
+  weight_tools(TString outname);
   ~weight_tools();
 };
 
