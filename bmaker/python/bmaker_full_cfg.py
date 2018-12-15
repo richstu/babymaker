@@ -53,7 +53,6 @@ else: fastsim = False
 doJEC = True
 
 # if doJEC: jets_label = "updatedPatJetsTransientCorrectedUpdatedJEC"
-# if doJEC: jets_label = "updatedPatJetsTransientCorrectedDeepFlavor"
 if doJEC: jets_label = "updatedPatJetsUpdatedJEC"
 else: jets_label = "slimmedJets"
 
@@ -94,7 +93,6 @@ if "Run201" in outName:
     # These only used for the official application of JECs
     globalTag = "80X_dataRun2_2016SeptRepro_v6"
     processRECO = "RECO"
-    jecLevels = ['L1FastJet', 'L2Relative', 'L3Absolute', 'L2L3Residual']
 else:
     isData = False
     # These only used for the official application of JECs
@@ -102,7 +100,6 @@ else:
     if "RunIISummer16MiniAOD" in outName: globalTag = "80X_mcRun2_asymptotic_2016_TrancheIV_v7"
     elif "RunIIFall17MiniAODv2" in outName: globalTag = "94X_mc2017_realistic_v14"
     processRECO = "PAT"
-    jecLevels = ['L1FastJet', 'L2Relative', 'L3Absolute']
 
 ###### Defining Baby process, input and output files 
 process = cms.Process("Baby")
@@ -118,7 +115,7 @@ if isData: # Processing only lumis in JSON
 process.load("Configuration.Geometry.GeometryRecoDB_cff")
 process.load("Configuration.StandardSequences.MagneticField_cff")
 
-###### Setting global tag 
+####### Setting global tag - using DB for now
 ## From https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookJetEnergyCorrections#JecGlobalTag
 process.load('Configuration.StandardSequences.Services_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
@@ -174,10 +171,6 @@ process.ecalBadCalibReducedMINIAODFilter = cms.EDFilter(
     )
 
 if doJEC:
-    process.options = cms.untracked.PSet(
-      allowUnscheduled = cms.untracked.bool(True),
-      wantSummary = cms.untracked.bool(False)
-    )
     ###### Setting sqlite file for the JECs that are in newer global tags 
     ## From https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookJetEnergyCorrections#JecSqliteFile
     process.load("CondCore.DBCommon.CondDBCommon_cfi")
@@ -201,8 +194,18 @@ if doJEC:
     updateJetCollection(
       process,
       jetSource = cms.InputTag('slimmedJets'),
-      labelName = 'UpdatedJEC',
-      jetCorrections = ('AK4PFchs', cms.vstring(jecLevels), 'None')
+      jetCorrections = ('AK4PFchs', cms.vstring(['L1FastJet', 'L2Relative', 'L3Absolute', 'L2L3Residual']), 'None'),
+      # pvSource = cms.InputTag('offlineSlimmedPrimaryVertices'), # doesn't work :(
+      # svSource = cms.InputTag('slimmedSecondaryVertices'),
+      # btagDiscriminators = [  
+      #   'pfDeepFlavourJetTags:probb', 
+      #   'pfDeepFlavourJetTags:probbb',
+      #   'pfDeepFlavourJetTags:problepb',
+      #   'pfDeepFlavourJetTags:probc',
+      #   'pfDeepFlavourJetTags:probuds',
+      #   'pfDeepFlavourJetTags:probg'
+      #   ],
+      postfix = 'UpdatedJEC',
     )
 
     ###### Apply new JECs to MET
@@ -218,22 +221,29 @@ if doJEC:
 
 # L1 prefiring issue
 # https://twiki.cern.ch/twiki/bin/viewauth/CMS/L1ECALPrefiringWeightRecipe 
+prefire_dataEra = "2017BtoF"
+if "RunIISummer16MiniAOD" in outName: prefire_dataEra = "2016BtoH"
 process.prefiringweight = cms.EDProducer("L1ECALPrefiringWeightProducer",
                                           ThePhotons = cms.InputTag("slimmedPhotons"),
                                           TheJets = cms.InputTag("slimmedJets"),
                                           L1Maps = cms.string("data/L1Prefire/L1PrefiringMaps_new.root"), # update this line with the location of this file
-                                          DataEra = cms.string("2017BtoF"), #Use 2016BtoH for 2016
+                                          DataEra = cms.string(prefire_dataEra),
                                           UseJetEMPt = cms.bool(False), #can be set to true to use jet prefiring maps parametrized vs pt(em) instead of pt
                                           PrefiringRateSystematicUncty = cms.double(0.2) #Minimum relative prefiring uncty per object
                                           )
 
+# putting EDProducers and EDFilters in a task is the new way to run unscheduled since 90X
+process.myTask = cms.Task(process.prefiringweight, 
+                          process.ecalBadCalibReducedMINIAODFilter, 
+                          process.patJetCorrFactorsUpdatedJEC, 
+                          process.updatedPatJetsUpdatedJEC
+                          )
+
+# printing stuff about the event
+# process.add_(cms.Service("Tracer"))
+# process.add_(cms.Service("ProductRegistryDumper"))
 # Include process.dump* in the path to have all the event ojects printed out
 process.dump=cms.EDAnalyzer('EventContentAnalyzer')
-process.p = cms.Path(
-                     process.prefiringweight*
-                     process.patJetCorrFactorsUpdatedJEC*
-                     process.updatedPatJetsUpdatedJEC*
-					 process.fullPatMetSequenceModifiedMET*
-           process.ecalBadCalibReducedMINIAODFilter*
-					 process.baby_full)
 
+process.p = cms.Path(process.fullPatMetSequenceModifiedMET*process.baby_full)
+process.p.associate(process.myTask)

@@ -803,7 +803,7 @@ void jet_met_tools::clusterFatJets(int &nfjets, float &mj,
   fjets_phi.resize(fjets.size());
   fjets_m.resize(fjets.size());
   fjets_nconst.resize(fjets.size());
-  jets_fjet_index.resize(baby.jets_csv().size(), -1);
+  jets_fjet_index.resize(baby.jets_csvd().size(), -1);
 
   for(size_t ipj = 0; ipj < fjets.size(); ++ipj){
     const fastjet::PseudoJet &pj = fjets.at(ipj);
@@ -890,7 +890,6 @@ jet_met_tools::jet_met_tools(TString ijecName, bool doSys, bool fastSim, TString
     jecUncProvider.reset(new JetCorrectionUncertainty(basename+"_Uncertainty_AK4PFchs.txt"));
   }
   // only add b-tagging weights if requested
-  string scaleFactorFile(getenv("CMSSW_BASE"));
   string scaleFactorFile_deep(getenv("CMSSW_BASE"));
   // set btag working points
   TString cmssw(getenv("CMSSW_VERSION"));
@@ -903,7 +902,6 @@ jet_met_tools::jet_met_tools(TString ijecName, bool doSys, bool fastSim, TString
     CSVLoose  = 0.5426;
     CSVMedium = 0.8484;
     CSVTight  = 0.9535;
-    scaleFactorFile+="/src/babymaker/bmaker/data/CSVv2_Moriond17_B_H.csv";//CSVv2Moriond17_2017_1_26_BtoH.csv";//CSVv2Moriond17_comb.csv";
     DeepCSVLoose  = 0.2219;
     DeepCSVMedium = 0.6324;
     DeepCSVTight  = 0.8958;
@@ -913,7 +911,6 @@ jet_met_tools::jet_met_tools(TString ijecName, bool doSys, bool fastSim, TString
     CSVLoose  = 0.5803;
     CSVMedium = 0.8838;
     CSVTight  = 0.9693;
-    scaleFactorFile+="/src/babymaker/bmaker/data/CSVv2_94XSF_V2_B_F.csv";
     DeepCSVLoose  = 0.1522;
     DeepCSVMedium = 0.4941;
     DeepCSVTight  = 0.8001;
@@ -924,13 +921,13 @@ jet_met_tools::jet_met_tools(TString ijecName, bool doSys, bool fastSim, TString
     // scaleFactorFile_deepflav+="/src/babymaker/bmaker/data/DeepFlavour_94XSF_V1_B_F.csv"; // to be added
   }
 
-  calib_full_.reset(new BTagCalibration("csvv2", scaleFactorFile));
-  for(const auto &op: op_pts_){
-    readers_full_[op] = MakeUnique<BTagCalibrationReader>(op, "central", vector<string>{"up", "down"});
-    readers_full_.at(op)->load(*calib_full_, BTagEntry::FLAV_UDSG, "incl");
-    readers_full_.at(op)->load(*calib_full_, BTagEntry::FLAV_C, "comb");
-    readers_full_.at(op)->load(*calib_full_, BTagEntry::FLAV_B, "comb");
-  }
+  // calib_full_.reset(new BTagCalibration("csvv2", scaleFactorFile));
+  // for(const auto &op: op_pts_){
+  //   readers_full_[op] = MakeUnique<BTagCalibrationReader>(op, "central", vector<string>{"up", "down"});
+  //   readers_full_.at(op)->load(*calib_full_, BTagEntry::FLAV_UDSG, "incl");
+  //   readers_full_.at(op)->load(*calib_full_, BTagEntry::FLAV_C, "comb");
+  //   readers_full_.at(op)->load(*calib_full_, BTagEntry::FLAV_B, "comb");
+  // }
   calib_deep_full_.reset(new BTagCalibration("csvv2_deep", scaleFactorFile_deep));
   for(const auto &op: op_pts_){
     readers_deep_full_[op] = MakeUnique<BTagCalibrationReader>(op, "central", vector<string>{"up", "down"});
@@ -940,15 +937,15 @@ jet_met_tools::jet_met_tools(TString ijecName, bool doSys, bool fastSim, TString
   }
 
   if (isFastSim){
-    string scaleFactorFileFastSim(getenv("CMSSW_BASE"));
-    scaleFactorFileFastSim+="/src/babymaker/bmaker/data/fastsim_csvv2_ttbar_26_1_2017.csv";//CSV_13TEV_Combined_14_7_2016.csv";
-    calib_fast_.reset(new BTagCalibration("csvv2", scaleFactorFileFastSim));
-    for(const auto &op: op_pts_){
-      readers_fast_[op] = MakeUnique<BTagCalibrationReader>(op, "central", vector<string>{"up", "down"});
-      readers_fast_.at(op)->load(*calib_fast_, BTagEntry::FLAV_UDSG, "fastsim");
-      readers_fast_.at(op)->load(*calib_fast_, BTagEntry::FLAV_C, "fastsim");
-      readers_fast_.at(op)->load(*calib_fast_, BTagEntry::FLAV_B, "fastsim");
-    }
+    // string scaleFactorFileFastSim(getenv("CMSSW_BASE"));
+    // scaleFactorFileFastSim+="/src/babymaker/bmaker/data/fastsim_csvv2_ttbar_26_1_2017.csv";//CSV_13TEV_Combined_14_7_2016.csv";
+    // calib_fast_.reset(new BTagCalibration("csvv2", scaleFactorFileFastSim));
+    // for(const auto &op: op_pts_){
+    //   readers_fast_[op] = MakeUnique<BTagCalibrationReader>(op, "central", vector<string>{"up", "down"});
+    //   readers_fast_.at(op)->load(*calib_fast_, BTagEntry::FLAV_UDSG, "fastsim");
+    //   readers_fast_.at(op)->load(*calib_fast_, BTagEntry::FLAV_C, "fastsim");
+    //   readers_fast_.at(op)->load(*calib_fast_, BTagEntry::FLAV_B, "fastsim");
+    // }
     string scaleFactorFileFastSim_deep(getenv("CMSSW_BASE"));
     scaleFactorFileFastSim_deep+="/src/babymaker/bmaker/data/fastsim_deepcsv_ttbar_26_1_2017.csv";//CSV_13TEV_Combined_14_7_2016.csv";
     calib_deep_fast_.reset(new BTagCalibration("csvv2", scaleFactorFileFastSim_deep));
@@ -960,27 +957,27 @@ jet_met_tools::jet_met_tools(TString ijecName, bool doSys, bool fastSim, TString
     }
   }
 
-  string filename(getenv("CMSSW_BASE"));
-  filename+="/src/babymaker/bmaker/data/btagEfficiencies/btagEfficiency.root";
-  TFile *efficiencyFile = TFile::Open(filename.c_str());
-  if(efficiencyFile->IsOpen()) {
-    for(size_t i = 0; i < op_pts_.size(); ++i){
-      string hist_name;
-      switch(op_pts_.at(i)){
-      case BTagEntry::OP_LOOSE: hist_name = "btagEfficiency_loose"; break;
-      case BTagEntry::OP_MEDIUM: hist_name = "btagEfficiency_medium"; break;
-      case BTagEntry::OP_TIGHT: hist_name = "btagEfficiency_tight"; break;
-      case BTagEntry::OP_RESHAPING: hist_name = "btagEfficiency_reshaping"; break;
-      default: hist_name = "btagEfficiency"; break;
-      }
-      btag_efficiencies_.at(i) = static_cast<const TH3D*>(efficiencyFile->Get(hist_name.c_str()));
-      if(!btag_efficiencies_.at(i)){
-        ERROR("Could not find efficiency parametrization " << hist_name);
-      }
-    }
-  }else{
-    ERROR("Could not find efficiency file " << filename);
-  }
+  // string filename(getenv("CMSSW_BASE"));
+  // filename+="/src/babymaker/bmaker/data/btagEfficiencies/btagEfficiency.root";
+  // TFile *efficiencyFile = TFile::Open(filename.c_str());
+  // if(efficiencyFile->IsOpen()) {
+  //   for(size_t i = 0; i < op_pts_.size(); ++i){
+  //     string hist_name;
+  //     switch(op_pts_.at(i)){
+  //     case BTagEntry::OP_LOOSE: hist_name = "btagEfficiency_loose"; break;
+  //     case BTagEntry::OP_MEDIUM: hist_name = "btagEfficiency_medium"; break;
+  //     case BTagEntry::OP_TIGHT: hist_name = "btagEfficiency_tight"; break;
+  //     case BTagEntry::OP_RESHAPING: hist_name = "btagEfficiency_reshaping"; break;
+  //     default: hist_name = "btagEfficiency"; break;
+  //     }
+  //     btag_efficiencies_.at(i) = static_cast<const TH3D*>(efficiencyFile->Get(hist_name.c_str()));
+  //     if(!btag_efficiencies_.at(i)){
+  //       ERROR("Could not find efficiency parametrization " << hist_name);
+  //     }
+  //   }
+  // }else{
+  //   ERROR("Could not find efficiency file " << filename);
+  // }
 
   string filename_deep(getenv("CMSSW_BASE"));
   filename_deep+="/src/babymaker/bmaker/data/btagEfficiencies/btagEfficiency_deep.root";
@@ -1004,53 +1001,53 @@ jet_met_tools::jet_met_tools(TString ijecName, bool doSys, bool fastSim, TString
     ERROR("Could not find efficiency file " << filename_deep);
   }
 
-  string filename_proc(getenv("CMSSW_BASE"));
-  if(outname.Contains("QCD")) filename_proc+="/src/babymaker/bmaker/data/btagEfficiencies/btagEfficiency_qcd.root";
-  else if(outname.Contains("WJets") && !outname.Contains("TTWJets")) filename_proc+="/src/babymaker/bmaker/data/btagEfficiencies/btagEfficiency_wjets.root";
-  else filename_proc+="/src/babymaker/bmaker/data/btagEfficiencies/btagEfficiency_tt.root";
-  TFile *efficiencyFile_proc = TFile::Open(filename_proc.c_str());
-  if(efficiencyFile_proc->IsOpen()) {
-    for(size_t i = 0; i < op_pts_.size(); ++i){
-      string hist_name;
-      switch(op_pts_.at(i)){
-      case BTagEntry::OP_LOOSE: hist_name = "btagEfficiency_loose"; break;
-      case BTagEntry::OP_MEDIUM: hist_name = "btagEfficiency_medium"; break;
-      case BTagEntry::OP_TIGHT: hist_name = "btagEfficiency_tight"; break;
-      case BTagEntry::OP_RESHAPING: hist_name = "btagEfficiency_reshaping"; break;
-      default: hist_name = "btagEfficiency"; break;
-      }
-      btag_efficiencies_proc_.at(i) = static_cast<const TH3D*>(efficiencyFile_proc->Get(hist_name.c_str()));
-      if(!btag_efficiencies_proc_.at(i)){
-        ERROR("Could not find efficiency parametrization " << hist_name);
-      }
-    }
-  }else{
-    ERROR("Could not find efficiency file " << filename_proc);
-  }
+  // string filename_proc(getenv("CMSSW_BASE"));
+  // if(outname.Contains("QCD")) filename_proc+="/src/babymaker/bmaker/data/btagEfficiencies/btagEfficiency_qcd.root";
+  // else if(outname.Contains("WJets") && !outname.Contains("TTWJets")) filename_proc+="/src/babymaker/bmaker/data/btagEfficiencies/btagEfficiency_wjets.root";
+  // else filename_proc+="/src/babymaker/bmaker/data/btagEfficiencies/btagEfficiency_tt.root";
+  // TFile *efficiencyFile_proc = TFile::Open(filename_proc.c_str());
+  // if(efficiencyFile_proc->IsOpen()) {
+  //   for(size_t i = 0; i < op_pts_.size(); ++i){
+  //     string hist_name;
+  //     switch(op_pts_.at(i)){
+  //     case BTagEntry::OP_LOOSE: hist_name = "btagEfficiency_loose"; break;
+  //     case BTagEntry::OP_MEDIUM: hist_name = "btagEfficiency_medium"; break;
+  //     case BTagEntry::OP_TIGHT: hist_name = "btagEfficiency_tight"; break;
+  //     case BTagEntry::OP_RESHAPING: hist_name = "btagEfficiency_reshaping"; break;
+  //     default: hist_name = "btagEfficiency"; break;
+  //     }
+  //     btag_efficiencies_proc_.at(i) = static_cast<const TH3D*>(efficiencyFile_proc->Get(hist_name.c_str()));
+  //     if(!btag_efficiencies_proc_.at(i)){
+  //       ERROR("Could not find efficiency parametrization " << hist_name);
+  //     }
+  //   }
+  // }else{
+  //   ERROR("Could not find efficiency file " << filename_proc);
+  // }
 
-  string filename_deep_proc(getenv("CMSSW_BASE"));
-  if(outname.Contains("QCD")) filename_deep_proc+="/src/babymaker/bmaker/data/btagEfficiencies/btagEfficiency_deep_qcd.root";
-  else if(outname.Contains("WJets") && !outname.Contains("TTWJets")) filename_deep_proc+="/src/babymaker/bmaker/data/btagEfficiencies/btagEfficiency_deep_wjets.root";
-  else filename_deep_proc+="/src/babymaker/bmaker/data/btagEfficiencies/btagEfficiency_deep_tt.root";
-  TFile *efficiencyFile_deep_proc = TFile::Open(filename_deep_proc.c_str());
-  if(efficiencyFile_deep_proc->IsOpen()) {
-    for(size_t i = 0; i < op_pts_.size(); ++i){
-      string hist_name;
-      switch(op_pts_.at(i)){
-      case BTagEntry::OP_LOOSE: hist_name = "btagEfficiency_deep_loose"; break;
-      case BTagEntry::OP_MEDIUM: hist_name = "btagEfficiency_deep_medium"; break;
-      case BTagEntry::OP_TIGHT: hist_name = "btagEfficiency_deep_tight"; break;
-      case BTagEntry::OP_RESHAPING: hist_name = "btagEfficiency_deep_reshaping"; break;
-      default: hist_name = "btagEfficiency"; break;
-      }
-      btag_efficiencies_deep_proc_.at(i) = static_cast<const TH3D*>(efficiencyFile_deep_proc->Get(hist_name.c_str()));
-      if(!btag_efficiencies_deep_proc_.at(i)){
-        ERROR("Could not find efficiency parametrization " << hist_name);
-      }
-    }
-  }else{
-    ERROR("Could not find efficiency file " << filename_deep_proc);
-  }
+  // string filename_deep_proc(getenv("CMSSW_BASE"));
+  // if(outname.Contains("QCD")) filename_deep_proc+="/src/babymaker/bmaker/data/btagEfficiencies/btagEfficiency_deep_qcd.root";
+  // else if(outname.Contains("WJets") && !outname.Contains("TTWJets")) filename_deep_proc+="/src/babymaker/bmaker/data/btagEfficiencies/btagEfficiency_deep_wjets.root";
+  // else filename_deep_proc+="/src/babymaker/bmaker/data/btagEfficiencies/btagEfficiency_deep_tt.root";
+  // TFile *efficiencyFile_deep_proc = TFile::Open(filename_deep_proc.c_str());
+  // if(efficiencyFile_deep_proc->IsOpen()) {
+  //   for(size_t i = 0; i < op_pts_.size(); ++i){
+  //     string hist_name;
+  //     switch(op_pts_.at(i)){
+  //     case BTagEntry::OP_LOOSE: hist_name = "btagEfficiency_deep_loose"; break;
+  //     case BTagEntry::OP_MEDIUM: hist_name = "btagEfficiency_deep_medium"; break;
+  //     case BTagEntry::OP_TIGHT: hist_name = "btagEfficiency_deep_tight"; break;
+  //     case BTagEntry::OP_RESHAPING: hist_name = "btagEfficiency_deep_reshaping"; break;
+  //     default: hist_name = "btagEfficiency"; break;
+  //     }
+  //     btag_efficiencies_deep_proc_.at(i) = static_cast<const TH3D*>(efficiencyFile_deep_proc->Get(hist_name.c_str()));
+  //     if(!btag_efficiencies_deep_proc_.at(i)){
+  //       ERROR("Could not find efficiency parametrization " << hist_name);
+  //     }
+  //   }
+  // }else{
+  //   ERROR("Could not find efficiency file " << filename_deep_proc);
+  // }
 }
 
 // 2016 PromptReco Data/MC SFs
