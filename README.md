@@ -9,60 +9,16 @@ CMSSW code to generate babies (small flat ntuples) from MINIAOD
   * [Submitting jobs to condor in the T3 at UCSB](#submitting-jobs-to-condor-in-the-T3-at-UCSB)
   * [Conventions in babymaker](#conventions-in-babymaker)
 
+#### Code setup for full Run II dataset: CMSSW 10_2_6
 
-#### Code setup
-To set up the code and generate a file named `baby.root`, issue the following commands 
-on lxplus:
-
-    cmsrel CMSSW_8_0_26_patch1
-    cd CMSSW_8_0_26_patch1/src
+    export SCRAM_ARCH=slc6_amd64_gcc700
+    cmsrel CMSSW_10_2_6
+    cd CMSSW_10_2_6/src
     cmsenv
     git cms-init
-    git cms-merge-topic -u cms-met:METRecipe_8020
-    git cms-merge-topic -u cms-met:fromCMSSW_8_0_20_postICHEPfilter
-    git cms-merge-topic -u mverzett:DeepFlavour-from-CMSSW_8_0_21
-    mkdir RecoBTag/DeepFlavour/data/
-    cd RecoBTag/DeepFlavour/data/
-    wget http://home.fnal.gov/~verzetti//DeepFlavour/training/DeepFlavourNoSL.json
-    cd -
-    git clone git@github.com:richstu/babymaker
-    cd babymaker
-    ./compile.sh
-    ./scripts/cmsrun.sh <inputfile> <nevents=1000> <outname>
-
-The `compile.sh` script first compiles the `babymaker/bmaker/genfiles` folder, which
-automatically generates the tree structure (see below), and then issues `scram b`
-in the `babymaker` folder. 
-
-#### CMSSW 9 Update
-Setup for running on 2017 re-reco data with tag 17Nov2017:
-
-    cmsrel CMSSW_9_4_9
-    cd CMSSW_9_4_9/src
-    cmsenv
-	git cms-merge-topic lathomas:L1Prefiring_9_4_9
-	git cms-merge-topic cms-met:METFixEE2017_949_v2
+    git cms-merge-topic lathomas:L1Prefiring_10_2_6
     git cms-addpkg RecoMET/METFilters
-    scram b
-    git clone git@github.com:richstu/babymaker
-    cd babymaker
-    ./compile.sh
-
-#### CMSSW 10 
-Setup for running on 2018 data and DeepAK8:
-
-    cmsrel CMSSW_10_2_1
-    cd CMSSW_10_2_1/src
-    cmsenv
-	# DeepAK8 setup (currently commented out)
-    	git clone ssh://git@gitlab.cern.ch:7999/DeepAK8/NNKit.git
-    	# setup mxnet library
-    	cp NNKit/misc/mxnet_predict.xml $CMSSW_BASE/config/toolbox/$SCRAM_ARCH/tools/selected
-    	scram setup mxnet_predict
-    	rm $CMSSW_BASE/external/$SCRAM_ARCH/lib/libmxnet_predict.so
-    	cp NNKit/misc/lib/libmxnet_predict.so $CMSSW_BASE/external/$SCRAM_ARCH/lib/libmxnet_predict.so
-    	# compile
-    	scram b -j16
+    git cms-merge-topic cms-met:METFixEE2017_949_v2_backport_to_102X
     git clone git@github.com:richstu/babymaker
     cd babymaker
     ./compile.sh
