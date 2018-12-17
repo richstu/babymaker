@@ -19,6 +19,8 @@ CMSSW code to generate babies (small flat ntuples) from MINIAOD
     git cms-merge-topic lathomas:L1Prefiring_10_2_6
     git cms-addpkg RecoMET/METFilters
     git cms-merge-topic cms-met:METFixEE2017_949_v2_backport_to_102X
+    git cms-addpkg RecoBTag/TensorFlow
+    git cherry-pick 94ceae257f846998c357fcad408986cc8a039152
     scram b
     git clone git@github.com:richstu/babymaker
     cd babymaker

@@ -14,6 +14,7 @@
 <use name="CommonTools/Utils"/>
 <use name="RecoEgamma/EgammaTools"/>
 <use name="JetMETCorrections/Type1MET"/>
+<use name="RecoBTag/TensorFlow"/>
 <use name="fastjet"/>
 <use name="fastjet-contrib"/>
 <!-- DAK8

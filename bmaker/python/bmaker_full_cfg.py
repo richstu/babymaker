@@ -52,8 +52,8 @@ else: fastsim = False
 ## => if doJEC = False, DeepCSV discriminator will not be included
 doJEC = True
 
-# if doJEC: jets_label = "updatedPatJetsTransientCorrectedUpdatedJEC"
-if doJEC: jets_label = "updatedPatJetsUpdatedJEC"
+# if doJEC: jets_label = "updatedPatJetsTransientCorrectedNewDFTraining"
+if doJEC: jets_label = "selectedUpdatedPatJetsNewDFTraining"
 else: jets_label = "slimmedJets"
 
 # to apply JECs with txt files in babymaker, 
@@ -197,17 +197,17 @@ if doJEC:
       process,
       jetSource = cms.InputTag('slimmedJets'),
       jetCorrections = ('AK4PFchs', cms.vstring(['L1FastJet', 'L2Relative', 'L3Absolute', 'L2L3Residual']), 'None'),
-      # pvSource = cms.InputTag('offlineSlimmedPrimaryVertices'), # doesn't work :(
-      # svSource = cms.InputTag('slimmedSecondaryVertices'),
-      # btagDiscriminators = [  
-      #   'pfDeepFlavourJetTags:probb', 
-      #   'pfDeepFlavourJetTags:probbb',
-      #   'pfDeepFlavourJetTags:problepb',
-      #   'pfDeepFlavourJetTags:probc',
-      #   'pfDeepFlavourJetTags:probuds',
-      #   'pfDeepFlavourJetTags:probg'
-      #   ],
-      postfix = 'UpdatedJEC',
+      pvSource = cms.InputTag('offlineSlimmedPrimaryVertices'), # doesn't work :(
+      svSource = cms.InputTag('slimmedSecondaryVertices'),
+      btagDiscriminators = [  
+        'pfDeepFlavourJetTags:probb', 
+        'pfDeepFlavourJetTags:probbb',
+        'pfDeepFlavourJetTags:problepb',
+        'pfDeepFlavourJetTags:probc',
+        'pfDeepFlavourJetTags:probuds',
+        'pfDeepFlavourJetTags:probg'
+        ],
+      postfix = 'NewDFTraining',
     )
 
     ###### Apply new JECs to MET
@@ -237,18 +237,21 @@ process.prefiringweight = cms.EDProducer("L1ECALPrefiringWeightProducer",
                                           PrefiringRateSystematicUncty = cms.double(0.2) #Minimum relative prefiring uncty per object
                                           )
 
-# putting EDProducers and EDFilters in a task is the new way to run unscheduled since 90X
-process.myTask = cms.Task(process.prefiringweight, 
-                          process.ecalBadCalibReducedMINIAODFilter, 
-                          process.patJetCorrFactorsUpdatedJEC, 
-                          process.updatedPatJetsUpdatedJEC
-                          )
-
 # printing stuff about the event
 # process.add_(cms.Service("Tracer"))
 # process.add_(cms.Service("ProductRegistryDumper"))
 # Include process.dump* in the path to have all the event ojects printed out
 process.dump=cms.EDAnalyzer('EventContentAnalyzer')
 
-process.p = cms.Path(process.fullPatMetSequenceModifiedMET*process.baby_full)
-process.p.associate(process.myTask)
+# putting EDProducers and EDFilters in a task is the new way to run unscheduled since 90X
+process.tsk = cms.Task()
+for mod in process.producers_().itervalues():
+    process.tsk.add(mod)
+for mod in process.filters_().itervalues():
+    process.tsk.add(mod)
+
+process.p = cms.Path(
+    process.fullPatMetSequenceModifiedMET
+    *process.baby_full,
+    process.tsk
+)

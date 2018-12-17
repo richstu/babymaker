@@ -62,6 +62,9 @@ outName="fullbaby_TTJets_HT-1200to2500_TuneCP5_13TeV-madgraphMLM-pythia8_RunIIFa
 inFile=/home/users/ana/TTJets_SingleLeptFromTbar_TuneCP5_13TeV-madgraphMLM-pythia8_RunIIFall17MiniAODv2_PU2017_12Apr2018_94X_mc2017_realistic_v14-v1.root
 outName="fullbaby_TTJets_SingleLeptFromTbar_TuneCP5_13TeV-madgraphMLM-pythia8_RunIIFall17MiniAODv2_PU2017_12Apr2018_94X_mc2017_realistic_v14-v1.root"
 
+inFile=/nfs-7/userdata/adorsett/TTJets_HT-800to1200_TuneCP5_13TeV-madgraphMLM-pythia8_RunIIFall17MiniAODv2_MINIAODSIM.root
+outName=TTJets_HT-800to1200_TuneCP5_13TeV-madgraphMLM-pythia8_RunIIFall17MiniAODv2_MINIAODSIM.root
+
 # inFile=ZprimeToWWToWlepWhad_narrow_M-3000_TuneCP5_13TeV-madgraph_RunIIFall17MiniAOD_94X_mc2017_realistic_v10-v1.root
 # outName="fullbaby_TTJets_TuneCP5_13TeV-madgraph_RunIIFall17MiniAOD.root"
 
@@ -71,7 +74,7 @@ outName="fullbaby_TTJets_SingleLeptFromTbar_TuneCP5_13TeV-madgraphMLM-pythia8_Ru
 # inFile=/home/users/ana/data/TTJets_SingleLeptFromT_genMET-150_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISummer16MiniAODv2.root
 # outName="TTJets_SingleLeptFromT_genMET-150_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISummer16MiniAODv2.root"
 
-nEvents="1"
+nEvents="3000"
 
 json=do_not_want_json # If it can't find the file, it doesn't pre-apply the JSON
 # json="babymaker/data/json/golden_Cert_271036-275125_13TeV_PromptReco_Collisions16.json"
