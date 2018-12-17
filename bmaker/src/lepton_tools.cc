@@ -66,94 +66,94 @@ namespace{
     return {sf, err};
   }
 
-  TH2D GraphToHist(const TGraphAsymmErrors &g){
-    struct Point{
-      double xl, xh, y, e;
-      Point(double xl_in, double xh_in, double y_in, double e_in):
-        xl(xl_in),
-        xh(xh_in),
-        y(y_in),
-        e(e_in){
-      }
-      bool operator<(const Point &p) const{
-        return make_tuple(xl, xh, fabs(log(fabs(y))), fabs(e))
-          <make_tuple(p.xl, p.xh, fabs(log(fabs(p.y))), fabs(p.e));
-      }
-    };
-    vector<Point> bins;
-    Double_t *x = g.GetX();
-    Double_t *xl = g.GetEXlow();
-    Double_t *xh = g.GetEXhigh();
-    Double_t *y = g.GetY();
-    Double_t *yl = g.GetEYlow();
-    Double_t *yh = g.GetEYhigh();
-    for(int i = 0; i < g.GetN(); ++i){
-      bins.emplace_back(x[i]-fabs(xl[i]), x[i]+fabs(xh[i]),
-                        y[i], max(fabs(yl[i]), fabs(yh[i])));
-    }
-    bool problems = true;
-    while(problems){
-      stable_sort(bins.begin(), bins.end());
-      problems = false;
-      for(auto low = bins.begin(); !problems && low != bins.end(); ++low){
-        auto high = low;
-        ++high;
-        if(high == bins.end()) break;
-        double new_y = sqrt(low->y * high->y);
-        double top = max(low->y+low->e, high->y+high->e);
-        double bot = min(low->y-low->e, high->y-high->e);
-        double new_e = max(top-new_y, new_y-bot);
-        if(low->xh < high->xl){
-          //Gap
-          bins.insert(high, Point(low->xh, high->xl, new_y, new_e));
-        }else if(low->xh > high->xl){
-          //Overlap
-          problems = true;
-          if(low->xh < high->xh){
-            //Plain overlap
-            Point new_low(low->xl, high->xl, low->y, low->e);
-            Point new_mid(high->xl, low->xh, new_y, new_e);
-            Point new_high(low->xh, high->xh, high->y, high->e);
-            *low = new_low;
-            *high = new_high;
-            bins.insert(high, new_mid);
-          }else if(low->xh == high->xh){
-            //Subset -> 2 bins
-            Point new_low(low->xl, high->xl, low->y, low->e);
-            Point new_high(high->xl, high->xh, new_y, new_e);
-            *low = new_low;
-            *high = new_high;
-          }else{
-            //Subset -> 3 bins
-            Point new_low(low->xl, high->xl, low->y, low->e);
-            Point new_mid(high->xl, high->xh, new_y, new_e);
-            Point new_high(high->xh, low->xh, low->y, low->e);
-            *low = new_low;
-            *high = new_high;
-            bins.insert(high, new_mid);
-          }
-        }
-      }
-    }
-    vector<double> bin_edges(bins.size()+1);
-    for(size_t i = 0; i < bins.size(); ++i){
-      bin_edges.at(i) = bins.at(i).xl;
-    }
-    bin_edges.back() = bins.back().xh;
-    TH2D h(g.GetName(), (string(g.GetTitle())+";"+g.GetXaxis()->GetTitle()+";"+g.GetYaxis()->GetTitle()).c_str(),
-           1, 0., 1.e4, bin_edges.size()-1, &bin_edges.at(0));
-    for(int ix = 0; ix <= 2; ++ix){
-      h.SetBinContent(ix, 0, 1.);
-      h.SetBinError(ix, 0, 1.);
-      h.SetBinContent(ix, h.GetNbinsY()+1, 1.);
-      h.SetBinError(ix, h.GetNbinsY()+1, 1.);
-      for(int iy = 1; iy <= h.GetNbinsY(); ++iy){
-        h.SetBinContent(ix, iy, bins.at(iy-1).y);
-        h.SetBinError(ix ,iy, bins.at(iy-1).e);
-      }
-    }
-    return h;
-  }
+  // TH2D GraphToHist(const TGraphAsymmErrors &g){
+  //   struct Point{
+  //     double xl, xh, y, e;
+  //     Point(double xl_in, double xh_in, double y_in, double e_in):
+  //       xl(xl_in),
+  //       xh(xh_in),
+  //       y(y_in),
+  //       e(e_in){
+  //     }
+  //     bool operator<(const Point &p) const{
+  //       return make_tuple(xl, xh, fabs(log(fabs(y))), fabs(e))
+  //         <make_tuple(p.xl, p.xh, fabs(log(fabs(p.y))), fabs(p.e));
+  //     }
+  //   };
+  //   vector<Point> bins;
+  //   Double_t *x = g.GetX();
+  //   Double_t *xl = g.GetEXlow();
+  //   Double_t *xh = g.GetEXhigh();
+  //   Double_t *y = g.GetY();
+  //   Double_t *yl = g.GetEYlow();
+  //   Double_t *yh = g.GetEYhigh();
+  //   for(int i = 0; i < g.GetN(); ++i){
+  //     bins.emplace_back(x[i]-fabs(xl[i]), x[i]+fabs(xh[i]),
+  //                       y[i], max(fabs(yl[i]), fabs(yh[i])));
+  //   }
+  //   bool problems = true;
+  //   while(problems){
+  //     stable_sort(bins.begin(), bins.end());
+  //     problems = false;
+  //     for(auto low = bins.begin(); !problems && low != bins.end(); ++low){
+  //       auto high = low;
+  //       ++high;
+  //       if(high == bins.end()) break;
+  //       double new_y = sqrt(low->y * high->y);
+  //       double top = max(low->y+low->e, high->y+high->e);
+  //       double bot = min(low->y-low->e, high->y-high->e);
+  //       double new_e = max(top-new_y, new_y-bot);
+  //       if(low->xh < high->xl){
+  //         //Gap
+  //         bins.insert(high, Point(low->xh, high->xl, new_y, new_e));
+  //       }else if(low->xh > high->xl){
+  //         //Overlap
+  //         problems = true;
+  //         if(low->xh < high->xh){
+  //           //Plain overlap
+  //           Point new_low(low->xl, high->xl, low->y, low->e);
+  //           Point new_mid(high->xl, low->xh, new_y, new_e);
+  //           Point new_high(low->xh, high->xh, high->y, high->e);
+  //           *low = new_low;
+  //           *high = new_high;
+  //           bins.insert(high, new_mid);
+  //         }else if(low->xh == high->xh){
+  //           //Subset -> 2 bins
+  //           Point new_low(low->xl, high->xl, low->y, low->e);
+  //           Point new_high(high->xl, high->xh, new_y, new_e);
+  //           *low = new_low;
+  //           *high = new_high;
+  //         }else{
+  //           //Subset -> 3 bins
+  //           Point new_low(low->xl, high->xl, low->y, low->e);
+  //           Point new_mid(high->xl, high->xh, new_y, new_e);
+  //           Point new_high(high->xh, low->xh, low->y, low->e);
+  //           *low = new_low;
+  //           *high = new_high;
+  //           bins.insert(high, new_mid);
+  //         }
+  //       }
+  //     }
+  //   }
+  //   vector<double> bin_edges(bins.size()+1);
+  //   for(size_t i = 0; i < bins.size(); ++i){
+  //     bin_edges.at(i) = bins.at(i).xl;
+  //   }
+  //   bin_edges.back() = bins.back().xh;
+  //   TH2D h(g.GetName(), (string(g.GetTitle())+";"+g.GetXaxis()->GetTitle()+";"+g.GetYaxis()->GetTitle()).c_str(),
+  //          1, 0., 1.e4, bin_edges.size()-1, &bin_edges.at(0));
+  //   for(int ix = 0; ix <= 2; ++ix){
+  //     h.SetBinContent(ix, 0, 1.);
+  //     h.SetBinError(ix, 0, 1.);
+  //     h.SetBinContent(ix, h.GetNbinsY()+1, 1.);
+  //     h.SetBinError(ix, h.GetNbinsY()+1, 1.);
+  //     for(int iy = 1; iy <= h.GetNbinsY(); ++iy){
+  //       h.SetBinContent(ix, iy, bins.at(iy-1).y);
+  //       h.SetBinError(ix ,iy, bins.at(iy-1).e);
+  //     }
+  //   }
+  //   return h;
+  // }
 }
 
 //////////////////// Scale Factor loading

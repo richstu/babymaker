@@ -920,7 +920,9 @@ jet_met_tools::jet_met_tools(TString ijecName, bool doSys, bool fastSim, TString
     DeepFlavourTight  = 0.7489;
     // scaleFactorFile_deepflav+="/src/babymaker/bmaker/data/DeepFlavour_94XSF_V1_B_F.csv"; // to be added
   }
-
+  cout<<endl<<"BABYMAKER: jet_met_tools: Using b-tagging SFs from file "
+              <<scaleFactorFile_deep.c_str()<<endl<<endl;
+  
   // calib_full_.reset(new BTagCalibration("csvv2", scaleFactorFile));
   // for(const auto &op: op_pts_){
   //   readers_full_[op] = MakeUnique<BTagCalibrationReader>(op, "central", vector<string>{"up", "down"});

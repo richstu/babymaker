@@ -39,11 +39,14 @@ using namespace utilities;
 
 ///////////////////////// analyze: METHOD CALLED EACH EVENT ///////////////////////////
 void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+  if (debug) cout<<"BABYMAKER:: bmaker_full:analyze beginning..."<<endl;
+
   nevents++;
   isData = iEvent.isRealData();
   baby.Clear();
 
   ////////////////////// Event info /////////////////////
+  if (debug) cout<<"BABYMAKER:: Processing event info..."<<endl;
   baby.run() = iEvent.id().run();
   baby.event() = iEvent.id().event();
   baby.lumiblock() = iEvent.luminosityBlock();
@@ -55,7 +58,7 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   if (outname.Contains("Run2017") || outname.Contains("RunIIFall17")) baby.is2017() = true;
   if (outname.Contains("Run2018") || outname.Contains("RunIIAutumn18")) baby.is2018() = true;
   ////////////////////// Trigger /////////////////////
-  if (debug) cout<<"INFO: Processing trigger info..."<<endl;
+  if (debug) cout<<"BABYMAKER:: Processing trigger info..."<<endl;
   bool triggerFired;
   edm::Handle<edm::TriggerResults> triggerBits;
   iEvent.getByToken(tok_trigResults_hlt_,triggerBits);  
@@ -75,7 +78,7 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   }
 
   ////////////////////// Primary vertices /////////////////////
-  if (debug) cout<<"INFO: Writing vertices..."<<endl;
+  if (debug) cout<<"BABYMAKER:: Writing vertices..."<<endl;
   edm::Handle<reco::VertexCollection> vtx;
   iEvent.getByToken(tok_primVertex_, vtx);
   edm::Handle<std::vector< PileupSummaryInfo > >  pu_info;
@@ -86,7 +89,7 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   writeVertices(vtx, pu_info);
 
   ////////////////////// Leptons /////////////////////
-  if (debug) cout<<"INFO: Writing leptons..."<<endl;
+  if (debug) cout<<"BABYMAKER:: Writing leptons..."<<endl;
   // pfcands, to be used in calculating isolation
   edm::Handle<pat::PackedCandidateCollection> pfcands;
   iEvent.getByToken(tok_packPFCands_, pfcands);
@@ -127,7 +130,7 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   //   keep_event = true;
 
   ///////////////////////////////// Photons ////////////////////////////////
-  if (debug) cout<<"INFO: Writing photons..."<<endl;
+  if (debug) cout<<"BABYMAKER:: Writing photons..."<<endl;
   vCands photons;
   edm::Handle<reco::BeamSpot> beamspot;
   iEvent.getByToken(tok_offBeamSpot_, beamspot);
@@ -138,7 +141,7 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   photons = writePhotons(allphotons, allelectrons, conversions, beamspot, *rhoEventAll_h);
 
   //////////////////////////// MET/JETs with JECs ///////////////////////////
-  if (debug) cout<<"INFO: Applying JECs..."<<endl;
+  if (debug) cout<<"BABYMAKER:: Applying JECs..."<<endl;
   edm::Handle<pat::JetCollection> alljets;
   iEvent.getByToken(tok_jets_, alljets);
   edm::Handle<edm::View<reco::GenJet> > genjets;
@@ -146,7 +149,7 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   jetTool->getJetCorrections(genjets, alljets, *rhoEventAll_h);
 
   /// MET
-  if (debug) cout<<"INFO: Writing MET..."<<endl;
+  if (debug) cout<<"BABYMAKER:: Writing MET..."<<endl;
   edm::Handle<pat::METCollection> mets;
   edm::Handle<pat::METCollection> mets_nohf;
   edm::Handle<pat::METCollection> mets_puppi;
@@ -166,7 +169,7 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   writeMET(mets, mets_nohf, mets_puppi);
 
   /// isolated tracks need to be after MET calculation and before jets cleaning
-  if (debug) cout<<"INFO: Calculating track veto..."<<endl;
+  if (debug) cout<<"BABYMAKER:: Calculating track veto..."<<endl;
   vCands tks,ra4tks;
   if (eventTool->hasGoodPV(vtx)){
     // RA2/b track veto
@@ -178,7 +181,7 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   }
 
   /// Jets
-  if (debug) cout<<"INFO: Writing jets..."<<endl;
+  if (debug) cout<<"BABYMAKER:: Writing jets..."<<endl;
   vector<LVector> all_baby_jets;
   vector<unsigned> all_baby_jets_idx;
   vector<double> jetsMuonEnergyFrac;
@@ -221,7 +224,7 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 
   ////////////////////// mT, dphi /////////////////////
   // It requires previous storing of MET
-  if (debug) cout<<"INFO: Calculating mT..."<<endl;
+  if (debug) cout<<"BABYMAKER:: Calculating mT..."<<endl;
   if(sig_leps.size()>0){
     float wx = baby.met()*cos(baby.met_phi()) + sig_leps[0]->px();
     float wy = baby.met()*sin(baby.met_phi()) + sig_leps[0]->py();
@@ -244,7 +247,7 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   }
 
   ///////////////////// Filters ///////////////////////
-  if (debug) cout<<"INFO: Writing filters..."<<endl; 
+  if (debug) cout<<"BABYMAKER:: Writing filters..."<<endl; 
 
   // update ECAL cell bad calibration filter, before filling all the rest
   edm::Handle< bool > passecalBadCalibFilterUpdate ;
@@ -265,7 +268,7 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   
 
   //////////////// HLT objects //////////////////
-  if (debug) cout<<"INFO: Writing HLT objects..."<<endl;
+  if (debug) cout<<"BABYMAKER:: Writing HLT objects..."<<endl;
   edm::Handle<pat::TriggerObjectStandAloneCollection> triggerObjects;
   iEvent.getByToken(tok_selectedPatTrig_,triggerObjects);  
   // Requires having called writeMuons and writeElectrons for truth-matching
@@ -276,7 +279,7 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 
   ////////////////// MC particles and Truth-matching //////////////////
   if (!isData) {
-    if (debug) cout<<"INFO: Writing MC particles..."<<endl;
+    if (debug) cout<<"BABYMAKER:: Writing MC particles..."<<endl;
     edm::Handle<reco::GenParticleCollection> genParticles;
     iEvent.getByToken(tok_pruneGenPart_, genParticles);
     writeMC(genParticles, all_mus, all_els, photons);
@@ -284,7 +287,7 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   }
 
   ////////////////// resolution-corrected MET /////////////////////////
-  if (debug) cout<<"INFO: Calculating MET rebalancing..."<<endl;
+  if (debug) cout<<"BABYMAKER:: Calculating MET rebalancing..."<<endl;
   baby.jetmismeas() = false;
   if(doMetRebalancing && sig_leps.size()==1) {
     double temp_met = baby.met();
@@ -300,7 +303,7 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   }
 
   ///////////////////// MC hard scatter info ///////////////////////
-  if (debug) cout<<"INFO: Retrieving hard scatter info..."<<endl;
+  if (debug) cout<<"BABYMAKER:: Retrieving hard scatter info..."<<endl;
   edm::Handle<LHEEventProduct> lhe_info;
   baby.stitch() = baby.stitch_ht() = baby.stitch_met() = true;
   if (outname.Contains("SMS-") && outname.Contains("PUSpring16Fast")) {
@@ -1947,7 +1950,7 @@ double bmaker_full::calculateRebalancedMET(unsigned int jetIdx, double mu, doubl
 
 void bmaker_full::writeWeights(const vCands &sig_leps, edm::Handle<GenEventInfoProduct> &gen_event_info, 
                                edm::Handle<LHEEventProduct> &lhe_info, const edm::Event& iEvent){
-  if (debug) cout<<"INFO: Filling weights..."<<endl;
+  if (debug) cout<<"BABYMAKER:: Filling weights..."<<endl;
 
   // Initializing weights
   if(isData) {
@@ -2126,11 +2129,17 @@ bmaker_full::bmaker_full(const edm::ParameterSet& iConfig):
   time(&startTime);
 
 
+  if (debug) cout<<"BABYMAKER:: Initialize lepton tools"<<endl;
   lepTool    = new lepton_tools(outname);
+  if (debug) cout<<"BABYMAKER:: Initialize JetMET tools"<<endl;
   jetTool    = new jet_met_tools(jec_label, doSystematics, isFastSim, outname);
+  if (debug) cout<<"BABYMAKER:: Initialize photon tools"<<endl;
   photonTool = new photon_tools();
+  if (debug) cout<<"BABYMAKER:: Initialize MC tools"<<endl;
   mcTool     = new mc_tools();
+  if (debug) cout<<"BABYMAKER:: Initialize weight tools"<<endl;
   weightTool = new weight_tools(outname);
+  if (debug) cout<<"BABYMAKER:: Initialize event tools"<<endl;
   eventTool  = new event_tools(outname);
 
 
@@ -2164,6 +2173,7 @@ bmaker_full::bmaker_full(const edm::ParameterSet& iConfig):
   //   exit(1);
   // }
 
+  if(debug) cout<<"BABYMAKER:: Save trigger names..."<<endl;
   trig_name = vector<TString>();
   if(outname.Contains("Run201")){ // Would like to define isData, but need iEvent?
     if(outname.Contains("Run2017") || outname.Contains("Run2018")){
@@ -2329,18 +2339,16 @@ bmaker_full::bmaker_full(const edm::ParameterSet& iConfig):
     trig_name.push_back("HLT_PFMETNoMu110_PFMHTNoMu110_IDTight_v7");      // 6
     trig_name.push_back("HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_v7");      // 7
   }
-
+  if (debug) cout<<"BABYMAKER:: bmaker_full constructor finished."<<endl;
 }
 
 
 bmaker_full::~bmaker_full(){
+  if (debug) cout<<"BABYMAKER:: bmaker_full desrtuctor beginning..."<<endl;
   outfile->cd();
   baby.tree_.SetDirectory(outfile);
   baby.Write();
 
-  string commit_s = execute("git rev-parse HEAD");
-  while(!commit_s.empty() && commit_s.at(commit_s.length()-1) == '\n') commit_s.erase(commit_s.length()-1);
-  TString commit = commit_s;
   TString type = baby.BabyType();
   TString root_version = gROOT->GetVersion();
   TString root_tutorial_dir = gROOT->GetTutorialsDir();
@@ -2361,17 +2369,16 @@ bmaker_full::~bmaker_full(){
   sys_names[kSysJECUp] = "jec_up";
   sys_names[kSysJECDn] = "jec_dn";
 
+  if (debug) cout<<"BABYMAKER:: bmaker_full desrtuctor preparing treeglobal..."<<endl;
   TTree treeglobal("treeglobal", "treeglobal");
   treeglobal.Branch("nev_sample", &nevents_sample);
   treeglobal.Branch("nev_file", &nevents);
   treeglobal.Branch("runtime_seconds", &seconds);
-  treeglobal.Branch("git_commit", &commit);
-  // treeglobal.Branch("model", &model);
   treeglobal.Branch("baby_type", &type);
   treeglobal.Branch("root_version", &root_version);
   treeglobal.Branch("root_tutorial_dir", &root_tutorial_dir);
-  treeglobal.Branch("trig_names", &trig_name);
-  treeglobal.Branch("sys_names", &sys_names);
+  // treeglobal.Branch("trig_names", &trig_name);
+  // treeglobal.Branch("sys_names", &sys_names);
   treeglobal.Branch("xsec", &xsec);
   treeglobal.Branch("user", &user);
   treeglobal.Branch("cmssw", &cmssw);
@@ -2383,6 +2390,7 @@ bmaker_full::~bmaker_full(){
   treeglobal.Fill();
   treeglobal.SetDirectory(outfile);
   treeglobal.Write();
+  if (debug) cout<<"BABYMAKER:: bmaker_full wrote treeglobal..."<<endl;
   
   outfile->Close();
 
@@ -2402,6 +2410,7 @@ bmaker_full::~bmaker_full(){
     cout<<"BABYMAKER: "<<inputfiles[ifile].c_str()<<endl;
   cout<<endl;
 
+  if (debug) cout<<"BABYMAKER:: bmaker_full free memory..."<<endl;
   delete outfile;
 
   delete lepTool;
@@ -2409,6 +2418,7 @@ bmaker_full::~bmaker_full(){
   delete jetTool;
   delete mcTool;
   delete weightTool;
+  if (debug) cout<<"BABYMAKER:: bmaker_full desrtuctor done."<<endl;
 }
 
 void bmaker_full::reportTime(const edm::Event& iEvent){
@@ -2435,6 +2445,7 @@ void bmaker_full::reportTime(const edm::Event& iEvent){
 
 // ------------ method called once each job just before starting event loop  ------------
 void bmaker_full::beginJob() {
+  if (debug) cout<<"BABYMAKER: bmaker_full beginJob()"<<endl;
 }
 
 // ------------ method called once each job just after ending the event loop  ------------

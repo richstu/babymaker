@@ -90,16 +90,18 @@ if fastsim:
 
 if "Run201" in outName:
     isData = True
-    # These only used for the official application of JECs
-    globalTag = "80X_dataRun2_2016SeptRepro_v6"
     processRECO = "RECO"
+    if "Run2016" in outName:
+      globalTag = "Summer16_07Aug2017_V11_DATA"
+    else: # 2017 and 2018
+      globalTag = "Fall17_17Nov2017_V32_DATA"
 else:
     isData = False
-    # These only used for the official application of JECs
-    globalTag = "80X_mcRun2_asymptotic_2016_miniAODv2"
-    if "RunIISummer16MiniAOD" in outName: globalTag = "80X_mcRun2_asymptotic_2016_TrancheIV_v7"
-    elif "RunIIFall17MiniAODv2" in outName: globalTag = "94X_mc2017_realistic_v14"
     processRECO = "PAT"
+    if "RunIISummer16MiniAODv3" in outName:
+      globalTag = "Summer16_07Aug2017_V11_MC"
+    else: # 2017 and 2018
+      globalTag = "94X_mc2017_realistic_v14" # to be replaced with: "Fall17_17Nov2017_V32_MC" when available
 
 ###### Defining Baby process, input and output files 
 process = cms.Process("Baby")
@@ -223,10 +225,13 @@ if doJEC:
 # https://twiki.cern.ch/twiki/bin/viewauth/CMS/L1ECALPrefiringWeightRecipe 
 prefire_dataEra = "2017BtoF"
 if "RunIISummer16MiniAOD" in outName: prefire_dataEra = "2016BtoH"
+prefire_file = 'CMSSW_10_2_6/src/babymaker/data/L1Prefire/L1PrefiringMaps_new.root'
+if 'babymaker' in environ['PWD']:
+  prefire_file = 'data/L1Prefire/L1PrefiringMaps_new.root'
 process.prefiringweight = cms.EDProducer("L1ECALPrefiringWeightProducer",
                                           ThePhotons = cms.InputTag("slimmedPhotons"),
                                           TheJets = cms.InputTag("slimmedJets"),
-                                          L1Maps = cms.string("data/L1Prefire/L1PrefiringMaps_new.root"), # update this line with the location of this file
+                                          L1Maps = cms.string(prefire_file), # update this line with the location of this file
                                           DataEra = cms.string(prefire_dataEra),
                                           UseJetEMPt = cms.bool(False), #can be set to true to use jet prefiring maps parametrized vs pt(em) instead of pt
                                           PrefiringRateSystematicUncty = cms.double(0.2) #Minimum relative prefiring uncty per object

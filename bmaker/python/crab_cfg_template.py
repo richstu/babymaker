@@ -13,6 +13,8 @@ taskname = taskname.replace('RunIISpring15MiniAODv2-Asympt25ns_74X_mcRun2_asympt
 taskname = taskname.replace('RunIISpring16MiniAODv1-PUSpring16_80X_mcRun2_asymptotic_2016','80XMiniAODv1')
 taskname = taskname.replace('RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2','80XMiniAODv2')
 taskname = taskname.replace('RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV','Moriond17_80XMiniAODv2')
+taskname = taskname.replace('RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3','RunIISummer16MiniAODv3')
+taskname = taskname.replace('RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14','RunIIFall17MiniAODv2')
 taskname = taskname.replace(':','___')
 # make sure task name is unique for each part of RunF
 if ('RUN_RANGE'=='Run2016F1'): taskname = taskname.replace('Run2016F', 'Run2016F1') 
@@ -63,7 +65,7 @@ config.Data.publication = False # used to be True for cfA production
 config.section_("Site")
 config.Site.storageSite = 'T2_US_UCSD'
 #config.Site.storageSite = 'T3_US_UCSB'
-config.Site.whitelist = ['T2_US_Caltech','T2_US_Florida', 'T2_US_MIT', 'T2_US_Nebraska', 'T2_US_Purdue', 'T2_US_UCSD', 'T2_US_Wisconsin', 'T1_US_FNAL','T2_US_MIT', 'T3_US_UCSB']
+config.Site.whitelist = ['T2_US_Caltech','T2_US_Florida', 'T2_US_MIT', 'T2_US_Nebraska', 'T2_US_Purdue', 'T2_US_UCSD', 'T2_US_Wisconsin', 'T1_US_FNAL','T2_US_MIT']
 #config.Site.blacklist = ['T2_US_Vanderbilt']
 # you may want to uncomment this line and force jobs to run in the US
 # only a few datasets (mostly very new ones) will not be accessible
