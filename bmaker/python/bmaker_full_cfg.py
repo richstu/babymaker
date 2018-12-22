@@ -75,8 +75,8 @@ elif "RunIISummer16MiniAOD" in outName:
   jecLabel = 'Summer16_23Sep2016V3_MC'
 elif "RunIIFall17MiniAODv2" in outName:
   jecLabel = 'Fall17_17Nov2017_V32_MC'
-elif "Run2017" in outName:
-  jecLabel = 'Summer16_23Sep2016GV3_DATA'
+elif "Run2017" in outName: 
+  jecLabel = 'Fall17_17Nov2017_V32_102X_DATA'
 
 # because FastSim naming for JECs variables inside db and txt files is really truly messed up...
 if fastsim: jecLabel = 'Spring16_25nsFastSimV1_MC'
@@ -93,7 +93,9 @@ if "Run201" in outName:
     processRECO = "RECO"
     if "Run2016" in outName:
       globalTag = "Summer16_07Aug2017_V11_DATA"
-    else: # 2017 and 2018
+    if "Run2017" in outName:
+      globalTag = "102X_dataRun2_v8"
+    else: #2018 to be updated
       globalTag = "Fall17_17Nov2017_V32_DATA"
 else:
     isData = False
@@ -177,8 +179,6 @@ if doJEC:
     ## From https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookJetEnergyCorrections#JecSqliteFile
     process.load("CondCore.DBCommon.CondDBCommon_cfi")
     from CondCore.DBCommon.CondDBSetup_cfi import CondDBSetup
-    jecLabel = 'Fall17_17Nov2017_V32_94X_MC'
-    jecCorrLabel = 'Fall17_17Nov2017_V32_94X_MC'
     process.jec = cms.ESSource("PoolDBESSource",CondDBSetup,
                                connect = cms.string('sqlite_fip:babymaker/data/jec/'+jecLabel+'.db'),
                                toGet   = cms.VPSet(
