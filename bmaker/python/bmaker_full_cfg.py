@@ -51,10 +51,14 @@ else: fastsim = False
 ## JECs must be undone and reapplied when rerunning b-tagging
 ## => if doJEC = False, DeepCSV discriminator will not be included
 doJEC = True
-
-# if doJEC: jets_label = "updatedPatJetsTransientCorrectedNewDFTraining"
-if doJEC: jets_label = "selectedUpdatedPatJetsNewDFTraining"
-else: jets_label = "slimmedJets"
+doDeepFlavour = False
+if doJEC: 
+    if doDeepFlavour:
+        jets_label = "selectedUpdatedPatJetsNewDFTraining"
+    else:
+        jets_label = "updatedPatJetsUpdatedJEC"
+else: 
+  jets_label = "slimmedJets"
 
 # to apply JECs with txt files in babymaker, 
 # prefix jecLabel with "onthefly_", e.g. onthefly_Spring16_25nsV6_MC
@@ -73,9 +77,9 @@ elif "RunIISpring16MiniAOD" in outName:
   jecLabel = 'Spring16_23Sep2016V2_MC' # for ICHEP MC against re-reco data
 elif "RunIISummer16MiniAOD" in outName:
   jecLabel = 'Summer16_23Sep2016V3_MC'
-elif "RunIIFall17MiniAODv2" in outName:
+elif "RunIIFall17MiniAODv2" in outName or "RunIIAutumn18" in outName:
   jecLabel = 'Fall17_17Nov2017_V32_MC'
-elif "Run2017" in outName: 
+elif "Run2017" in outName or "Run2018" in outName: 
   jecLabel = 'Fall17_17Nov2017_V32_102X_DATA'
 
 # because FastSim naming for JECs variables inside db and txt files is really truly messed up...
@@ -93,10 +97,8 @@ if "Run201" in outName:
     processRECO = "RECO"
     if "Run2016" in outName:
       globalTag = "Summer16_07Aug2017_V11_DATA"
-    if "Run2017" in outName:
+    if "Run2017" in outName or "Run2018" in outName:
       globalTag = "102X_dataRun2_v8"
-    else: #2018 to be updated
-      globalTag = "Fall17_17Nov2017_V32_DATA"
 else:
     isData = False
     processRECO = "PAT"
@@ -154,25 +156,26 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(options.nEve
 process.MessageLogger.cerr.FwkReport.reportEvery = 100000
 
 # ECAL bad calibration filter update for 2017 and 2018 only
-baddetEcallist = cms.vuint32(
-    [872439604,872422825,872420274,872423218,
-     872423215,872416066,872435036,872439336,
-     872420273,872436907,872420147,872439731,
-     872436657,872420397,872439732,872439339,
-     872439603,872422436,872439861,872437051,
-     872437052,872420649,872422436,872421950,
-     872437185,872422564,872421566,872421695,
-     872421955,872421567,872437184,872421951,
-     872421694,872437056,872437057,872437313]
-     )
-process.ecalBadCalibReducedMINIAODFilter = cms.EDFilter(
-    "EcalBadCalibFilter",
-    EcalRecHitSource = cms.InputTag("reducedEgamma:reducedEERecHits"),
-    ecalMinEt        = cms.double(50.),
-    baddetEcal    = baddetEcallist, 
-    taggingMode = cms.bool(True),
-    debug = cms.bool(False)
-    )
+if "RunIISummer16" not in outName and "Run2016" not in outName:
+    baddetEcallist = cms.vuint32(
+      [872439604,872422825,872420274,872423218,
+       872423215,872416066,872435036,872439336,
+       872420273,872436907,872420147,872439731,
+       872436657,872420397,872439732,872439339,
+       872439603,872422436,872439861,872437051,
+       872437052,872420649,872422436,872421950,
+       872437185,872422564,872421566,872421695,
+       872421955,872421567,872437184,872421951,
+       872421694,872437056,872437057,872437313]
+       )
+    process.ecalBadCalibReducedMINIAODFilter = cms.EDFilter(
+      "EcalBadCalibFilter",
+      EcalRecHitSource = cms.InputTag("reducedEgamma:reducedEERecHits"),
+      ecalMinEt        = cms.double(50.),
+      baddetEcal    = baddetEcallist, 
+      taggingMode = cms.bool(True),
+      debug = cms.bool(False)
+      )
 
 if doJEC:
     ###### Setting sqlite file for the JECs that are in newer global tags 
@@ -193,49 +196,62 @@ if doJEC:
     ###### Applying JECs and including deepCSV info
     ## From https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookJetEnergyCorrections#CorrPatJets
     from PhysicsTools.PatAlgos.tools.jetTools import updateJetCollection
-    updateJetCollection(
-      process,
-      jetSource = cms.InputTag('slimmedJets'),
-      jetCorrections = ('AK4PFchs', cms.vstring(['L1FastJet', 'L2Relative', 'L3Absolute', 'L2L3Residual']), 'None'),
-      pvSource = cms.InputTag('offlineSlimmedPrimaryVertices'), # doesn't work :(
-      svSource = cms.InputTag('slimmedSecondaryVertices'),
-      btagDiscriminators = [  
-        'pfDeepFlavourJetTags:probb', 
-        'pfDeepFlavourJetTags:probbb',
-        'pfDeepFlavourJetTags:problepb',
-        'pfDeepFlavourJetTags:probc',
-        'pfDeepFlavourJetTags:probuds',
-        'pfDeepFlavourJetTags:probg'
-        ],
-      postfix = 'NewDFTraining',
-    )
-
+    if doDeepFlavour:
+        updateJetCollection(
+          process,
+          jetSource = cms.InputTag('slimmedJets'),
+          jetCorrections = ('AK4PFchs', cms.vstring(['L1FastJet', 'L2Relative', 'L3Absolute', 'L2L3Residual']), 'None'),
+          pvSource = cms.InputTag('offlineSlimmedPrimaryVertices'),
+          svSource = cms.InputTag('slimmedSecondaryVertices'),
+          btagDiscriminators = [  
+            'pfDeepFlavourJetTags:probb', 
+            'pfDeepFlavourJetTags:probbb',
+            'pfDeepFlavourJetTags:problepb',
+            'pfDeepFlavourJetTags:probc',
+            'pfDeepFlavourJetTags:probuds',
+            'pfDeepFlavourJetTags:probg'
+            ],
+          postfix = 'NewDFTraining',
+        )
+    else:
+        updateJetCollection(
+          process,
+          jetSource = cms.InputTag('slimmedJets'),
+          jetCorrections = ('AK4PFchs', cms.vstring(['L1FastJet', 'L2Relative', 'L3Absolute', 'L2L3Residual']), 'None'),
+          postfix = 'UpdatedJEC',
+        )
     ###### Apply new JECs to MET
     ## From https://twiki.cern.ch/twiki/bin/view/CMS/MissingETUncertaintyPrescription
     from PhysicsTools.PatUtils.tools.runMETCorrectionsAndUncertainties import runMetCorAndUncFromMiniAOD
     ## If you only want to re-correct and get the proper uncertainties, no reclustering
-    runMetCorAndUncFromMiniAOD(process,
-                               isData = isData,
-                               fixEE2017 = True,
-                               fixEE2017Params = {'userawPt': True, 'ptThreshold':50.0, 'minEtaThreshold':2.65, 'maxEtaThreshold':3.139},
-                               postfix = "ModifiedMET"
-    )
-
+    if ("RunIIFall17" in outName) or ("Run2017" in outName):
+      runMetCorAndUncFromMiniAOD(process,
+                                 isData = isData,
+                                 fixEE2017 = True,
+                                 fixEE2017Params = {'userawPt': True, 'ptThreshold':50.0, 'minEtaThreshold':2.65, 'maxEtaThreshold':3.139},
+                                 postfix = "ModifiedMET"
+      )
+    else:
+      runMetCorAndUncFromMiniAOD(process,
+                                 isData = isData,
+                                 postfix = "ModifiedMET"
+      )
 # L1 prefiring issue
 # https://twiki.cern.ch/twiki/bin/viewauth/CMS/L1ECALPrefiringWeightRecipe 
-prefire_dataEra = "2017BtoF"
-if "RunIISummer16MiniAOD" in outName: prefire_dataEra = "2016BtoH"
-prefire_file = 'CMSSW_10_2_6/src/babymaker/data/L1Prefire/L1PrefiringMaps_new.root'
-if 'babymaker' in environ['PWD']:
-  prefire_file = 'data/L1Prefire/L1PrefiringMaps_new.root'
-process.prefiringweight = cms.EDProducer("L1ECALPrefiringWeightProducer",
-                                          ThePhotons = cms.InputTag("slimmedPhotons"),
-                                          TheJets = cms.InputTag("slimmedJets"),
-                                          L1Maps = cms.string(prefire_file), # update this line with the location of this file
-                                          DataEra = cms.string(prefire_dataEra),
-                                          UseJetEMPt = cms.bool(False), #can be set to true to use jet prefiring maps parametrized vs pt(em) instead of pt
-                                          PrefiringRateSystematicUncty = cms.double(0.2) #Minimum relative prefiring uncty per object
-                                          )
+if "RunIISummer16" in outName or "RunIIFall17" in outName:
+  prefire_dataEra = "2017BtoF"
+  if "RunIISummer16" in outName: prefire_dataEra = "2016BtoH"
+  prefire_file = 'CMSSW_10_2_6/src/babymaker/data/L1Prefire/L1PrefiringMaps_new.root'
+  if 'babymaker' in environ['PWD']:
+    prefire_file = 'data/L1Prefire/L1PrefiringMaps_new.root'
+  process.prefiringweight = cms.EDProducer("L1ECALPrefiringWeightProducer",
+                                            ThePhotons = cms.InputTag("slimmedPhotons"),
+                                            TheJets = cms.InputTag("slimmedJets"),
+                                            L1Maps = cms.string(prefire_file), # update this line with the location of this file
+                                            DataEra = cms.string(prefire_dataEra),
+                                            UseJetEMPt = cms.bool(False), #can be set to true to use jet prefiring maps parametrized vs pt(em) instead of pt
+                                            PrefiringRateSystematicUncty = cms.double(0.2) #Minimum relative prefiring uncty per object
+                                            )
 
 # printing stuff about the event
 # process.add_(cms.Service("Tracer"))
@@ -250,8 +266,14 @@ for mod in process.producers_().itervalues():
 for mod in process.filters_().itervalues():
     process.tsk.add(mod)
 
-process.p = cms.Path(
-    process.fullPatMetSequenceModifiedMET
-    *process.baby_full,
-    process.tsk
-)
+if ("RunIIFall17" in outName) or ("Run2017" in outName):
+    process.p = cms.Path(
+      process.fullPatMetSequenceModifiedMET
+      *process.baby_full,
+      process.tsk
+  )
+else:
+    process.p = cms.Path(
+      process.baby_full,
+        process.tsk
+    )

@@ -7,26 +7,15 @@ nevents = NEVENTS
 # CRAB3 task names can no longer be greater than 100 characters; need to shorten task name
 # Do NOT replace: "PUSpring16Fast" since it is used by the bmaker_full code to decide how to read GenInfo !!!
 taskname = dataset[1:].replace('/','__')
-taskname = taskname.replace('RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2','MiniAODv2')
-taskname = taskname.replace('TuneCUETP8M1_13TeV-madgraphMLM-pythia8','13TeV-MG-PY8')
-taskname = taskname.replace('RunIISpring15MiniAODv2-Asympt25ns_74X_mcRun2_asymptotic_v2','MiniAODv2')
-taskname = taskname.replace('RunIISpring16MiniAODv1-PUSpring16_80X_mcRun2_asymptotic_2016','80XMiniAODv1')
 taskname = taskname.replace('RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2','80XMiniAODv2')
-taskname = taskname.replace('RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV','Moriond17_80XMiniAODv2')
 taskname = taskname.replace('RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3','RunIISummer16MiniAODv3')
 taskname = taskname.replace('RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14','RunIIFall17MiniAODv2')
 taskname = taskname.replace(':','___')
-# make sure task name is unique for each part of RunF
-if ('RUN_RANGE'=='Run2016F1'): taskname = taskname.replace('Run2016F', 'Run2016F1') 
-elif ('RUN_RANGE'=='Run2016F2'): taskname = taskname.replace('Run2016F', 'Run2016F2') 
 
 if(len(taskname)>100): taskname = taskname[0:99]
 
 datasetID = dataset.replace('/','',1).replace('/', '_', 1)
 datasetID = datasetID[0:datasetID.find('/')]
-# make sure baby filename is unique for each part of RunF
-if ("Run2016F1" in taskname): datasetID = datasetID.replace('Run2016F', 'Run2016F1')
-elif ("Run2016F2" in taskname): datasetID = datasetID.replace('Run2016F', 'Run2016F2')
 
 from WMCore.Configuration import Configuration
 config = Configuration()
@@ -48,13 +37,11 @@ config.section_("Data")
 config.Data.inputDataset = dataset
 config.Data.inputDBS = 'global'
 config.Data.ignoreLocality = True
+config.Data.allowNonValidInputDataset = True
 if "Run201" in taskname:
     config.Data.splitting = 'LumiBased'
     config.Data.unitsPerJob = 75
-    config.Data.lumiMask = 'babymaker/data/json/golden_Cert_314472-319851_13TeV_PromptReco_Collisions18.json' 
-    # split due to JECs: https://hypernews.cern.ch/HyperNews/CMS/get/jes/642.html
-    if ("Run2016F1" in taskname): config.Data.runRange = '277772-278801'
-    elif ("Run2016F2" in taskname): config.Data.runRange = '278802-278808'
+    config.Data.lumiMask = 'babymaker/data/json/golden_Cert_314472-325175_13TeV_PromptReco_Collisions18.json' 
 else:
     config.Data.splitting = 'FileBased'
     config.Data.unitsPerJob = 4

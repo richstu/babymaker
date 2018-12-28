@@ -104,7 +104,7 @@ void event_tools::fillBeamHaloMap(string eventList){
 int event_tools::type(const string &name){
   int sample = -999, category = -9, bin = -99;
   if(contains(name, "Run201")){ sample = 0;
-    if(contains(name, "SingleElectron")){ category = 0;
+    if(contains(name, "SingleElectron") || contains(name, "EGamma")){ category = 0;
     }else if(contains(name, "SingleMuon")){ category = 1;
     }else if(contains(name, "DoubleEG")){ category = 2;
     }else if(contains(name, "DoubleMuon")){ category = 3;

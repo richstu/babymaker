@@ -50,11 +50,11 @@ def getNumberOfEvents(dataset):
     return sumevents
 
 doMC2016 = False 
-doMC2017 = True
+doMC2017 = False
 
 doData2016 = False 
 doData2017 = False 
-doData2018 = False 
+doData2018 = True 
 
 doFastSimScans = False
 doMiscellaneous = False
