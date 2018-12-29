@@ -251,8 +251,10 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 
   // update ECAL cell bad calibration filter, before filling all the rest
   edm::Handle< bool > passecalBadCalibFilterUpdate ;
-  iEvent.getByToken(tok_ecalBadCalibFilterUpdate_,passecalBadCalibFilterUpdate);
-  baby.pass_badcalib() =  (*passecalBadCalibFilterUpdate);
+  if(!outname.Contains("Run2016") && !outname.Contains("RunIISummer16")){
+    iEvent.getByToken(tok_ecalBadCalibFilterUpdate_,passecalBadCalibFilterUpdate);
+    baby.pass_badcalib() =  (*passecalBadCalibFilterUpdate);
+  }
 
   edm::Handle<edm::TriggerResults> filterBits;
   iEvent.getByToken(tok_trigResults_pat_,filterBits);    
@@ -918,10 +920,10 @@ vCands bmaker_full::writeMuons(edm::Handle<pat::MuonCollection> muons,
   baby.nmus() = 0; baby.nvmus() = 0;
 
   set<unsigned> badmu_idx, badmu_dupl_idx;
-  if (isData && !outname.Contains("Run2017") && !outname.Contains("Run2018")) {
-    badmu_idx = lepTool->badGlobalMuonSelector(vtx, muons, false);
-    badmu_dupl_idx = lepTool->badGlobalMuonSelector(vtx, muons, true);
-  }
+  // if (isData && !outname.Contains("Run2017") && !outname.Contains("Run2018")) {
+  //   badmu_idx = lepTool->badGlobalMuonSelector(vtx, muons, false);
+  //   badmu_dupl_idx = lepTool->badGlobalMuonSelector(vtx, muons, true);
+  // }
 
   for (unsigned ilep(0); ilep < muons->size(); ilep++) {
     const pat::Muon &lep = (*muons)[ilep];    

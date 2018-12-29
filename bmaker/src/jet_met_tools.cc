@@ -892,25 +892,16 @@ jet_met_tools::jet_met_tools(TString ijecName, bool doSys, bool fastSim, TString
   // only add b-tagging weights if requested
   string scaleFactorFile_deep(getenv("CMSSW_BASE"));
   // set btag working points
-  TString cmssw(getenv("CMSSW_VERSION"));
-  if(cmssw.Contains("CMSSW_7_4")){
-    CSVLoose  = 0.605;
-    CSVMedium = 0.890;
-    CSVTight  = 0.970;
-  }
-  else if (cmssw.Contains("CMSSW_8")){
-    CSVLoose  = 0.5426;
-    CSVMedium = 0.8484;
-    CSVTight  = 0.9535;
+  if (jecName.Contains("Summer16")){ // 80X WPs
     DeepCSVLoose  = 0.2219;
     DeepCSVMedium = 0.6324;
     DeepCSVTight  = 0.8958;
     scaleFactorFile_deep+="/src/babymaker/bmaker/data/DeepCSV_Moriond17_B_H.csv";//CSVv2Moriond17_2017_1_26_BtoH.csv";//DeepCSVMoriond17_comb.csv";
-  }
-  else if (cmssw.Contains("CMSSW_9") || cmssw.Contains("CMSSW_10")){
-    CSVLoose  = 0.5803;
-    CSVMedium = 0.8838;
-    CSVTight  = 0.9693;
+    // DeepFlavour WPs not available yet, use just a copy of 2017 WPs
+    DeepFlavourLoose  = 0.0521;
+    DeepFlavourMedium = 0.3033;
+    DeepFlavourTight  = 0.7489;
+  } else {
     DeepCSVLoose  = 0.1522;
     DeepCSVMedium = 0.4941;
     DeepCSVTight  = 0.8001;
@@ -921,7 +912,7 @@ jet_met_tools::jet_met_tools(TString ijecName, bool doSys, bool fastSim, TString
     // scaleFactorFile_deepflav+="/src/babymaker/bmaker/data/DeepFlavour_94XSF_V1_B_F.csv"; // to be added
   }
   if (!isData)
-    cout<<endl<<"BABYMAKER: jet_met_tools: Using b-tagging SFs from file "
+    cout<<"BABYMAKER: jet_met_tools: Using b-tagging SFs from file "
               <<scaleFactorFile_deep.c_str()<<endl<<endl;
   
   // calib_full_.reset(new BTagCalibration("csvv2", scaleFactorFile));

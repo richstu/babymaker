@@ -63,24 +63,26 @@ else:
 # to apply JECs with txt files in babymaker, 
 # prefix jecLabel with "onthefly_", e.g. onthefly_Spring16_25nsV6_MC
 # systematics will also be calculated using this tag, even if JECs are not re-applied
-# N.B. JECs change in the middle of RunF, thereby the Run2016F1 vs Run2016F2 distinction
+# N.B. B-tagging WPs are also selected based on this label
 jecLabel = 'onthefly_Spring16_23Sep2016V2_MC'
-if ("Run2016B" in outName) or ("Run2016C" in outName) or ("Run2016D" in outName): 
-  jecLabel = 'Summer16_23Sep2016BCDV3_DATA'
-elif ("Run2016E" in outName) or ("Run2016F1" in outName):
-  jecLabel = 'Summer16_23Sep2016EFV3_DATA'
-elif ("Run2016F2" in outName) or ("Run2016G" in outName):
-  jecLabel = 'Summer16_23Sep2016GV3_DATA'
-elif ("Run2016H" in outName): 
-  jecLabel = 'Summer16_23Sep2016HV3_DATA'
-elif "RunIISpring16MiniAOD" in outName:
-  jecLabel = 'Spring16_23Sep2016V2_MC' # for ICHEP MC against re-reco data
-elif "RunIISummer16MiniAOD" in outName:
-  jecLabel = 'Summer16_23Sep2016V3_MC'
-elif "RunIIFall17MiniAODv2" in outName or "RunIIAutumn18" in outName:
-  jecLabel = 'Fall17_17Nov2017_V32_MC'
-elif "Run2017" in outName or "Run2018" in outName: 
-  jecLabel = 'Fall17_17Nov2017_V32_102X_DATA'
+if "Run201" in outName:
+    isData = True
+    processRECO = "RECO"
+    if "Run2016" in outName:
+      globalTag = "94X_dataRun2_v10"
+      jecLabel = 'Summer16_07Aug2017All_V11_DATA'
+    if "Run2017" in outName or "Run2018" in outName:
+      globalTag = "102X_dataRun2_v8"
+      jecLabel = 'Fall17_17Nov2017_V32_102X_DATA'
+else:
+    isData = False
+    processRECO = "PAT"
+    if "RunIISummer16" in outName:
+      globalTag = "94X_mcRun2_asymptotic_v3"
+      jecLabel = 'Summer16_07Aug2017_V11_MC'
+    if "RunIIFall17" in outName or "RunIIAutumn18" in outName:
+      globalTag = "94X_mc2017_realistic_v14"
+      jecLabel = 'Fall17_17Nov2017_V32_MC'
 
 # because FastSim naming for JECs variables inside db and txt files is really truly messed up...
 if fastsim: jecLabel = 'Spring16_25nsFastSimV1_MC'
@@ -90,22 +92,6 @@ jecBabyLabel = jecLabel
 if fastsim: 
   if (doJEC): jecBabyLabel = 'Spring16_FastSimV1_MC'
   else: jecBabyLabel = 'onthefly_Spring16_FastSimV1_MC'
-
-
-if "Run201" in outName:
-    isData = True
-    processRECO = "RECO"
-    if "Run2016" in outName:
-      globalTag = "Summer16_07Aug2017_V11_DATA"
-    if "Run2017" in outName or "Run2018" in outName:
-      globalTag = "102X_dataRun2_v8"
-else:
-    isData = False
-    processRECO = "PAT"
-    if "RunIISummer16MiniAODv3" in outName:
-      globalTag = "Summer16_07Aug2017_V11_MC"
-    else: # 2017 and 2018
-      globalTag = "94X_mc2017_realistic_v14" # to be replaced with: "Fall17_17Nov2017_V32_MC" when available
 
 ###### Defining Baby process, input and output files 
 process = cms.Process("Baby")

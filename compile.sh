@@ -55,12 +55,8 @@ if [ $count == 0 ]
 then 
     cd babymaker/data/jec/
     for i in $( ls *.tar.gz); do
-        tar --strip-components=2 -zxf $i
+        tar -zxf $i
     done
-    # the FastSim does not have nested folders
-    tar -zxf Spring16_25nsFastSimV1_MC.tar.gz    
-	# nor does the 2017 MC
-	tar -zxf Fall17_17Nov2017_V32_MC.tar.gz
     ls -1 *.txt | grep -v 'AK4PFchs.txt' | xargs rm
     cd -
 fi 

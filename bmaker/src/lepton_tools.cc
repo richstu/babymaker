@@ -316,58 +316,30 @@ bool lepton_tools::idElectron(const pat::Electron &lep, edm::Handle<reco::Vertex
   vertexElectron(lep, vtx, dz, d0);
   double esc = lep.superCluster()->energy();
 
-  if (outname_lt.Contains("Run2017") || outname_lt.Contains("RunIIFall17") ||
-      outname_lt.Contains("Run2018") || outname_lt.Contains("RunIIAutumn18")) {
-    if(barrel){
-      ieta_cut        = chooseVal(threshold       ,0.0126,  0.0112,  0.0106,  0.0104);
-      deta_cut        = chooseVal(threshold       ,0.00463, 0.00377, 0.0032,  0.00255);
-      dphi_cut        = chooseVal(threshold       ,0.148,   0.0884,  0.0547,  0.022);
-      hovere_cut      = chooseVal(threshold       ,0.05+1.16/esc+0.0324*rho/esc,   0.05+1.16/esc+0.0324*rho/esc,   0.046+1.16/esc+0.0324*rho/esc,  0.026+1.15/esc+0.0324*rho/esc);
-      reliso_cut      = chooseVal(threshold       ,0.198+0.506/lep.pt(),  0.112+0.506/lep.pt(),  0.0478+0.506/lep.pt(),     0.0287+0.506/lep.pt());
-      ooeminusoop_cut = chooseVal(threshold       ,0.209,   0.193,   0.184,   0.159);
-      d0_cut          = chooseVal(threshold       ,0.05,    0.05,    0.05,    0.05);
-      dz_cut          = chooseVal(threshold       ,0.10,    0.10,    0.10,    0.10);
-      misshits_cut    = chooseVal(threshold       ,2,   1,   1,   1);
-      req_conv_veto   = chooseVal(threshold       ,true           ,  true         ,  true         ,  true );
-    } else {
-      ieta_cut        = chooseVal(threshold       ,0.0457,  0.0425,  0.0387,  0.0353);
-      deta_cut        = chooseVal(threshold       ,0.00814, 0.00674, 0.00632, 0.00501);
-      dphi_cut        = chooseVal(threshold       ,0.19,    0.169,   0.0394,  0.0236);
-      hovere_cut      = chooseVal(threshold       ,0.05+2.54/esc+0.183*rho/esc,   0.0441+2.54/esc+0.183*rho/esc,     0.0275+2.52/esc+0.183*rho/esc,     0.0188+2.06/esc+0.183*rho/esc);
-      reliso_cut      = chooseVal(threshold       ,0.203+0.963/lep.pt(),  0.108+0.963/lep.pt(),  0.0658+0.963/lep.pt(),     0.0445+0.963/lep.pt());
-      ooeminusoop_cut = chooseVal(threshold       ,0.132,   0.111,   0.0721,  0.0197);
-      d0_cut          = chooseVal(threshold       ,0.1,     0.1,     0.1,     0.1);
-      dz_cut          = chooseVal(threshold       ,0.2,     0.2,     0.2,     0.2);
-      misshits_cut    = chooseVal(threshold       ,3, 1, 1, 1);
-      req_conv_veto   = chooseVal(threshold       ,true   ,  true   ,  true   ,  true );
-    }
+  if(barrel){
+    ieta_cut        = chooseVal(threshold       ,0.0126,  0.0112,  0.0106,  0.0104);
+    deta_cut        = chooseVal(threshold       ,0.00463, 0.00377, 0.0032,  0.00255);
+    dphi_cut        = chooseVal(threshold       ,0.148,   0.0884,  0.0547,  0.022);
+    hovere_cut      = chooseVal(threshold       ,0.05+1.16/esc+0.0324*rho/esc,   0.05+1.16/esc+0.0324*rho/esc,   0.046+1.16/esc+0.0324*rho/esc,  0.026+1.15/esc+0.0324*rho/esc);
+    reliso_cut      = chooseVal(threshold       ,0.198+0.506/lep.pt(),  0.112+0.506/lep.pt(),  0.0478+0.506/lep.pt(),     0.0287+0.506/lep.pt());
+    ooeminusoop_cut = chooseVal(threshold       ,0.209,   0.193,   0.184,   0.159);
+    d0_cut          = chooseVal(threshold       ,0.05,    0.05,    0.05,    0.05);
+    dz_cut          = chooseVal(threshold       ,0.10,    0.10,    0.10,    0.10);
+    misshits_cut    = chooseVal(threshold       ,2,   1,   1,   1);
+    req_conv_veto   = chooseVal(threshold       ,true           ,  true         ,  true         ,  true );
   } else {
-    //https://twiki.cern.ch/twiki/bin/viewauth/CMS/CutBasedElectronIdentificationRun2#Working_points_for_Spring15_MC_s
-    // Last updated October 8th
-    if(barrel){
-      ieta_cut        = chooseVal(threshold       ,0.0114,  0.0103,  0.0101,  0.0101);
-      deta_cut        = chooseVal(threshold       ,0.0152,  0.0105,  0.0103,  0.00926);
-      dphi_cut        = chooseVal(threshold       ,0.216,   0.115,   0.0336,  0.0336);
-      hovere_cut      = chooseVal(threshold       ,0.181,   0.104,   0.0876,  0.0597);
-      reliso_cut      = chooseVal(threshold       ,0.126,   0.0893,  0.0766,  0.0354);
-      ooeminusoop_cut = chooseVal(threshold       ,0.207,   0.102,   0.0174,  0.012);
-      d0_cut          = chooseVal(threshold       ,0.0564,  0.0261,  0.0118,  0.0111);
-      dz_cut          = chooseVal(threshold       ,0.472,   0.41,  0.373,   0.0466);
-      misshits_cut    = chooseVal(threshold       ,2,   2,   2,   2);
-      req_conv_veto   = chooseVal(threshold       ,true           ,  true         ,  true         ,  true );
-    } else {
-      ieta_cut        = chooseVal(threshold       ,0.0352 , 0.0301 , 0.0283 , 0.0279);
-      deta_cut        = chooseVal(threshold       ,0.0113 , 0.00814 , 0.00733 , 0.00724);
-      dphi_cut        = chooseVal(threshold       ,0.237 , 0.182 , 0.114 , 0.0918);
-      hovere_cut      = chooseVal(threshold       ,0.116 , 0.0897 , 0.0678 , 0.0615);
-      reliso_cut      = chooseVal(threshold       ,0.144 , 0.121 , 0.0678 , 0.0646);
-      ooeminusoop_cut = chooseVal(threshold       ,0.174 , 0.126 , 0.0898 , 0.00999);
-      d0_cut          = chooseVal(threshold       ,0.222 , 0.118 , 0.0739 , 0.0351);
-      dz_cut          = chooseVal(threshold       ,0.921 , 0.822 , 0.602 , 0.417);
-      misshits_cut    = chooseVal(threshold       ,3, 1, 1, 1);
-      req_conv_veto   = chooseVal(threshold       ,true   ,  true   ,  true   ,  true );
-    }
+    ieta_cut        = chooseVal(threshold       ,0.0457,  0.0425,  0.0387,  0.0353);
+    deta_cut        = chooseVal(threshold       ,0.00814, 0.00674, 0.00632, 0.00501);
+    dphi_cut        = chooseVal(threshold       ,0.19,    0.169,   0.0394,  0.0236);
+    hovere_cut      = chooseVal(threshold       ,0.05+2.54/esc+0.183*rho/esc,   0.0441+2.54/esc+0.183*rho/esc,     0.0275+2.52/esc+0.183*rho/esc,     0.0188+2.06/esc+0.183*rho/esc);
+    reliso_cut      = chooseVal(threshold       ,0.203+0.963/lep.pt(),  0.108+0.963/lep.pt(),  0.0658+0.963/lep.pt(),     0.0445+0.963/lep.pt());
+    ooeminusoop_cut = chooseVal(threshold       ,0.132,   0.111,   0.0721,  0.0197);
+    d0_cut          = chooseVal(threshold       ,0.1,     0.1,     0.1,     0.1);
+    dz_cut          = chooseVal(threshold       ,0.2,     0.2,     0.2,     0.2);
+    misshits_cut    = chooseVal(threshold       ,3, 1, 1, 1);
+    req_conv_veto   = chooseVal(threshold       ,true   ,  true   ,  true   ,  true );
   }
+  
   int mhits(0);
   if(lep.gsfTrack().isAvailable()){
     mhits = lep.gsfTrack()->hitPattern().numberOfLostHits(reco::HitPattern::MISSING_INNER_HITS);;
