@@ -22,10 +22,6 @@ typedef std::pair<double,double> double_double;
 const long double PI = acos(-1.L);
 enum varType{kDouble, kvDouble, kFloat, kvFloat, kInt, kvInt, kBool, kvBool};
 
-int change_branch_one(TString indir, TString name, TString outdir, std::vector<TString> var_type, std::vector<TString> var, 
-		      std::vector<std::vector<TString> > var_val, int totentries);
-int change_branch_one(TString indir, TString name, TString outdir, std::vector<TString> var_type, std::vector<TString> var, 
-		      std::vector<TString> var_val, TString newname="empty");
 bool eigen2x2(float matrix[2][2], float &eig1, float &eig2);
 bool id_big2small(const int_double& left, const int_double& right);
 bool dd_big2small(const double_double& left, const double_double& right);

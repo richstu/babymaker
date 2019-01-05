@@ -327,8 +327,8 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
         baby.stitch_met() = false;
       }      
     }
-    if((outname.Contains("DYJetsToLL_M-50_TuneCUETP8M")  && baby.ht_isr_me()>70)
-       || (outname.Contains("WJetsToLNu_TuneCUETP8M1")  && baby.ht_isr_me()>70)){
+    if((outname.Contains("DYJetsToLL_M-50_Tune")  && baby.ht_isr_me()>70)
+       || (outname.Contains("WJetsToLNu_Tune")  && baby.ht_isr_me()>70)){
       baby.stitch() = false;
       baby.stitch_ht() = false;
       baby.stitch_met() = false;
@@ -340,7 +340,7 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
       }
       if(baby.ht_isr_me()>600) baby.stitch_ht()=false;
     }
-    if(outname.Contains("DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX")){
+    if(outname.Contains("DYJetsToLL_M-50_Tune") && outname.Contains("amcatnloFXFX")){
       if (baby.ptll_me()>50) {
         baby.stitch()=false;
       }

@@ -59,7 +59,7 @@ names = [
     'TTTT_Tune','ttHTobb_M125',
     'WZTo1L1Nu2Q','WZTo1L3Nu','WZTo2L2Q','WZTo3LNu_Tune',
     'WWTo2L2Nu','WWToLNuQQ','ZZ_Tune',
-    'WH_HToBB_WToLNu_M125','ZH_HToBB_ZToNuNu_M125'
+    'WH_HToBB_WToLNu_M125','ZH_HToBB_ZToNuNu_M125',
     'SMS-T1tttt_mGluino-1200_mLSP-800','SMS-T1tttt_mGluino-1500_mLSP-100','SMS-T1tttt_mGluino-2000_mLSP-100'
 ]
 

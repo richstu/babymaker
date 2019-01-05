@@ -51,7 +51,7 @@ else: fastsim = False
 ## JECs must be undone and reapplied when rerunning b-tagging
 ## => if doJEC = False, DeepCSV discriminator will not be included
 doJEC = True
-doDeepFlavour = False
+doDeepFlavour = True
 if doJEC: 
     if doDeepFlavour:
         jets_label = "selectedUpdatedPatJetsNewDFTraining"
