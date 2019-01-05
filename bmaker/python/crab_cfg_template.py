@@ -44,7 +44,7 @@ if "Run201" in taskname:
     config.Data.lumiMask = 'babymaker/data/json/golden_Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16.json' 
 else:
     config.Data.splitting = 'FileBased'
-    config.Data.unitsPerJob = 15
+    config.Data.unitsPerJob = 5
 
 config.Data.publication = False # used to be True for cfA production
 # config.Data.publishDBS = 'phys03'
