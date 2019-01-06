@@ -28,33 +28,16 @@
 # python babymaker/scripts/generate_crab_cfg.py
 #========================================================
 
-import das_client as das
 import json
 import os
 import sys
 
-def getNumberOfEvents(dataset):
-  query = "file dataset=" + dataset + " | sum(file.nevents)"
-
-  data = das.get_data(query)
-  if isinstance(data, basestring):
-    dasjson = json.loads(data)
-  else:
-    dasjson = data
-  status  = dasjson.get('status')
-  if  status == 'ok':
-    data = dasjson.get('data')
-    sumevents=0
-    for idata in data:
-      sumevents+=idata.get('result').get('value')
-    return sumevents
-
-doMC2016 = True 
+doMC2016 = False 
 doMC2017 = False
 
 doData2016 = False 
 doData2017 = False 
-doData2018 = False 
+doData2018 = True 
 
 doFastSimScans = False
 doMiscellaneous = False
@@ -131,12 +114,10 @@ if doData2018:  # updated for Moriond'19, a couple datasets still trickling in, 
   datasets.append(["/MET/Run2018A-17Sep2018-v1/MINIAOD"])
   datasets.append(["/MET/Run2018B-17Sep2018-v1/MINIAOD"])
   datasets.append(["/MET/Run2018C-17Sep2018-v1/MINIAOD"])
-  datasets.append(["/MET/Run2018D-PromptReco-v1/MINIAOD"])
   datasets.append(["/MET/Run2018D-PromptReco-v2/MINIAOD"])
   datasets.append(["/EGamma/Run2018A-17Sep2018-v2/MINIAOD"])
   datasets.append(["/EGamma/Run2018B-17Sep2018-v1/MINIAOD"])
   datasets.append(["/EGamma/Run2018C-17Sep2018-v1/MINIAOD"])
-  datasets.append(["/EGamma/Run2018D-PromptReco-v1/MINIAOD"])
   datasets.append(["/EGamma/Run2018D-PromptReco-v2/MINIAOD"])
   datasets.append(["/SingleMuon/Run2018A-17Sep2018-v2/MINIAOD"])
   datasets.append(["/SingleMuon/Run2018B-17Sep2018-v1/MINIAOD"])
@@ -145,7 +126,6 @@ if doData2018:  # updated for Moriond'19, a couple datasets still trickling in, 
   datasets.append(["/JetHT/Run2018A-17Sep2018-v1/MINIAOD"])
   datasets.append(["/JetHT/Run2018B-17Sep2018-v1/MINIAOD"])
   datasets.append(["/JetHT/Run2018C-17Sep2018-v1/MINIAOD"])
-  datasets.append(["/JetHT/Run2018D-PromptReco-v1/MINIAOD"])
   datasets.append(["/JetHT/Run2018D-PromptReco-v2/MINIAOD"])
 
 
@@ -373,9 +353,7 @@ for ilist in datasets:
   nevents=0
   print ""
   for ids in ilist:
-    #nevents += getNumberOfEvents(ids) # Not working currently
     nevents += 1000000 ## Only needed to get w_lumi right on the first go, will fix at renormalization
-    #print "running nevents is "+str(nevents)
 
   for ids in ilist:
     cmssw_base = os.getenv("CMSSW_BASE")
