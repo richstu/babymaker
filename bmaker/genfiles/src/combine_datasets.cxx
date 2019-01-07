@@ -24,10 +24,10 @@ int main(int argc, char *argv[]){
   time_t startTime, curTime;
   time(&startTime);
 
-  TString file_datasets("txt/singlelep.txt"), infolder(""), outfolder("out/");
+  TString file_datasets("txt/singlelep.txt"), infolder(""), outfolder("out/"),basename("Run2016");
   int begrun(-1), endrun(-1);
   int c(0);
-  while((c=getopt(argc, argv, "f:i:o:b:e:"))!=-1){
+  while((c=getopt(argc, argv, "f:i:o:n:b:e:"))!=-1){
     switch(c){
     case 'i':
       infolder=optarg;
@@ -40,6 +40,9 @@ int main(int argc, char *argv[]){
       break;
     case 'o':
       outfolder=optarg;
+      break;
+    case 'n':
+      basename=optarg;
       break;
     case 'f':
       file_datasets=optarg;
@@ -68,7 +71,7 @@ int main(int argc, char *argv[]){
   }
 
   vector<TString> datasets;
-  TString buffer, basename("Run2016");
+  TString buffer;
   ifstream indata(file_datasets);
   while(indata){
     indata >> buffer;

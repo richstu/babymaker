@@ -1,5 +1,4 @@
-HTMHT		
 MET		
 JetHT
-SingleElectron	
+EGamma	
 SingleMuon	

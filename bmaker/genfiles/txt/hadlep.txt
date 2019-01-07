@@ -1,4 +1,0 @@
-MET		
-SingleMuon	
-SingleElectron	
-JetHT

@@ -18,47 +18,53 @@ directory are unnecessary.
 ## Post-processing of ntuple production
 
 Post-processing relies on the UCSB tier 3, so all ntuples must first
-be copied to a folder like `/net/cmsX/cmsXr0/babymaker/babies/YYYY_MM_DD/mc/to_renormalize/`. All commands
+be copied to a folder like `/net/cmsX/cmsXr0/babymaker/babies/YYYY_MM_DD/mc/unprocessed/`. All commands
 are issued from the `genfiles` directory for both MC and data.
+
+If not done already, create a soft link from where the ntuples are to /net/cms2/cms2r0/babymaker/babies/YYYY_MM_DD, e.g.:
+
+        cd /net/cms2/cms2r0/babymaker/babies/
+        ln -s /net/cms29/cms29r0/babymaker/babies/YYYY_MM_DD YYYY_MM_DD
+        ls -l
+
+Before starting to process, make sure you have the permissions to rwx the files and folders. This will generally not be the case if you didn't do the copy to UCSB.
 
 ### Data
 
 1. Combine datasets removing duplicates using 
 
-        python/send_combine_ntuples.py
+        ./python/send_combine_data_datasets.py
 
-    where you'll need to set the proper `infolder`, `outfolder`, `datasets`, and `jsonfile`. This script sends
+    where you'll need to set the proper `infolder`, `outfolder`, `datasets`, and `jsonfile`, if not already set. This script sends
     combination jobs for groups of `run_files` runs.
 
-2. Skim the combined dataset. Each skim requires one execution of
-`python/send_skim_ntuples.py`. Suppose, for example, that one want to
-produce the standard and baseline skims for the "alldata" combined
-dataset produced in the last step; then one would issue the commands
+2. Rename files to have the Run era in the filename such that it is easy to study effects dependent on the era once the babies are merged. Check the macro to see if any of the inputs need to be updated.
 
-        python/send_skim_ntuples.py /net/cmsX/cmsXr0/babymaker/babies/YYYY_MM_DD/data/unskimmed/alldata standard
-        python/send_skim_ntuples.py /net/cmsX/cmsXr0/babymaker/babies/YYYY_MM_DD/data/unskimmed/alldata baseline
+        ./python/rename_data_eras.py
 
-    This will produce the subdirectories `skim_standard` and `skim_baseline` inside of `data`.
+3. Skim the combined dataset. Each skim requires one execution of
+`python/send_skim_ntuples.py`. Make sure that the skim definition XXX is defined in `src/skim_ntuples.cxx`. If you change it, remember to compile(!):
 
-3. Slim and merge the skimmed ntuples. Multiple skims can be slimmed
-with multiple slimming rules using `python/send_slim_ntuples.py`. The
-script takes the outer product of the requested slims and skims, so if
-one wanted the minimal and base_data slims for both the standard and
-baseline skims produced in the last step, one would issue the command
+        ./run/send_skim.sh /net/cms2/cms2r0/babymaker/babies/2018_12_17/data/unskimmed/ /net/cms2/cms2r0/babymaker/babies/2018_12_17/data/skim_XXX/ 40 XXX
 
-        python/send_slim_ntuples.py --input_dir /net/cmsX/cmsXr0/babymaker/babies/YYYY_MM_DD/data/alldata --skims standard baseline --slims minimal base_data
+    it's also possible to give the skim a name (try to make it such that it's as clear as possible to others what it contains) and then the last argument can just be a string like "met>100". Note that for more complex cuts this might not work because of special characters. If the cut was defined in `skim_ntuples.cxx`, please commit! Otherwise it would be impossible to tell what the skim contains later on.
 
-    This will produce subdirectories `slim_minimal_standard`,
-`slim_minimal_baseline`, `slim_base_data_standard`, and
-`slim_base_data_baseline` inside `alldata`.
+4. Slim and merge the skimmed ntuples. To slim and merge a single skim: 
 
-4. Validate! More extensive validation scripts are in progress, but
-one should minimally check that the number of root files stays the
+        ./python/send_slim_ntuples.py -i /net/cms2/cms2r0/babymaker/babies/2018_12_17/data/ -l txt/slim_rules/database.txt -k stdnj5
+
+    If needed multiple skims can be slimmed with multiple slimming rules using `python/send_slim_ntuples.py`. The script takes the outer product of the requested slims and skims, so if one wanted the database and isrdata slims for both the stdnj5 and abcd skims produced in the last step, one would issue the command
+
+        ./python/send_slim_ntuples.py -i /net/cms2/cms2r0/babymaker/babies/2018_12_17/data/ -l txt/slim_rules/database.txt txt/slim_rules/isrdata.txt -k stdnj5 abcd
+
+    This will produce subdirectories `merged_database_stdnj5`, `merged_isrdata_stdnj5`, `merged_database_abcd`, and `merged_isrdata_abcd`.
+
+5. Validate! One should minimally check that the number of root files stays the
 same after skimming and that the number of events stays the same after
 slimming and merging. The number of files can be checked with the
 command
 
-        python/count_root_files.py -f /net/cmsX/cmsXr0/babymaker/babies/YYYY_MM_DD/data
+        python/count_root_files.py -f /net/cms2/cms2r0/babymaker/babies/YYYY_MM_DD/data
 
 ### MC
 
@@ -68,9 +74,7 @@ is done with the script below after setting the proper `infolder` and `outfolder
         ./run/send_split_scan.py 
 
 
-2. Renormalize the weights so that the cross section is kept constant. Set up the correct `infolder` and `outfolder` and run
-
-        python/send_change_weights.py
+2. Renormalize the weights so that the cross section is kept constant. This is done in the groomer repository.
 
 3. Validate `weight` by setting the proper `infolder`, `outfolder` in 
 
@@ -80,9 +84,9 @@ is done with the script below after setting the proper `infolder` and `outfolder
     might have changed, so for instance when comparing Marmot and Capybara, the variables that would agree
     would be `weight/w_toppt/eff_trig` and `weight/w_isr/w_pu`
 
-4. Follow steps 2 through 4 from [Data](#Data).
+4. Follow steps 3 through 5 from [Data](#Data).
 
-## Utility scripts and data caching
+## [Not currently in use] Utility scripts and data caching 
 
 There are two useful tools for running on the batch system:
 `run/wrapper.sh` and `python/cache.py`. The former should be inserted
