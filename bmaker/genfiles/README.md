@@ -4,12 +4,13 @@ Code for processing existing babies without CMSSW dependencies.
 
 ## Code setup
 
-The `babymaker/bmaker/genfiles` directory can be compiled as a
-standalone set of scripts independent from the rest of the `babymaker`
-repository. To do so, simply issue the following commands from this
-directory:
+N.B. Until we update PyROOT on UCSB machines, the post-processing is setup to run in 8_0_16. To get started setup the release and compile genfiles *standalone*:
 
+    cmsrel CMSSW_8_0_16
+    cd CMSSW_8_0_16/src
     cmsenv
+    git clone git@github.com:richstu/babymaker
+    cd bmaker/genfiles/
     ./compile.sh
 
 Note that running scram and compiling in the root `babymaker`
