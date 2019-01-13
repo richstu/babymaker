@@ -32,6 +32,8 @@ Before starting to process, make sure you have the permissions to rwx the files 
 
 ### Data
 
+0. Chain all root files in the `unprocessed` directory together and do GetEntries() to check if there are any corrupt files. If there are any, delete and try to recopy from UCSD. If the fresh copy is also corrupt, DELETE it before starting the combination. If bad files remain in the unprocessed directory, everything that follows will have to be redone!
+
 1. Combine datasets removing duplicates using 
 
         ./python/send_combine_data_datasets.py
@@ -41,7 +43,7 @@ Before starting to process, make sure you have the permissions to rwx the files 
 
 2. Rename files to have the Run era in the filename such that it is easy to study effects dependent on the era once the babies are merged. Check the macro to see if any of the inputs need to be updated.
 
-        ./python/rename_data_eras.py
+        ./python/rename_data_eras.py -y YYYY
 
 3. Skim the combined dataset. Each skim requires one execution of
 `python/send_skim_ntuples.py`. Make sure that the skim definition XXX is defined in `src/skim_ntuples.cxx`. If you change it, remember to compile(!):

@@ -66,6 +66,7 @@ keep jets_gen_pt
 keep jets_islep
 keep jets_hflavor
 keep jets_pflavor
+keep jets_csv*
 
 ## Dileptons
 keep elel_m

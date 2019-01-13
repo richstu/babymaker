@@ -14,6 +14,7 @@ parser.add_argument("-o", "--outfolder", help="Folder to write files to",
                     default="/net/cms2/cms2r0/babymaker/babies/2018_12_17/data/unskimmed/")
 parser.add_argument("-y", "--year", type=int, help="Year of the data.", 
                     default=2016)
+parser.add_argument("-e", "--execute", help="Execute", action='store_true')
 args = parser.parse_args()
 args.outfolder = args.outfolder+"/"
 
@@ -35,7 +36,7 @@ if not os.path.exists(args.outfolder):
 noera_runs = []
 nfiles = 0
 files = glob.glob(args.infolder+'/*.root')
-for file in files:
+for ifile,file in enumerate(files):
   outfile = file.replace(args.infolder, args.outfolder)
 
   ## Parsing run from file name
@@ -54,10 +55,11 @@ for file in files:
   else:
     ## Moving file
     cmd = "mv -i "+file+" "+outfile
-    # print cmd
-    os.system(cmd)
+    if (ifile==0): 
+      print cmd
+    if (args.execute): 
+      os.system(cmd)
     nfiles += 1
-
 
 ## Final printouts
 if len(noera_runs)>0:
@@ -65,3 +67,5 @@ if len(noera_runs)>0:
   print noera_runs
 print "\nCopied and renamed "+str(nfiles)+" files into "+args.outfolder+"\n\n"
 
+if not args.execute:
+  print "If printed command looks ok, use -e to execute"

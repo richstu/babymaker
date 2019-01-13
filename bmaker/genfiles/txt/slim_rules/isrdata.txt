@@ -48,7 +48,7 @@ keep jets_eta
 keep jets_phi
 keep jets_m
 keep jets_islep
-
+keep jets_csv*
 
 ## Dileptons
 keep elel_m

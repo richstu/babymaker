@@ -50,6 +50,7 @@ int main(int argc, char *argv[]){
   if(cuts=="standard") cuts="nleps>=1&&st>500&&met>100";
   if(cuts=="nl1met200ht500") cuts="nleps>=1&&ht>500&&met>200";
   if(cuts=="stdnj5") cuts="nleps>=1 && st>500 && met>100 && njets>=5";
+  if(cuts=="stdnj5mj250nb1") cuts="nleps>=1 && st>500 && met>100 && njets>=5 && mj14>250 && nbdm>=1";
   if(cuts=="abcd") cuts="nleps==1&&st>500&&met>200&&njets>=6&&nbdm>=1&&mj14>250&&nveto==0";
   if(cuts=="baseline") cuts="nleps==1&&st>500&&met>200&&njets>=6&&nbdm>=1";
   if(cuts=="sys_abcd") 
@@ -59,7 +60,7 @@ int main(int argc, char *argv[]){
   if(cuts=="dy_ht300")
     cuts = "nvleps==2&&nleps>=1&&Max$(leps_pt)>30&&((elelv_m>80&&elelv_m<100)||(mumuv_m>80&&mumuv_m<100))&&ht>300";
   if(cuts=="ttisr")
-    cuts = "nleps==2&&Max$(leps_pt)>40&&nbdm==2";
+    cuts = "nleps==2&&Max$(leps_pt)>40&&(nbm==2||nbdm==2)";
   if(cuts=="wisr")
     cuts = "met>100&&Max$(leps_pt)>40&&nbdl==0";
   if(cuts=="wisrht200")
