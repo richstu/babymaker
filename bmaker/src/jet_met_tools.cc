@@ -353,7 +353,7 @@ float jet_met_tools::jetBTagWeight(const pat::Jet &jet, const LVector &jetp4,
 
   float csv = jet.bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags");
   if (doDeepCSV) 
-    csv = jet.bDiscriminator("deepFlavourJetTags:probb")+jet.bDiscriminator("deepFlavourJetTags:probbb");
+    csv = jet.bDiscriminator("pfDeepCSVJetTags:probb")+jet.bDiscriminator("pfDeepCSVJetTags:probbb");
 
   int tag = -1;
   for (unsigned iop(0); iop<opcuts.size(); iop++) 

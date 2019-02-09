@@ -438,15 +438,10 @@ vector<LVector> bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
 
     LVector jetp4(jetTool->corrJet[ijet]);
     float csv(jet.bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags"));
-    float csvd(-999.), csvdf(-999.);
-    TString cmssw_rel = getenv("CMSSW_BASE");
-    if (cmssw_rel.Contains("CMSSW_8"))
-      csvd = jet.bDiscriminator("deepFlavourJetTags:probb")+jet.bDiscriminator("deepFlavourJetTags:probbb");
-    else {
-      csvd = jet.bDiscriminator("pfDeepCSVJetTags:probb")+jet.bDiscriminator("pfDeepCSVJetTags:probbb");
-      csvdf = jet.bDiscriminator("pfDeepFlavourJetTags:probb")+jet.bDiscriminator("pfDeepFlavourJetTags:problepb")
-             +jet.bDiscriminator("pfDeepFlavourJetTags:probbb");
-    }
+    float csvd = jet.bDiscriminator("pfDeepCSVJetTags:probb")+jet.bDiscriminator("pfDeepCSVJetTags:probbb");
+    float csvdf = jet.bDiscriminator("pfDeepFlavourJetTags:probb")+jet.bDiscriminator("pfDeepFlavourJetTags:problepb")
+                 +jet.bDiscriminator("pfDeepFlavourJetTags:probbb");
+    
 
     bool isLep = jetTool->leptonInJet(jet, sig_leps);
     bool looseID = jetTool->idJet(jet, (is80Xreco ? jetTool->kLoose : jetTool->kTight));
