@@ -34,25 +34,27 @@ Before starting to process, make sure you have the permissions to rwx the files 
 
 0. Chain all root files in the `unprocessed` directory together and do GetEntries() to check if there are any corrupt files. If there are any, delete and try to recopy from UCSD. If the fresh copy is also corrupt, DELETE it before starting the combination. If bad files remain in the unprocessed directory, everything that follows will have to be redone!
 
-1. Combine datasets removing duplicates using 
+1. Check that the merging was successful by looking at how many events passed the MET120 trigger (trig[9]) in the `unprocessed/fullbaby_MET_*root` vs. `unskimmed/*root`. This number should be the same, since within the MET dataset itself there are no duplicates. This should be redone for SingleMuon with trig[20] and SingleElectron with trig[23]. Example indices are for 2017 and might need to be changed for other years (must pick an unprescaled trigger!).
+
+2. Combine datasets removing duplicates using 
 
         ./python/send_combine_data_datasets.py
 
     where you'll need to set the proper `infolder`, `outfolder`, `datasets`, and `jsonfile`, if not already set. This script sends
     combination jobs for groups of `run_files` runs.
 
-2. Rename files to have the Run era in the filename such that it is easy to study effects dependent on the era once the babies are merged. Check the macro to see if any of the inputs need to be updated.
+3. Rename files to have the Run era in the filename such that it is easy to study effects dependent on the era once the babies are merged. Check the macro to see if any of the inputs need to be updated.
 
         ./python/rename_data_eras.py -y YYYY
 
-3. Skim the combined dataset. Each skim requires one execution of
+4. Skim the combined dataset. Each skim requires one execution of
 `python/send_skim_ntuples.py`. Make sure that the skim definition XXX is defined in `src/skim_ntuples.cxx`. If you change it, remember to compile(!):
 
         ./run/send_skim.sh /net/cms2/cms2r0/babymaker/babies/2018_12_17/data/unskimmed/ /net/cms2/cms2r0/babymaker/babies/2018_12_17/data/skim_XXX/ 40 XXX
 
     it's also possible to give the skim a name (try to make it such that it's as clear as possible to others what it contains) and then the last argument can just be a string like "met>100". Note that for more complex cuts this might not work because of special characters. If the cut was defined in `skim_ntuples.cxx`, please commit! Otherwise it would be impossible to tell what the skim contains later on.
 
-4. Slim and merge the skimmed ntuples. To slim and merge a single skim: 
+5. Slim and merge the skimmed ntuples. To slim and merge a single skim: 
 
         ./python/send_slim_ntuples.py -i /net/cms2/cms2r0/babymaker/babies/2018_12_17/data/ -l txt/slim_rules/database.txt -k stdnj5
 

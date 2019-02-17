@@ -41,6 +41,7 @@ for ifile,file in enumerate(files):
 
   ## Parsing run from file name
   run = file.split('runs')[-1]
+  run = run.split('_')[0]
   run = int(run.split('.root')[0])
 
   ## Finding era for run
