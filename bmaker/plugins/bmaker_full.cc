@@ -445,8 +445,8 @@ vector<LVector> bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
     
 
     bool isLep = jetTool->leptonInJet(jet, sig_leps);
-    bool looseID = jetTool->idJet(jet, (is80Xreco ? jetTool->kLoose : jetTool->kTight));
-    bool tightID = jetTool->idJet(jet, (is80Xreco ? jetTool->kTight : jetTool->kLoose));
+    bool looseID = jetTool->idJet(jet, outname);
+    bool tightID = jetTool->idJet(jet, outname);
     bool goodPtEta = jetp4.pt() > jetTool->JetPtCut && fabs(jet.eta()) <= jetTool->JetEtaCut;
     if(isFastSim){
       if(jetp4.pt() > 20. && fabs(jet.eta()) < 2.5 && !jetTool->matchesGenJet(jet,genjets) && jet.chargedHadronEnergyFraction() < 0.1) baby.pass_fsjets()=false;

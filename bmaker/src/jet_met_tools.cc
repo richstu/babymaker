@@ -115,7 +115,7 @@ float jet_met_tools::trueHT(edm::Handle<edm::View <reco::GenJet> > genjets){
   return ht;
 }
 
-bool jet_met_tools::idJet(const pat::Jet &jet, CutLevel cut){
+bool jet_met_tools::idJet(const pat::Jet &jet, TString outname){
   // From https://twiki.cern.ch/twiki/bin/view/CMS/JetID
   double eta = fabs(jet.eta());
   double NHF = jet.neutralHadronEnergyFraction();
@@ -127,36 +127,41 @@ bool jet_met_tools::idJet(const pat::Jet &jet, CutLevel cut){
   double CHM = jet.chargedMultiplicity(); 
   double CEMF = jet.chargedEmEnergyFraction();
   
-  if(cut == kPBNR){  // RA2/b's PBNR and old Jet ID
-    bool eta_l_2p4 =  NumConst>=2 && NHF<0.9 && NEMF<0.95 && CHM>0 && CHF>0 && CEMF<0.99;
-    bool eta_geq_2p4 =  NHF<0.9 && NEMF<0.95 && NumConst>=2;
-    return (eta_l_2p4 && eta<2.4) || (eta>=2.4 && eta_geq_2p4);   
-  }
-
   bool passJetID = true;
-  if (cut==kLoose) { // default for 80X
+	if(outname.Contains("RunIISummer16") || outname.Contains("Run2016")) { // default for 80X
     if (eta<=2.7) {
       passJetID = NHF<0.99 && NEMF<0.99 && NumConst>1;
       if (eta<=2.4){
         passJetID = passJetID && CHF>0 && CHM>0 && CEMF<0.99;
       }
-    } else if (eta<=3.0) {
+    } 
+		else if (eta<=3.0) 
       passJetID = NHF<0.98 && NEMF>0.01 && NumNeutralParticles>2;
-    } else {
+    else 
       passJetID = NEMF<0.90 && NumNeutralParticles>10;
-    }
-  } else if (cut==kTight) { // default for 94X
+  } 
+	else if(outname.Contains("RunIIFall17") || outname.Contains("Run2017")) { // default for 94X
     if (eta<=2.7) { 
       passJetID = NHF<0.90 && NEMF<0.90 && NumConst>1;
       if (eta<=2.4){
         passJetID = passJetID && CHF>0 && CHM>0;
       }
-    } else if (eta<=3.0) {
+		}
+    else if (eta<=3.0) 
       passJetID = NEMF>0.02 && NEMF<0.99 && NumNeutralParticles>2;
-    } else {
+    else 
       passJetID = NEMF<0.90 && NHF>0.02 && NumNeutralParticles>10;
-    }    
   }
+	else { // default for 102X
+    if (eta<=2.6)  
+      passJetID = NHF<0.90 && NEMF<0.90 && NumConst>1 && CHF>0 && CHM>0;
+    else if (eta<=2.7) 
+      passJetID = NHF<0.90 && NEMF<0.99 && CHM>0;
+    else if (eta<=3.0) 
+      passJetID = NEMF>0.02 && NEMF<0.99 && NumNeutralParticles>2;
+    else 
+      passJetID = NEMF<0.90 && NHF>0.2 && NumNeutralParticles>10;
+	}
   return passJetID;
 }
 
