@@ -69,20 +69,26 @@ if "Run201" in outName:
     isData = True
     processRECO = "RECO"
     if "Run2016" in outName:
-      globalTag = "94X_dataRun2_v10"
-      jecLabel = 'Summer16_07Aug2017All_V11_DATA'
-    if "Run2017" in outName or "Run2018" in outName:
-      globalTag = "102X_dataRun2_v8"
-      jecLabel = 'Fall17_17Nov2017_V32_102X_DATA'
+      globalTag = '94X_dataRun2_v10'
+      jecLabel  = 'Summer16_07Aug2017All_V11_DATA'
+    if "Run2017" in outName:
+      globalTag = '102X_dataRun2_v8'
+      jecLabel  = 'Fall17_17Nov2017_V32_102X_DATA'
+    if "Run2018" in outName:
+      globalTag = '102X_dataRun2_v8'
+      jecLabel  = 'Autumn18_RunABCD_V8_DATA'
 else:
     isData = False
     processRECO = "PAT"
     if "RunIISummer16" in outName:
-      globalTag = "94X_mcRun2_asymptotic_v3"
-      jecLabel = 'Summer16_07Aug2017_V11_MC'
-    if "RunIIFall17" in outName or "RunIIAutumn18" in outName:
-      globalTag = "94X_mc2017_realistic_v14"
-      jecLabel = 'Fall17_17Nov2017_V32_MC'
+      globalTag = '94X_mcRun2_asymptotic_v3'
+      jecLabel  = 'Summer16_07Aug2017_V11_MC'
+    if "RunIIFall17" in outName:
+      globalTag = '94X_mc2017_realistic_v14'
+      jecLabel  = 'Fall17_17Nov2017_V32_MC'
+    if "RunIIAutumn18" in outName:
+      globalTag = '102X_upgrade2018_realistic_v15'
+      jecLabel  = 'Autumn18_V8_MC'
 
 # because FastSim naming for JECs variables inside db and txt files is really truly messed up...
 if fastsim: jecLabel = 'Spring16_25nsFastSimV1_MC'

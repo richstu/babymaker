@@ -323,12 +323,13 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
         baby.stitch() = false;
         baby.stitch_ht() = false;
       }
-      if (baby.met_tru()>150) {
+	  if(outname.Contains("RunIIAutumn18") && baby.met_tru()>80)
         baby.stitch_met() = false;
-      }      
+      else if (baby.met_tru()>150) 
+        baby.stitch_met() = false;
     }
-    if((outname.Contains("DYJetsToLL_M-50_Tune")  && baby.ht_isr_me()>70)
-       || (outname.Contains("WJetsToLNu_Tune")  && baby.ht_isr_me()>70)){
+    if((outname.Contains("DYJetsToLL_M-50_Tune")  && baby.ht_isr_me()>100)
+       || (outname.Contains("WJetsToLNu_Tune")  && baby.ht_isr_me()>100)){
       baby.stitch() = false;
       baby.stitch_ht() = false;
       baby.stitch_met() = false;
@@ -1512,7 +1513,8 @@ void bmaker_full::writeGenInfo(edm::Handle<LHEEventProduct> lhe_info){
         px1 = px; py1 = py;
       } else if (nme_leps==1){
         px2 = px; py2 = py;
-      } else cout<<"Found more than two leptons in ME"<<endl;
+      } 
+// 			else cout<<"Found more than two leptons in ME"<<endl;
       nme_leps++;
     }
   } // Loop over generator particles
@@ -1990,14 +1992,16 @@ void bmaker_full::writeWeights(const vCands &sig_leps, edm::Handle<GenEventInfoP
   // L1 Prefire weight
   edm::Handle<double> prefweight;
   edm::Handle<double> prefweightup, prefweightdown;
-  iEvent.getByToken(tok_prefweight_,     prefweight);
-  iEvent.getByToken(tok_prefweightup_,   prefweightup);
-  iEvent.getByToken(tok_prefweightdown_, prefweightdown);
-  baby.w_prefire() = *prefweight;
   baby.sys_prefire().resize(2,1.);
-  // prefweightdown(up) is upper(lower) value
-  baby.sys_prefire()[0] = *prefweightdown;
-  baby.sys_prefire()[1] = *prefweightup;
+	if(outname.Contains("RunIISummer16") || outname.Contains("RunIIFall17")) {
+    iEvent.getByToken(tok_prefweight_,     prefweight);
+    iEvent.getByToken(tok_prefweightup_,   prefweightup);
+    iEvent.getByToken(tok_prefweightdown_, prefweightdown);
+    baby.w_prefire() = *prefweight;
+    // prefweightdown(up) is upper(lower) value
+    baby.sys_prefire()[0] = *prefweightdown;
+    baby.sys_prefire()[1] = *prefweightup;
+	}
 
   // VVVL trigger efficiency
   baby.eff_trig() = weightTool->triggerEfficiency(baby.nmus(), baby.nels(), baby.met(), baby.sys_trig());

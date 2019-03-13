@@ -901,7 +901,8 @@ jet_met_tools::jet_met_tools(TString ijecName, bool doSys, bool fastSim, TString
     DeepFlavourLoose  = 0.0521;
     DeepFlavourMedium = 0.3033;
     DeepFlavourTight  = 0.7489;
-  } else {
+	}
+  else if (jecName.Contains("Fall17")){ // 94X WPs
     DeepCSVLoose  = 0.1522;
     DeepCSVMedium = 0.4941;
     DeepCSVTight  = 0.8001;
@@ -910,6 +911,15 @@ jet_met_tools::jet_met_tools(TString ijecName, bool doSys, bool fastSim, TString
     DeepFlavourMedium = 0.3033;
     DeepFlavourTight  = 0.7489;
     // scaleFactorFile_deepflav+="/src/babymaker/bmaker/data/DeepFlavour_94XSF_V1_B_F.csv"; // to be added
+  } 
+	else { // 102X WPs
+    DeepCSVLoose  = 0.1241;
+    DeepCSVMedium = 0.4184;
+    DeepCSVTight  = 0.7527;
+    scaleFactorFile_deep+="/src/babymaker/bmaker/data/DeepCSV_102XSF_V1.csv";
+    DeepFlavourLoose  = 0.0494;
+    DeepFlavourMedium = 0.2770;
+    DeepFlavourTight  = 0.7264;
   }
   if (!isData)
     cout<<"BABYMAKER: jet_met_tools: Using b-tagging SFs from file "
