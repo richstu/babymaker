@@ -422,7 +422,7 @@ vector<LVector> bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
   baby.nbdl() = 0; baby.nbdm() = 0;  baby.nbdt() = 0;
   baby.nbdfl() = 0; baby.nbdfm() = 0;  baby.nbdft() = 0;
   baby.ht() = 0.; baby.st() = 0.; baby.ht_hlt() = 0.;
-  baby.njets_ra2() = 0; baby.njets_clean() = 0; baby.nbm_ra2() = 0; baby.ht_ra2() = 0.; baby.ht_clean() = 0.; 
+  baby.njets_ra2() = 0; baby.njets_clean() = 0; baby.nbm_ra2() = 0; baby.ht_ra2() = 0.; baby.ht_clean() = 0.;baby.ht_ejets() = 0; 
   baby.pass_jets() = true; baby.pass_jets_nohf() = true; baby.pass_jets_tight() = true; 
   baby.pass_jets_ra2() = true; baby.pass_jets_tight_ra2() = true; baby.pass_fsjets()=true;
   if (doSystematics) {
@@ -446,8 +446,9 @@ vector<LVector> bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
 
     bool isLep = jetTool->leptonInJet(jet, sig_leps);
     bool looseID = jetTool->idJet(jet, outname);
-    bool tightID = jetTool->idJet(jet, outname);
-    bool goodPtEta = jetp4.pt() > jetTool->JetPtCut && fabs(jet.eta()) <= jetTool->JetEtaCut;
+    bool tightID = jetTool->idJet(jet, "RunIIFall17");
+    bool goodPtEta =  jetp4.pt() > jetTool->JetPtCut && fabs(jet.eta()) <= jetTool->JetEtaCut;
+    bool goodPtEta5 = jetp4.pt() > jetTool->JetPtCut && fabs(jet.eta()) > jetTool->JetEtaCut && fabs(jet.eta()) <= 5;
     if(isFastSim){
       if(jetp4.pt() > 20. && fabs(jet.eta()) < 2.5 && !jetTool->matchesGenJet(jet,genjets) && jet.chargedHadronEnergyFraction() < 0.1) baby.pass_fsjets()=false;
     }
@@ -480,11 +481,17 @@ vector<LVector> bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
       baby.jets_csv().push_back(csv);
       baby.jets_csvd().push_back(csvd);
       baby.jets_csvdf().push_back(csvdf);
+      baby.jets_nhf().push_back(jet.neutralHadronEnergyFraction());
+      baby.jets_chf().push_back(jet.chargedHadronEnergyFraction());
+      baby.jets_nemf().push_back(jet.neutralEmEnergyFraction());
+      baby.jets_npm().push_back(jet.neutralMultiplicity());
+      baby.jets_cpm().push_back(jet.chargedMultiplicity());
  
-      if(!isLep && goodPtEta){
+      if(!isLep){
         jetsys_p4 += jet.p4();
         baby.njets()++;
         baby.ht() += jetp4.pt();
+        baby.ht_ejets() += jetp4.pt();
         baby.st() += jetp4.pt();
         if(csv > jetTool->CSVLoose)  baby.nbl()++;
         if(csv > jetTool->CSVMedium) baby.nbm()++;
@@ -500,6 +507,20 @@ vector<LVector> bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
         if(csvdf > jetTool->DeepFlavourTight)  baby.nbdft()++;
       }
     } 
+    if(looseID && goodPtEta5) {
+      baby.ejets_pt().push_back(jetp4.pt());
+      baby.ejets_eta().push_back(jet.eta());
+      baby.ejets_phi().push_back(jet.phi());
+      baby.ejets_m().push_back(jetp4.mass());
+      baby.ejets_nhf().push_back(jet.neutralHadronEnergyFraction());
+      baby.ejets_chf().push_back(jet.chargedHadronEnergyFraction());
+      baby.ejets_nemf().push_back(jet.neutralEmEnergyFraction());
+      baby.ejets_npm().push_back(jet.neutralMultiplicity());
+      baby.ejets_cpm().push_back(jet.chargedMultiplicity());
+      if(!isLep)
+        baby.ht_ejets() += jetp4.pt();
+    }
+      
     
     //    HLT HT definition
     //----------------------------
