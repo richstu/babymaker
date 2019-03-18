@@ -120,6 +120,7 @@ std::vector<bool>  jets_h2d
 std::vector<float> jets_nhf
 std::vector<float> jets_chf
 std::vector<float> jets_nemf
+std::vector<float> jets_cemf
 std::vector<int>   jets_npm
 std::vector<int>   jets_cpm
 
@@ -130,6 +131,7 @@ std::vector<float> ejets_m
 std::vector<float> ejets_nhf
 std::vector<float> ejets_chf
 std::vector<float> ejets_nemf
+std::vector<float> ejets_cemf
 std::vector<int>   ejets_npm
 std::vector<int>   ejets_cpm
 

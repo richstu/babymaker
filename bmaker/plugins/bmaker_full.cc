@@ -484,6 +484,7 @@ vector<LVector> bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
       baby.jets_nhf().push_back(jet.neutralHadronEnergyFraction());
       baby.jets_chf().push_back(jet.chargedHadronEnergyFraction());
       baby.jets_nemf().push_back(jet.neutralEmEnergyFraction());
+      baby.jets_cemf().push_back(jet.chargedEmEnergyFraction());
       baby.jets_npm().push_back(jet.neutralMultiplicity());
       baby.jets_cpm().push_back(jet.chargedMultiplicity());
  
@@ -515,6 +516,7 @@ vector<LVector> bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
       baby.ejets_nhf().push_back(jet.neutralHadronEnergyFraction());
       baby.ejets_chf().push_back(jet.chargedHadronEnergyFraction());
       baby.ejets_nemf().push_back(jet.neutralEmEnergyFraction());
+      baby.ejets_cemf().push_back(jet.chargedEmEnergyFraction());
       baby.ejets_npm().push_back(jet.neutralMultiplicity());
       baby.ejets_cpm().push_back(jet.chargedMultiplicity());
       if(!isLep)
