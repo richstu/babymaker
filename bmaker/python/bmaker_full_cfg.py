@@ -51,14 +51,16 @@ else: fastsim = False
 ## JECs must be undone and reapplied when rerunning b-tagging
 ## => if doJEC = False, DeepCSV discriminator will not be included
 doJEC = True
-doDeepFlavour = True
+doDeepFlavour = False
 if doJEC: 
+    met_label = "slimmedMETsModifiedMET"
     if doDeepFlavour:
         jets_label = "selectedUpdatedPatJetsNewDFTraining"
     else:
         jets_label = "updatedPatJetsUpdatedJEC"
 else: 
-  jets_label = "slimmedJets"
+    jets_label = "slimmedJets"
+    met_label = "slimmedMETs"
 
 # to apply JECs with txt files in babymaker, 
 # prefix jecLabel with "onthefly_", e.g. onthefly_Spring16_25nsV6_MC
@@ -131,7 +133,7 @@ process.baby_full = cms.EDAnalyzer('bmaker_full',
                                     inputFiles = cms.vstring(options.inputFiles),
                                     json = cms.string(options.json),
                                     jec = cms.string(jecBabyLabel),
-                                    met = cms.InputTag("slimmedMETsModifiedMET"),
+                                    met = cms.InputTag(met_label),
                                     met_nohf = cms.InputTag("slimmedMETsNoHF"),
                                     jets = cms.InputTag(jets_label),
                                     nEventsSample = cms.uint32(options.nEventsSample),

@@ -40,8 +40,8 @@ config.Data.inputDBS = 'global'
 config.Data.allowNonValidInputDataset = True
 if "Run201" in taskname:
     config.Data.splitting = 'LumiBased'
-    config.Data.unitsPerJob = 75
-    config.Data.lumiMask = 'babymaker/data/json/golden_Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16.json' 
+    config.Data.unitsPerJob = 50
+    config.Data.lumiMask = 'babymaker/data/json/golden_Cert_314472-325175_13TeV_PromptReco_Collisions18.json' 
 else:
     config.Data.splitting = 'FileBased'
     config.Data.unitsPerJob = 5

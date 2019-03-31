@@ -34,11 +34,11 @@ import sys
 
 doMC2016 = False 
 doMC2017 = False
-doMC2018 = True
+doMC2018 = False
 
 doData2016 = False 
 doData2017 = False 
-doData2018 = False 
+doData2018 = True
 
 doFastSimScans = False
 doMiscellaneous = False
@@ -124,10 +124,10 @@ if doData2018:  # updated for Moriond'19, a couple datasets still trickling in, 
   datasets.append(["/SingleMuon/Run2018B-17Sep2018-v1/MINIAOD"])
   datasets.append(["/SingleMuon/Run2018C-17Sep2018-v1/MINIAOD"])
   datasets.append(["/SingleMuon/Run2018D-PromptReco-v2/MINIAOD"])
-  datasets.append(["/JetHT/Run2018A-17Sep2018-v1/MINIAOD"])
-  datasets.append(["/JetHT/Run2018B-17Sep2018-v1/MINIAOD"])
-  datasets.append(["/JetHT/Run2018C-17Sep2018-v1/MINIAOD"])
-  datasets.append(["/JetHT/Run2018D-PromptReco-v2/MINIAOD"])
+#   datasets.append(["/JetHT/Run2018A-17Sep2018-v1/MINIAOD"])
+#   datasets.append(["/JetHT/Run2018B-17Sep2018-v1/MINIAOD"])
+#   datasets.append(["/JetHT/Run2018C-17Sep2018-v1/MINIAOD"])
+#   datasets.append(["/JetHT/Run2018D-PromptReco-v2/MINIAOD"])
 
 
 
