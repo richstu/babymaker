@@ -10,7 +10,7 @@ import time
 import pprint
 
 # Setting folders
-year = 2017
+year = 2018
 datasets, infolder, outfolder, jsonfile = '', '', '', ''
 
 if year==2016:
@@ -25,8 +25,8 @@ elif year==2017:
     jsonfile = '../../data/json/golden_Cert_294927-306462_13TeV_EOY2017ReReco_Collisions17.json'
 elif year==2018:
     datasets = 'txt/alldata_2018.txt'
-    infolder  = '/net/cms2/cms2r0/babymaker/babies/2019_01_04/data/unprocessed/'
-    outfolder = '/net/cms2/cms2r0/babymaker/babies/2019_01_04/data/unskimmed/'
+    infolder  = '/net/cms2/cms2r0/babymaker/babies/2019_03_30/data/unprocessed/'
+    outfolder = '/net/cms2/cms2r0/babymaker/babies/2019_03_30/data/unskimmed/'
     jsonfile = '../../data/json/golden_Cert_314472-325175_13TeV_PromptReco_Collisions18.json'
 
 runs_file = 1 # Number of runs in each ntuple

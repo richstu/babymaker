@@ -10,13 +10,10 @@ import argparse
 parser = argparse.ArgumentParser(description='Process some integers.')
 parser.add_argument("-i", "--infolder", help="Folder to find root files in", 
                     default="/net/cms2/cms2r0/babymaker/babies/2018_12_17/data/unskimmed/")
-parser.add_argument("-o", "--outfolder", help="Folder to write files to", 
-                    default="/net/cms2/cms2r0/babymaker/babies/2018_12_17/data/unskimmed/")
 parser.add_argument("-y", "--year", type=int, help="Year of the data.", 
                     default=2016)
 parser.add_argument("-e", "--execute", help="Execute", action='store_true')
 args = parser.parse_args()
-args.outfolder = args.outfolder+"/"
 
 eras = []
 if args.year==2016:
@@ -28,16 +25,18 @@ elif args.year==2017:
 elif args.year==2018:
   eras = [["A", [315252, 316995]], ["B", [317080, 319310]], ["C", [319337, 320065]], ["D", [320673, 325175]]] 
 
+outfolder = args.infolder
+
 ## Create output folder
-if not os.path.exists(args.outfolder):
-  print "\nCreating "+args.outfolder
-  os.system("mkdir -p "+args.outfolder)
+if not os.path.exists(outfolder):
+  print "\nCreating "+outfolder
+  os.system("mkdir -p "+outfolder)
 
 noera_runs = []
 nfiles = 0
 files = glob.glob(args.infolder+'/*.root')
 for ifile,file in enumerate(files):
-  outfile = file.replace(args.infolder, args.outfolder)
+  outfile = file.replace(args.infolder, outfolder)
 
   ## Parsing run from file name
   run = file.split('runs')[-1]
@@ -66,7 +65,7 @@ for ifile,file in enumerate(files):
 if len(noera_runs)>0:
   print "\nNot found era for runs "
   print noera_runs
-print "\nCopied and renamed "+str(nfiles)+" files into "+args.outfolder+"\n\n"
+print "\nCopied and renamed "+str(nfiles)+" files into "+outfolder+"\n\n"
 
 if not args.execute:
   print "If printed command looks ok, use -e to execute"

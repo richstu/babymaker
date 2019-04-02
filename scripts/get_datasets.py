@@ -73,7 +73,7 @@ data_tier = 'MINIAODSIM'
 # ------------- Monte Carlo samples ------------------
 if args.mc:
     for name in names:
-        output = subprocess.check_output(['./dasgoclient', '-query=dataset=/'+name+'*/'+tag+'*/'+data_tier,'status=*'])
+        output = subprocess.check_output(['./dasgoclient', '-query="dataset dataset=/'+name+'*/'+tag+'*/'+data_tier+' status=PRODUCTION"'])
         miniAODs = output.split()
         if args.year==2017:
             found = False
