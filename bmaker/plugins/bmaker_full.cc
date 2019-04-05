@@ -2007,15 +2007,15 @@ void bmaker_full::writeWeights(const vCands &sig_leps, edm::Handle<GenEventInfoP
   edm::Handle<double> prefweight;
   edm::Handle<double> prefweightup, prefweightdown;
   baby.sys_prefire().resize(2,1.);
-  if(outname.Contains("RunIISummer16") || outname.Contains("RunIIFall17")) {
-    iEvent.getByToken(tok_prefweight_,     prefweight);
-    iEvent.getByToken(tok_prefweightup_,   prefweightup);
-    iEvent.getByToken(tok_prefweightdown_, prefweightdown);
-    baby.w_prefire() = *prefweight;
-    // prefweightdown(up) is upper(lower) value
-    baby.sys_prefire()[0] = *prefweightdown;
-    baby.sys_prefire()[1] = *prefweightup;
-  }
+//   if(outname.Contains("RunIISummer16") || outname.Contains("RunIIFall17")) {
+//     iEvent.getByToken(tok_prefweight_,     prefweight);
+//     iEvent.getByToken(tok_prefweightup_,   prefweightup);
+//     iEvent.getByToken(tok_prefweightdown_, prefweightdown);
+//     baby.w_prefire() = *prefweight;
+//     // prefweightdown(up) is upper(lower) value
+//     baby.sys_prefire()[0] = *prefweightdown;
+//     baby.sys_prefire()[1] = *prefweightup;
+//   }
 
   // VVVL trigger efficiency
   baby.eff_trig() = weightTool->triggerEfficiency(baby.nmus(), baby.nels(), baby.met(), baby.sys_trig());
@@ -2133,9 +2133,9 @@ bmaker_full::bmaker_full(const edm::ParameterSet& iConfig):
   tok_source_(consumes<LHEEventProduct>(edm::InputTag("source"))),
   tok_generator_(consumes<GenEventInfoProduct>(edm::InputTag("generator"))),
   tok_genlumiheader_(consumes<GenLumiInfoHeader,edm::InLumi>(edm::InputTag("generator"))),
-  tok_prefweight_(consumes< double >(edm::InputTag("prefiringweight:NonPrefiringProb"))),
-  tok_prefweightup_(consumes< double >(edm::InputTag("prefiringweight:NonPrefiringProbUp"))),
-  tok_prefweightdown_(consumes< double >(edm::InputTag("prefiringweight:NonPrefiringProbDown"))),
+  //  tok_prefweight_(consumes< double >(edm::InputTag("prefiringweight:NonPrefiringProb"))),
+  //  tok_prefweightup_(consumes< double >(edm::InputTag("prefiringweight:NonPrefiringProbUp"))),
+  //  tok_prefweightdown_(consumes< double >(edm::InputTag("prefiringweight:NonPrefiringProbDown"))),
   tok_ecalBadCalibFilterUpdate_(consumes< bool >(edm::InputTag("ecalBadCalibReducedMINIAODFilter")))
 /* DAK8
   tok_deepJetToken_(consumes<edm::View<pat::Jet> >(edm::InputTag("slimmedJetsAK8")))

@@ -43,7 +43,7 @@ if outName == "output.root": # output filename not set
     rootfile = basename(options.inputFiles[0])
     outName = "fullbaby_"+rootfile.replace("file:","")
 
-doSystematics = True
+doSystematics = False
 if "FSPremix" in outName or "Fast" in outName: fastsim = True
 else: fastsim = False
 
@@ -96,8 +96,6 @@ else:
 # because FastSim naming for JECs variables inside db and txt files is really truly messed up...
 jecCorrLabel = jecFileLabel
 jecBmakerLabel = jecFileLabel
-# if "RunIIFall17" in outName: jecBmakerLabel = 'Fall17_17Nov2017_V32_MC'
-if "RunIIFall17" in outName: jecBmakerLabel = 'onthefly_Fall17_17Nov2017_V32_MC'
 if fastsim: 
   jecLevels = ['L1FastJet', 'L2Relative', 'L3Absolute']
   if "RunIIFall17" in outName or "RunIIAutumn18" in outName:
@@ -231,35 +229,35 @@ if doJEC:
     ###### Apply new JECs to MET
     ## From https://twiki.cern.ch/twiki/bin/view/CMS/MissingETUncertaintyPrescription
     from PhysicsTools.PatUtils.tools.runMETCorrectionsAndUncertainties import runMetCorAndUncFromMiniAOD #fixme
-    if ("RunIIFall17" in outName) or ("Run2017" in outName):
-      runMetCorAndUncFromMiniAOD(process,
-                                 isData = isData,
-                                 fixEE2017 = True,
-                                 fixEE2017Params = {'userawPt': True, 'ptThreshold':50.0, 'minEtaThreshold':2.65, 'maxEtaThreshold':3.139},
-                                 postfix = "ModifiedMET"
-      )
-    else:
-      runMetCorAndUncFromMiniAOD(process,
+#     if ("RunIIFall17" in outName) or ("Run2017" in outName):
+#       runMetCorAndUncFromMiniAOD(process,
+#                                  isData = isData,
+#                                  fixEE2017 = True,
+#                                  fixEE2017Params = {'userawPt': True, 'ptThreshold':50.0, 'minEtaThreshold':2.65, 'maxEtaThreshold':3.139},
+#                                  postfix = "ModifiedMET"
+#       )
+#     else:
+    runMetCorAndUncFromMiniAOD(process,
                                  isData = isData,
                                  postfix = "ModifiedMET"
       )
 # L1 prefiring issue
 # https://twiki.cern.ch/twiki/bin/viewauth/CMS/L1ECALPrefiringWeightRecipe 
-if "RunIISummer16" in outName or "RunIIFall17" in outName:
-  prefire_dataEra = "2017BtoF"
-  if "RunIISummer16" in outName: prefire_dataEra = "2016BtoH"
-  prefire_file = 'CMSSW_10_2_6/src/babymaker/data/L1Prefire/L1PrefiringMaps_new.root'
-  if 'babymaker' in environ['PWD']:
-    prefire_file = 'data/L1Prefire/L1PrefiringMaps_new.root'
-  process.prefiringweight = cms.EDProducer("L1ECALPrefiringWeightProducer",
-                                            ThePhotons = cms.InputTag("slimmedPhotons"),
-                                            TheJets = cms.InputTag("slimmedJets"),
-                                            L1Maps = cms.string(prefire_file), # update this line with the location of this file
-                                            DataEra = cms.string(prefire_dataEra),
-                                            UseJetEMPt = cms.bool(False), #can be set to true to use jet prefiring maps parametrized vs pt(em) instead of pt
-                                            PrefiringRateSystematicUncty = cms.double(0.2) #Minimum relative prefiring uncty per object
-                                            )
-
+# if "RunIISummer16" in outName or "RunIIFall17" in outName:
+#   prefire_dataEra = "2017BtoF"
+#   if "RunIISummer16" in outName: prefire_dataEra = "2016BtoH"
+#   prefire_file = 'CMSSW_10_2_6/src/babymaker/data/L1Prefire/L1PrefiringMaps_new.root'
+#   if 'babymaker' in environ['PWD']:
+#     prefire_file = 'data/L1Prefire/L1PrefiringMaps_new.root'
+#   process.prefiringweight = cms.EDProducer("L1ECALPrefiringWeightProducer",
+#                                             ThePhotons = cms.InputTag("slimmedPhotons"),
+#                                             TheJets = cms.InputTag("slimmedJets"),
+#                                             L1Maps = cms.string(prefire_file), # update this line with the location of this file
+#                                             DataEra = cms.string(prefire_dataEra),
+#                                             UseJetEMPt = cms.bool(False), #can be set to true to use jet prefiring maps parametrized vs pt(em) instead of pt
+#                                             PrefiringRateSystematicUncty = cms.double(0.2) #Minimum relative prefiring uncty per object
+#                                             )
+# 
 # printing stuff about the event
 # process.add_(cms.Service("Tracer"))
 # process.add_(cms.Service("ProductRegistryDumper"))
