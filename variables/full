@@ -45,8 +45,6 @@ bool jetmismeas
 ###################   MET   ##################
 float met
 float met_phi
-float met_puppi
-float met_phi_puppi
 float met_calo
 float met_calo_phi
 float met_raw

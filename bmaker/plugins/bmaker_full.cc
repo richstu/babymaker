@@ -152,21 +152,17 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   if (debug) cout<<"BABYMAKER:: Writing MET..."<<endl;
   edm::Handle<pat::METCollection> mets;
   edm::Handle<pat::METCollection> mets_nohf;
-  edm::Handle<pat::METCollection> mets_puppi;
+  edm::Handle<pat::METCollection> mets_mini;
 
   iEvent.getByToken(tok_met_noHF_, mets_nohf);
-  if (!isData) { 
-    iEvent.getByToken(tok_met_, mets); // using MuEGClean for default, for now
-  } else {
-    iEvent.getByToken(tok_met_Puppi_, mets_puppi);
-    iEvent.getByToken(tok_met_, mets); //The collection called "slimmedMETs" is corrected for muons but not EG 
-  }
+  iEvent.getByToken(tok_met_mini_, mets_mini);
+  iEvent.getByToken(tok_met_, mets); //The collection called "slimmedMETs" is corrected for muons but not EG 
 
   //Saving these lines here in case we decide to switch to a different default
   // edm::Handle<pat::METCollection> mets_muegclean;
 
 
-  writeMET(mets, mets_nohf, mets_puppi);
+  writeMET(mets, mets_nohf, mets_mini);
 
   /// isolated tracks need to be after MET calculation and before jets cleaning
   if (debug) cout<<"BABYMAKER:: Calculating track veto..."<<endl;
@@ -308,7 +304,7 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   if (debug) cout<<"BABYMAKER:: Retrieving hard scatter info..."<<endl;
   edm::Handle<LHEEventProduct> lhe_info;
   baby.stitch() = baby.stitch_ht() = baby.stitch_met() = true;
-  if (outname.Contains("SMS-") && outname.Contains("PUSpring16Fast")) {
+  if (outname.Contains("SMS-") && outname.Contains("Fast")) {
     baby.mgluino() = mprod_;
     baby.mlsp() = mlsp_;
   } else if (!isData) {
@@ -376,7 +372,7 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 */
 
 // Requires having called jetTool->getJetCorrections(alljets, rhoEvent_) beforehand
-void bmaker_full::writeMET(edm::Handle<pat::METCollection> mets, edm::Handle<pat::METCollection> mets_nohf, edm::Handle<pat::METCollection> mets_puppi){
+void bmaker_full::writeMET(edm::Handle<pat::METCollection> mets, edm::Handle<pat::METCollection> mets_nohf, edm::Handle<pat::METCollection> mets_mini){
   jetTool->getMETWithJEC(mets, baby.met(), baby.met_phi(), kSysLast);
   jetTool->getMETRaw(mets, baby.met_raw(), baby.met_raw_phi());
 
@@ -385,13 +381,9 @@ void bmaker_full::writeMET(edm::Handle<pat::METCollection> mets, edm::Handle<pat
   // jetTool->getMETWithJEC(mets_egclean, baby.met_egclean(), baby.met_phi_egclean(), kSysLast);
   // jetTool->getMETWithJEC(mets_muclean, baby.met_muclean(), baby.met_phi_muclean(), kSysLast);
 
-  if (isData) {
-    baby.met_puppi() = mets_puppi->at(0).pt();
-    baby.met_phi_puppi() = mets_puppi->at(0).phi();
-  }
+  baby.met_mini() = mets_mini->at(0).pt();
+  baby.met_mini_phi() = mets_mini->at(0).phi();
 
-  baby.met_mini() = mets->at(0).pt();
-  baby.met_mini_phi() = mets->at(0).phi();
   baby.met_calo() = mets->at(0).caloMETPt();
   baby.met_calo_phi() = mets->at(0).caloMETPhi();
   if(mets_nohf.isValid()){
@@ -1545,23 +1537,23 @@ void bmaker_full::writeGenInfo(edm::Handle<LHEEventProduct> lhe_info){
     baby.ptll_me() = sqrt(pow(px1+px2,2)+pow(py1+py2,2));
   }
 
-  if (outname.Contains("SMS-") && outname.Contains("PUSpring16Fast")){ //Get mgluino and mlsp
-    typedef std::vector<std::string>::const_iterator comments_const_iterator;
+//   if (outname.Contains("SMS-") && outname.Contains("Fast")){ //Get mgluino and mlsp
+//     typedef std::vector<std::string>::const_iterator comments_const_iterator;
     
-    comments_const_iterator c_begin = lhe_info->comments_begin();
-    comments_const_iterator c_end = lhe_info->comments_end();
+//     comments_const_iterator c_begin = lhe_info->comments_begin();
+//     comments_const_iterator c_end = lhe_info->comments_end();
     
-    TString model_params;
-    for(comments_const_iterator cit=c_begin; cit!=c_end; ++cit) {
-      size_t found = (*cit).find("model");
-      if(found != std::string::npos)   {
-//        std::cout <<"BABYMAKER: "<< *cit <<"end"<< std::endl;  
-        model_params = *cit;
-      }
-    }
+//     TString model_params;
+//     for(comments_const_iterator cit=c_begin; cit!=c_end; ++cit) {
+//       size_t found = (*cit).find("model");
+//       if(found != std::string::npos)   {
+// //        std::cout <<"BABYMAKER: "<< *cit <<"end"<< std::endl;  
+//         model_params = *cit;
+//       }
+//     }
 
-    mcTool->getMassPoints(model_params,baby.mgluino(),baby.mlsp());
-  }
+//     mcTool->getMassPoints(model_params,baby.mgluino(),baby.mlsp());
+//   }
 } // writeGenInfo
 
 void bmaker_full::writeIFSR(edm::Handle<reco::GenParticleCollection> genParticles, 
@@ -2057,12 +2049,12 @@ void bmaker_full::writeWeights(const vCands &sig_leps, edm::Handle<GenEventInfoP
     const float isr_norm_tt = 1.117;
     float isr_wgt = -999.;
     if (baby.nisr()==0)      isr_wgt = 1.; 
-    else if (baby.nisr()==1) isr_wgt = 0.882; 
-    else if (baby.nisr()==2) isr_wgt = 0.792; 
-    else if (baby.nisr()==3) isr_wgt = 0.702; 
-    else if (baby.nisr()==4) isr_wgt = 0.648; 
-    else if (baby.nisr()==5) isr_wgt = 0.601; 
-    else if (baby.nisr()>=6) isr_wgt = 0.515; 
+    else if (baby.nisr()==1) isr_wgt = 0.920; 
+    else if (baby.nisr()==2) isr_wgt = 0.821; 
+    else if (baby.nisr()==3) isr_wgt = 0.715; 
+    else if (baby.nisr()==4) isr_wgt = 0.662; 
+    else if (baby.nisr()==5) isr_wgt = 0.561; 
+    else if (baby.nisr()>=6) isr_wgt = 0.511; 
     baby.w_isr() = isr_wgt*isr_norm_tt;
     //assign relative unc = 50% of the deviation from flat
     float absolute_unc = (1-isr_wgt)/2.;
@@ -2130,7 +2122,7 @@ bmaker_full::bmaker_full(const edm::ParameterSet& iConfig):
   tok_genJets_(consumes<edm::View<reco::GenJet> >(edm::InputTag("slimmedGenJets"))),
   tok_met_(consumes<pat::METCollection>(met_label)),
   tok_met_noHF_(consumes<pat::METCollection>(met_nohf_label)),
-  tok_met_Puppi_(consumes<pat::METCollection>(edm::InputTag("slimmedMETsPuppi"))),
+  tok_met_mini_(consumes<pat::METCollection>(edm::InputTag("slimmedMETs"))),
   tok_HBHENoiseFilter_(consumes<bool>(edm::InputTag("HBHENoiseFilterResultProducer","HBHENoiseFilterResult"))),
   tok_HBHEIsoNoiseFilter_(consumes<bool>(edm::InputTag("HBHENoiseFilterResultProducer","HBHEIsoNoiseFilterResult"))),
   tok_trigResults_reco_(consumes<edm::TriggerResults>(edm::InputTag("TriggerResults","","RECO"))),
@@ -2494,9 +2486,9 @@ void bmaker_full::endJob() {
 // ------------ method called when starting to processes a luminosity block  ------------
 
 void bmaker_full::beginLuminosityBlock(edm::LuminosityBlock const& iLumi, edm::EventSetup const& iEvent){
-  if (outname.Contains("PUSpring16Fast") && outname.Contains("SMS-")){
+  if (outname.Contains("Fast") && outname.Contains("SMS-")){
     edm::Handle<GenLumiInfoHeader> gen_header;
-//    iLumi.getByToken(tok_genlumiheader_, gen_header);  
+    iLumi.getByToken(tok_genlumiheader_, gen_header);  
     string model = gen_header->configDescription();
     mcTool->getMassPoints(model, mprod_, mlsp_);
   }

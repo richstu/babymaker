@@ -13,6 +13,7 @@
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/EDAnalyzer.h"
 #include "FWCore/Framework/interface/Event.h"
+#include "FWCore/Framework/interface/LuminosityBlock.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 
 // FW physics include files
@@ -198,7 +199,7 @@ private:
   edm::EDGetTokenT<edm::View<reco::GenJet> > tok_genJets_;
   edm::EDGetTokenT<pat::METCollection> tok_met_;
   edm::EDGetTokenT<pat::METCollection> tok_met_noHF_;
-  edm::EDGetTokenT<pat::METCollection> tok_met_Puppi_;
+  edm::EDGetTokenT<pat::METCollection> tok_met_mini_;
   edm::EDGetTokenT<bool> tok_HBHENoiseFilter_;
   edm::EDGetTokenT<bool> tok_HBHEIsoNoiseFilter_;
   edm::EDGetTokenT<edm::TriggerResults> tok_trigResults_reco_;

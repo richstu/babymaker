@@ -5,11 +5,17 @@ dataset = 'DATASETNAME'
 nevents = NEVENTS
 
 # CRAB3 task names can no longer be greater than 100 characters; need to shorten task name
-# Do NOT replace: "PUSpring16Fast" since it is used by the bmaker_full code to decide how to read GenInfo !!!
 taskname = dataset[1:].replace('/','__')
 taskname = taskname.replace('RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2','80XMiniAODv2')
 taskname = taskname.replace('RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3','RunIISummer16MiniAODv3')
 taskname = taskname.replace('RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14','RunIIFall17MiniAODv2')
+
+taskname = taskname.replace('RunIISummer16MiniAODv3-PUSummer16v3Fast_94X_mcRun2_asymptotic_v3-v1','RunIISummer16MiniAODv3Fast')
+taskname = taskname.replace('RunIIFall17MiniAODv2-PUFall17Fast_94X_mc2017_realistic_v15-v1','RunIIFall17MiniAODv2Fast')
+taskname = taskname.replace('RunIIFall17MiniAODv2-PUFall17Fast_lhe_94X_mc2017_realistic_v15-v1','RunIIFall17MiniAODv2Fast')
+taskname = taskname.replace('RunIIFall17MiniAODv2-PUFall17Fast_pilot_94X_mc2017_realistic_v15-v3','RunIIFall17MiniAODv2Fast')
+taskname = taskname.replace('RunIIFall17MiniAODv2-PUFall17Fast_pilot_94X_mc2017_realistic_v15_ext1-v1','RunIIAutumn18MiniAODFastFake')
+taskname = taskname.replace('RunIIFall17MiniAODv2-PUFall17Fast_94X_mc2017_realistic_v15_ext1-v1','RunIIAutumn18MiniAODFastFake')
 taskname = taskname.replace(':','___')
 
 if(len(taskname)>100): taskname = taskname[0:99]

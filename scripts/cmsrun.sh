@@ -10,8 +10,17 @@ outName=fullbaby_TTJets_HT-800to1200_TuneCP5_13TeV-madgraphMLM-pythia8_RunIIFall
 inFile=/nfs-7/userdata/ana/Run2018C_EGamma_17Sep2018-v1.root
 outName=fullbaby_Run2018C_EGamma_17Sep2018-v1.root
 
-# inFile=/nfs-7/userdata/ana/TTJets_SingleLeptFromT_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISummer16MiniAODv3_PUMoriond17_94X_mcRun2_asymptotic_v3-v2.root
-# outName=fullbaby_TTJets_SingleLeptFromT_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISummer16MiniAODv3_PUMoriond17_94X_mcRun2_asymptotic_v3-v2.root
+inFile=/home/users/ana/Run2017F_MET_31Mar2018_v1.root
+outName=fullbaby_Run2017F_MET_31Mar2018_v1.root
+
+# inFile=/home/users/ana/TTJets_SingleLeptFromTbar_TuneCP5_13TeV-madgraphMLM-pythia8_RunIIFall17MiniAODv2_PU2017_12Apr2018_94X_mc2017_realistic_v14-v1.root
+# outName=fullbaby_TTJets_SingleLeptFromTbar_TuneCP5_13TeV-madgraphMLM-pythia8_RunIIFall17MiniAODv2.root
+
+inFile=/hadoop/cms/store/user/ana/test/SMS-T1tttt_TuneCP2_13TeV-madgraphMLM-pythia8_RunIIFall17MiniAODv2_PUFall17Fast_pilot_94X_mc2017_realistic_v15.root
+outName=fullbaby_SMS-T1tttt_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIIFall17MiniAODv2Fast.root
+
+# inFile=/home/users/ana/SMS-T1tttt_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISummer16MiniAODv3_PUSummer16v3Fast_94X_mcRun2_asymptotic_v3.root
+# outName=fullbaby_SMS-T1tttt_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIIAutumn18MiniAODFastFake.root
 
 nEvents="1000"
 
