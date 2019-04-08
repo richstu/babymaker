@@ -14,6 +14,7 @@ def findBaseSampleNames(folder):
     for file in glob.glob(folder+'/*.root'):
         tag = file.split("RunII")[0]
         tag = tag.split("13TeV")[0]
+        tag = tag.split("CP5")[0]
         tag = tag.split("CUETP")[0]
         tag = tag.split("-PromptReco")[0]
         tag = tag.split("-23Sep2016")[0]

@@ -21,23 +21,11 @@ class bcolors:
     UNDERLINE = '\033[4m'
 
 # Setting folders
-oldfolder    = '/net/cms2/cms2r0/babymaker/babies/2016_01_11/mc/T1tttt/skim_abcd/'
-newfolder    = '/net/cms26/cms26r0/babymaker/2016_04_29/normalized/T1tttt/skim_abcd/'
+oldfolder    = '/net/cms29/cms29r0/babymaker/babies/2017_01_27/mc/unskimmed/'
+newfolder    = '/net/cms29/cms29r0/babymaker/babies/2018_12_17/mc/unskimmed/'
 
-oldfolder    = '/net/cms2/cms2r0/babymaker/babies/2016_01_11/mc/T1tttt/'
-newfolder    = '/net/cms26/cms26r0/babymaker/2016_04_29/normalized/T1tttt/'
-
-newfolder    = '/net/cms27/cms27r0/babymaker/2016_04_29/mc/skim_met100nb2nj4nl0'
-oldfolder    = '/net/cms27/cms27r0/babymaker/2016_04_29/mc/merged_met100nb2nj4nl0'
-
-oldfolder    = '/net/cms2/cms2r0/babymaker/babies/2015_11_28/mc/skim_1lht500met200'
-newfolder    = '/net/cms27/cms27r0/babymaker/2016_04_29/mc/merged_1lht500met200'
-
-oldfolder    = '/net/cms2/cms2r0/babymaker/babies/2016_04_29/mc/unskimmed/'
-newfolder    = '/net/cms29/cms29r0/babymaker/babies/2016_08_10/mc/unskimmed/'
-
-oweight = "weight/w_toppt/eff_trig"
-nweight = "weight/w_isr/w_pu"
+oweight = "weight/eff_trig"
+nweight = "weight/w_isr/w_pu/eff_trig"
 
 ## Finding tags for each dataset
 sortedfiles = findBaseSampleNames(newfolder)

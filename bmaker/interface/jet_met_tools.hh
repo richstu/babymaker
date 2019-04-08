@@ -90,7 +90,7 @@ public:
 
   bool leptonInJet(const pat::Jet &jet, vCands leptons);
   bool jetMatched(const pat::Jet &jet, vCands objects);
-  bool idJet(const pat::Jet &jet, CutLevel cut);
+  bool idJet(const pat::Jet &jet, TString outname);
   bool isLowDphi(vCands jets, float mht_phi, float &dphi1, float &dphi2, float &dphi3, float &dphi4);
 
   float getGenPt(const pat::Jet &jet, edm::Handle<edm::View <reco::GenJet> > genjets);

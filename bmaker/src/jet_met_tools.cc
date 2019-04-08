@@ -115,7 +115,7 @@ float jet_met_tools::trueHT(edm::Handle<edm::View <reco::GenJet> > genjets){
   return ht;
 }
 
-bool jet_met_tools::idJet(const pat::Jet &jet, CutLevel cut){
+bool jet_met_tools::idJet(const pat::Jet &jet, TString outname){
   // From https://twiki.cern.ch/twiki/bin/view/CMS/JetID
   double eta = fabs(jet.eta());
   double NHF = jet.neutralHadronEnergyFraction();
@@ -127,35 +127,40 @@ bool jet_met_tools::idJet(const pat::Jet &jet, CutLevel cut){
   double CHM = jet.chargedMultiplicity(); 
   double CEMF = jet.chargedEmEnergyFraction();
   
-  if(cut == kPBNR){  // RA2/b's PBNR and old Jet ID
-    bool eta_l_2p4 =  NumConst>=2 && NHF<0.9 && NEMF<0.95 && CHM>0 && CHF>0 && CEMF<0.99;
-    bool eta_geq_2p4 =  NHF<0.9 && NEMF<0.95 && NumConst>=2;
-    return (eta_l_2p4 && eta<2.4) || (eta>=2.4 && eta_geq_2p4);   
-  }
-
   bool passJetID = true;
-  if (cut==kLoose) { // default for 80X
+  if(outname.Contains("RunIISummer16") || outname.Contains("Run2016")) { // default for 80X
     if (eta<=2.7) {
       passJetID = NHF<0.99 && NEMF<0.99 && NumConst>1;
       if (eta<=2.4){
         passJetID = passJetID && CHF>0 && CHM>0 && CEMF<0.99;
       }
-    } else if (eta<=3.0) {
+    } 
+    else if (eta<=3.0) 
       passJetID = NHF<0.98 && NEMF>0.01 && NumNeutralParticles>2;
-    } else {
+    else 
       passJetID = NEMF<0.90 && NumNeutralParticles>10;
-    }
-  } else if (cut==kTight) { // default for 94X
+  } 
+  else if(outname.Contains("RunIIFall17") || outname.Contains("Run2017")) { // default for 94X
     if (eta<=2.7) { 
       passJetID = NHF<0.90 && NEMF<0.90 && NumConst>1;
       if (eta<=2.4){
         passJetID = passJetID && CHF>0 && CHM>0;
       }
-    } else if (eta<=3.0) {
+    }
+    else if (eta<=3.0) 
       passJetID = NEMF>0.02 && NEMF<0.99 && NumNeutralParticles>2;
-    } else {
+    else 
       passJetID = NEMF<0.90 && NHF>0.02 && NumNeutralParticles>10;
-    }    
+  }
+  else { // default for 102X
+    if (eta<=2.6)  
+      passJetID = NHF<0.90 && NEMF<0.90 && NumConst>1 && CHF>0 && CHM>0;
+    else if (eta<=2.7) 
+      passJetID = NHF<0.90 && NEMF<0.99 && CHM>0;
+    else if (eta<=3.0) 
+      passJetID = NEMF>0.02 && NEMF<0.99 && NumNeutralParticles>2;
+    else 
+      passJetID = NEMF<0.90 && NHF>0.2 && NumNeutralParticles>10;
   }
   return passJetID;
 }
@@ -296,31 +301,31 @@ void jet_met_tools::getMETWithJEC(edm::Handle<pat::METCollection> mets, float &m
 }
 
 float jet_met_tools::jetBTagWeight(const pat::Jet &jet, const LVector &jetp4, 
-           BTagEntry::OperatingPoint op,
-           const string &bc_full_syst, const string &udsg_full_syst,
-				   const string &bc_fast_syst, const string &udsg_fast_syst, bool doDeepCSV, bool doByProc) const{
+                                   BTagEntry::OperatingPoint op,
+                                   const string &bc_full_syst, const string &udsg_full_syst,
+                                   const string &bc_fast_syst, const string &udsg_fast_syst, bool doDeepCSV, bool doByProc) const{
   return jetBTagWeight(jet, jetp4, vector<BTagEntry::OperatingPoint>{op}, 
-		       bc_full_syst, udsg_full_syst, bc_fast_syst, udsg_fast_syst, doDeepCSV, doByProc);             
+                       bc_full_syst, udsg_full_syst, bc_fast_syst, udsg_fast_syst, doDeepCSV, doByProc);             
 }
 
 float jet_met_tools::jetBTagWeight(const pat::Jet &jet, const LVector &jetp4, 
-				   BTagEntry::OperatingPoint op,
-				   const string &bc_full_syst, const string &udsg_full_syst, bool doDeepCSV, bool doByProc) const{
+                                    BTagEntry::OperatingPoint op,
+                                    const string &bc_full_syst, const string &udsg_full_syst, bool doDeepCSV, bool doByProc) const{
   return jetBTagWeight(jet, jetp4, vector<BTagEntry::OperatingPoint>{op}, 
-		       bc_full_syst, udsg_full_syst, "central", "central", doDeepCSV, doByProc);  
+                       bc_full_syst, udsg_full_syst, "central", "central", doDeepCSV, doByProc);  
 }
 
 float jet_met_tools::jetBTagWeight(const pat::Jet &jet, const LVector &jetp4, 
-           const vector<BTagEntry::OperatingPoint> &ops, 
-				   const string &bc_full_syst, const string &udsg_full_syst, bool doDeepCSV, bool doByProc) const{
+                                   const vector<BTagEntry::OperatingPoint> &ops, 
+                                   const string &bc_full_syst, const string &udsg_full_syst, bool doDeepCSV, bool doByProc) const{
   return jetBTagWeight(jet, jetp4, ops, 
-		       bc_full_syst, udsg_full_syst, "central", "central", doDeepCSV, doByProc);             
+                        bc_full_syst, udsg_full_syst, "central", "central", doDeepCSV, doByProc);             
 }
 
 float jet_met_tools::jetBTagWeight(const pat::Jet &jet, const LVector &jetp4,
-           const vector<BTagEntry::OperatingPoint> &ops,
-           const string &bc_full_syst, const string &udsg_full_syst,
-				   const string &bc_fast_syst, const string &udsg_fast_syst, bool doDeepCSV, bool doByProc) const{
+                                   const vector<BTagEntry::OperatingPoint> &ops,
+                                   const string &bc_full_syst, const string &udsg_full_syst,
+                                   const string &bc_fast_syst, const string &udsg_fast_syst, bool doDeepCSV, bool doByProc) const{
   // procedure from https://twiki.cern.ch/twiki/bin/view/CMS/BTagSFMethods#1a_Event_reweighting_using_scale
   int hadronFlavour = abs(jet.hadronFlavour());
   BTagEntry::JetFlavor flav;
@@ -353,7 +358,7 @@ float jet_met_tools::jetBTagWeight(const pat::Jet &jet, const LVector &jetp4,
 
   float csv = jet.bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags");
   if (doDeepCSV) 
-    csv = jet.bDiscriminator("deepFlavourJetTags:probb")+jet.bDiscriminator("deepFlavourJetTags:probbb");
+    csv = jet.bDiscriminator("pfDeepCSVJetTags:probb")+jet.bDiscriminator("pfDeepCSVJetTags:probbb");
 
   int tag = -1;
   for (unsigned iop(0); iop<opcuts.size(); iop++) 
@@ -901,7 +906,8 @@ jet_met_tools::jet_met_tools(TString ijecName, bool doSys, bool fastSim, TString
     DeepFlavourLoose  = 0.0521;
     DeepFlavourMedium = 0.3033;
     DeepFlavourTight  = 0.7489;
-  } else {
+  }
+  else if (jecName.Contains("Fall17")){ // 94X WPs
     DeepCSVLoose  = 0.1522;
     DeepCSVMedium = 0.4941;
     DeepCSVTight  = 0.8001;
@@ -910,6 +916,15 @@ jet_met_tools::jet_met_tools(TString ijecName, bool doSys, bool fastSim, TString
     DeepFlavourMedium = 0.3033;
     DeepFlavourTight  = 0.7489;
     // scaleFactorFile_deepflav+="/src/babymaker/bmaker/data/DeepFlavour_94XSF_V1_B_F.csv"; // to be added
+  } 
+  else { // 102X WPs
+    DeepCSVLoose  = 0.1241;
+    DeepCSVMedium = 0.4184;
+    DeepCSVTight  = 0.7527;
+    scaleFactorFile_deep+="/src/babymaker/bmaker/data/DeepCSV_102XSF_V1.csv";
+    DeepFlavourLoose  = 0.0494;
+    DeepFlavourMedium = 0.2770;
+    DeepFlavourTight  = 0.7264;
   }
   if (!isData)
     cout<<"BABYMAKER: jet_met_tools: Using b-tagging SFs from file "

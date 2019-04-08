@@ -49,49 +49,67 @@ else: fastsim = False
 
     
 ## JECs must be undone and reapplied when rerunning b-tagging
-## => if doJEC = False, DeepCSV discriminator will not be included
-doJEC = True
-doDeepFlavour = True
+doJEC = True 
+doDeepFlavour = False
 if doJEC: 
+    # met_label = "slimmedMETs" #fixme
+    met_label = "slimmedMETsModifiedMET"
     if doDeepFlavour:
         jets_label = "selectedUpdatedPatJetsNewDFTraining"
     else:
         jets_label = "updatedPatJetsUpdatedJEC"
 else: 
-  jets_label = "slimmedJets"
+    jets_label = "slimmedJets"
+    met_label = "slimmedMETs"
 
 # to apply JECs with txt files in babymaker, 
-# prefix jecLabel with "onthefly_", e.g. onthefly_Spring16_25nsV6_MC
+# prefix jecFileLabel with "onthefly_", e.g. onthefly_Spring16_25nsV6_MC
 # systematics will also be calculated using this tag, even if JECs are not re-applied
 # N.B. B-tagging WPs are also selected based on this label
-jecLabel = 'onthefly_Spring16_23Sep2016V2_MC'
+jecFileLabel = 'onthefly_Spring16_23Sep2016V2_MC'
+jecLevels = ['L1FastJet', 'L2Relative', 'L3Absolute', 'L2L3Residual']
 if "Run201" in outName:
     isData = True
     processRECO = "RECO"
     if "Run2016" in outName:
-      globalTag = "94X_dataRun2_v10"
-      jecLabel = 'Summer16_07Aug2017All_V11_DATA'
-    if "Run2017" in outName or "Run2018" in outName:
-      globalTag = "102X_dataRun2_v8"
-      jecLabel = 'Fall17_17Nov2017_V32_102X_DATA'
+      globalTag = '94X_dataRun2_v10'
+      jecFileLabel  = 'Summer16_07Aug2017All_V11_DATA'
+    if "Run2017" in outName:
+      globalTag = '102X_dataRun2_v8'
+      jecFileLabel  = 'Fall17_17Nov2017_V32_102X_DATA'
+    if "Run2018" in outName:
+      globalTag = '102X_dataRun2_v8'
+      jecFileLabel  = 'Autumn18_RunABCD_V8_DATA'
 else:
     isData = False
     processRECO = "PAT"
     if "RunIISummer16" in outName:
-      globalTag = "94X_mcRun2_asymptotic_v3"
-      jecLabel = 'Summer16_07Aug2017_V11_MC'
-    if "RunIIFall17" in outName or "RunIIAutumn18" in outName:
-      globalTag = "94X_mc2017_realistic_v14"
-      jecLabel = 'Fall17_17Nov2017_V32_MC'
+      globalTag = '94X_mcRun2_asymptotic_v3'
+      jecFileLabel  = 'Summer16_07Aug2017_V11_MC'
+    if "RunIIFall17" in outName:
+      globalTag = '94X_mc2017_realistic_v14'
+      jecFileLabel  = 'Fall17_17Nov2017_V32_102X_MC'
+    if "RunIIAutumn18" in outName:
+      globalTag = '102X_upgrade2018_realistic_v15'
+      jecFileLabel  = 'Autumn18_V8_MC'
 
 # because FastSim naming for JECs variables inside db and txt files is really truly messed up...
-if fastsim: jecLabel = 'Spring16_25nsFastSimV1_MC'
-jecCorrLabel = jecLabel
-if fastsim: jecCorrLabel = 'Spring16_25nsFastSimMC_V1'
-jecBabyLabel = jecLabel
+jecCorrLabel = jecFileLabel
+jecBmakerLabel = jecFileLabel
+# if "RunIIFall17" in outName: jecBmakerLabel = 'Fall17_17Nov2017_V32_MC'
+if "RunIIFall17" in outName: jecBmakerLabel = 'onthefly_Fall17_17Nov2017_V32_MC'
 if fastsim: 
-  if (doJEC): jecBabyLabel = 'Spring16_FastSimV1_MC'
-  else: jecBabyLabel = 'onthefly_Spring16_FastSimV1_MC'
+  jecLevels = ['L1FastJet', 'L2Relative', 'L3Absolute']
+  if "RunIIFall17" in outName or "RunIIAutumn18" in outName:
+    jecFileLabel = 'Fall17_FastsimV1_MC'
+    jecCorrLabel = 'Fall17_FastsimV1_MC'
+    if (doJEC): jecBmakerLabel = 'Fall17_FastsimV1_MC'
+    else: jecBmakerLabel = 'onthefly_Fall17_FastsimV1_MC'
+  else:
+    jecFileLabel = 'Spring16_25nsFastSimV1_MC'
+    jecCorrLabel = 'Spring16_25nsFastSimMC_V1'
+    if (doJEC): jecBmakerLabel = 'Spring16_FastSimV1_MC'
+    else: jecBmakerLabel = 'onthefly_Spring16_FastSimV1_MC'
 
 ###### Defining Baby process, input and output files 
 process = cms.Process("Baby")
@@ -124,8 +142,8 @@ process.baby_full = cms.EDAnalyzer('bmaker_full',
                                     outputFile = cms.string(outName),
                                     inputFiles = cms.vstring(options.inputFiles),
                                     json = cms.string(options.json),
-                                    jec = cms.string(jecBabyLabel),
-                                    met = cms.InputTag("slimmedMETsModifiedMET"),
+                                    jec = cms.string(jecBmakerLabel),
+                                    met = cms.InputTag(met_label),
                                     met_nohf = cms.InputTag("slimmedMETsNoHF"),
                                     jets = cms.InputTag(jets_label),
                                     nEventsSample = cms.uint32(options.nEventsSample),
@@ -149,10 +167,14 @@ if "RunIISummer16" not in outName and "Run2016" not in outName:
        872420273,872436907,872420147,872439731,
        872436657,872420397,872439732,872439339,
        872439603,872422436,872439861,872437051,
-       872437052,872420649,872422436,872421950,
-       872437185,872422564,872421566,872421695,
-       872421955,872421567,872437184,872421951,
-       872421694,872437056,872437057,872437313]
+       872437052,872420649,872421950,872437185, 
+       872422564,872421566,872421695,872421955,
+       872421567,872437184,872421951,872421694, 
+       872437056,872437057,872437313,872438182,
+       872438951,872439990,872439864,872439609,
+       872437181,872437182,872437053,872436794,
+       872436667,872436536,872421541,872421413, 
+       872421414,872421031,872423083,872421439]
        )
     process.ecalBadCalibReducedMINIAODFilter = cms.EDFilter(
       "EcalBadCalibFilter",
@@ -169,7 +191,7 @@ if doJEC:
     process.load("CondCore.DBCommon.CondDBCommon_cfi")
     from CondCore.DBCommon.CondDBSetup_cfi import CondDBSetup
     process.jec = cms.ESSource("PoolDBESSource",CondDBSetup,
-                               connect = cms.string('sqlite_fip:babymaker/data/jec/'+jecLabel+'.db'),
+                               connect = cms.string('sqlite_fip:babymaker/data/jec/'+jecFileLabel+'.db'),
                                toGet   = cms.VPSet(
                                    cms.PSet(
                                        record = cms.string("JetCorrectionsRecord"),
@@ -186,7 +208,7 @@ if doJEC:
         updateJetCollection(
           process,
           jetSource = cms.InputTag('slimmedJets'),
-          jetCorrections = ('AK4PFchs', cms.vstring(['L1FastJet', 'L2Relative', 'L3Absolute', 'L2L3Residual']), 'None'),
+          jetCorrections = ('AK4PFchs', cms.vstring(jecLevels), 'None'),
           pvSource = cms.InputTag('offlineSlimmedPrimaryVertices'),
           svSource = cms.InputTag('slimmedSecondaryVertices'),
           btagDiscriminators = [  
@@ -203,13 +225,12 @@ if doJEC:
         updateJetCollection(
           process,
           jetSource = cms.InputTag('slimmedJets'),
-          jetCorrections = ('AK4PFchs', cms.vstring(['L1FastJet', 'L2Relative', 'L3Absolute', 'L2L3Residual']), 'None'),
+          jetCorrections = ('AK4PFchs', cms.vstring(jecLevels), 'None'),
           postfix = 'UpdatedJEC',
         )
     ###### Apply new JECs to MET
     ## From https://twiki.cern.ch/twiki/bin/view/CMS/MissingETUncertaintyPrescription
-    from PhysicsTools.PatUtils.tools.runMETCorrectionsAndUncertainties import runMetCorAndUncFromMiniAOD
-    ## If you only want to re-correct and get the proper uncertainties, no reclustering
+    from PhysicsTools.PatUtils.tools.runMETCorrectionsAndUncertainties import runMetCorAndUncFromMiniAOD #fixme
     if ("RunIIFall17" in outName) or ("Run2017" in outName):
       runMetCorAndUncFromMiniAOD(process,
                                  isData = isData,
@@ -252,14 +273,7 @@ for mod in process.producers_().itervalues():
 for mod in process.filters_().itervalues():
     process.tsk.add(mod)
 
-if ("RunIIFall17" in outName) or ("Run2017" in outName):
-    process.p = cms.Path(
-      process.fullPatMetSequenceModifiedMET
-      *process.baby_full,
-      process.tsk
-  )
-else:
-    process.p = cms.Path(
-      process.baby_full,
-        process.tsk
-    )
+process.p = cms.Path(
+  process.baby_full,
+    process.tsk
+)

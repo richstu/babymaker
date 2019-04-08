@@ -47,6 +47,7 @@ keep eff_*
 
 ## Jets
 keep jets_*
+keep ejets_*
 drop jets_fjet*_index
 keep *fjet14*
 keep *fjets14*

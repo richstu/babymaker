@@ -3,18 +3,16 @@
 # in case we decide to use David's batch:
 import os, sys, pprint, glob
 
-ntup_date = ''
-models = ["T1tttt","TChiWH"]
-
+models = ["T1tttt"]
 
 for model in models:
-  infolder = "/net/cms26/cms26r0/babymaker/babies/2016_08_10/to_renormalize/ana/"+model+"/"
-  outfolder = infolder+"split/"
+  infolder = "/net/cms2/cms2r0/babymaker/babies/2019_01_25/"+model+"/unsplit/"
+  outfolder = "/net/cms29/cms29r0/babymaker/babies/2019_01_25/"+model+"/unprocessed/"
   if not os.path.exists(outfolder):
     os.system("mkdir -p "+outfolder)
 
-  outname = "fullbaby_SMS-"+model+"_MASS_TAG_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv2-PUSpring16Fast_80X_mcRun2_asymptotic.root"
-
+  # outname = "fullbaby_SMS-"+model+"_MASS_TAG_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv2-PUSpring16Fast_80X_mcRun2_asymptotic.root"
+  outname = "fullbaby_SMS-"+model+"_MASS_TAG_TuneCP2_13TeV-madgraphMLM-pythia8_RunIIFall17MiniAODv2-PUFall17Fast_pilot_94X_mc2017_realistic_v15.root"
   os.system("JobSetup.csh")
   cmd = "JobSubmit.csh ./run/wrapper.sh ./run/skim_scan_onefile.exe %s %s" % (infolder, outfolder+"/"+outname)
   print cmd+"\n"

@@ -152,21 +152,17 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   if (debug) cout<<"BABYMAKER:: Writing MET..."<<endl;
   edm::Handle<pat::METCollection> mets;
   edm::Handle<pat::METCollection> mets_nohf;
-  edm::Handle<pat::METCollection> mets_puppi;
+  edm::Handle<pat::METCollection> mets_mini;
 
   iEvent.getByToken(tok_met_noHF_, mets_nohf);
-  if (!isData) { 
-    iEvent.getByToken(tok_met_, mets); // using MuEGClean for default, for now
-  } else {
-    iEvent.getByToken(tok_met_Puppi_, mets_puppi);
-    iEvent.getByToken(tok_met_, mets); //The collection called "slimmedMETs" is corrected for muons but not EG 
-  }
+  iEvent.getByToken(tok_met_mini_, mets_mini);
+  iEvent.getByToken(tok_met_, mets); //The collection called "slimmedMETs" is corrected for muons but not EG 
 
   //Saving these lines here in case we decide to switch to a different default
   // edm::Handle<pat::METCollection> mets_muegclean;
 
 
-  writeMET(mets, mets_nohf, mets_puppi);
+  writeMET(mets, mets_nohf, mets_mini);
 
   /// isolated tracks need to be after MET calculation and before jets cleaning
   if (debug) cout<<"BABYMAKER:: Calculating track veto..."<<endl;
@@ -308,7 +304,7 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   if (debug) cout<<"BABYMAKER:: Retrieving hard scatter info..."<<endl;
   edm::Handle<LHEEventProduct> lhe_info;
   baby.stitch() = baby.stitch_ht() = baby.stitch_met() = true;
-  if (outname.Contains("SMS-") && outname.Contains("PUSpring16Fast")) {
+  if (outname.Contains("SMS-") && outname.Contains("Fast")) {
     baby.mgluino() = mprod_;
     baby.mlsp() = mlsp_;
   } else if (!isData) {
@@ -323,12 +319,13 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
         baby.stitch() = false;
         baby.stitch_ht() = false;
       }
-      if (baby.met_tru()>150) {
+      if(outname.Contains("RunIIAutumn18") && baby.met_tru()>80)
         baby.stitch_met() = false;
-      }      
+      else if (baby.met_tru()>150) 
+        baby.stitch_met() = false;
     }
-    if((outname.Contains("DYJetsToLL_M-50_Tune")  && baby.ht_isr_me()>70)
-       || (outname.Contains("WJetsToLNu_Tune")  && baby.ht_isr_me()>70)){
+    if((outname.Contains("DYJetsToLL_M-50_Tune")  && baby.ht_isr_me()>100)
+       || (outname.Contains("WJetsToLNu_Tune")  && baby.ht_isr_me()>100)){
       baby.stitch() = false;
       baby.stitch_ht() = false;
       baby.stitch_met() = false;
@@ -375,7 +372,7 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 */
 
 // Requires having called jetTool->getJetCorrections(alljets, rhoEvent_) beforehand
-void bmaker_full::writeMET(edm::Handle<pat::METCollection> mets, edm::Handle<pat::METCollection> mets_nohf, edm::Handle<pat::METCollection> mets_puppi){
+void bmaker_full::writeMET(edm::Handle<pat::METCollection> mets, edm::Handle<pat::METCollection> mets_nohf, edm::Handle<pat::METCollection> mets_mini){
   jetTool->getMETWithJEC(mets, baby.met(), baby.met_phi(), kSysLast);
   jetTool->getMETRaw(mets, baby.met_raw(), baby.met_raw_phi());
 
@@ -384,13 +381,9 @@ void bmaker_full::writeMET(edm::Handle<pat::METCollection> mets, edm::Handle<pat
   // jetTool->getMETWithJEC(mets_egclean, baby.met_egclean(), baby.met_phi_egclean(), kSysLast);
   // jetTool->getMETWithJEC(mets_muclean, baby.met_muclean(), baby.met_phi_muclean(), kSysLast);
 
-  if (isData) {
-    baby.met_puppi() = mets_puppi->at(0).pt();
-    baby.met_phi_puppi() = mets_puppi->at(0).phi();
-  }
+  baby.met_mini() = mets_mini->at(0).pt();
+  baby.met_mini_phi() = mets_mini->at(0).phi();
 
-  baby.met_mini() = mets->at(0).pt();
-  baby.met_mini_phi() = mets->at(0).phi();
   baby.met_calo() = mets->at(0).caloMETPt();
   baby.met_calo_phi() = mets->at(0).caloMETPhi();
   if(mets_nohf.isValid()){
@@ -409,7 +402,7 @@ void bmaker_full::writeMET(edm::Handle<pat::METCollection> mets, edm::Handle<pat
 
 // Requires having called jetTool->getJetCorrections(alljets, rhoEvent_) beforehand
 vector<LVector> bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
-				       vector<unsigned> &all_baby_jets_idx,
+                            vector<unsigned> &all_baby_jets_idx,
                             edm::Handle<edm::View <reco::GenJet> > genjets,
                             vCands &sig_leps, vCands &veto_leps, vCands &photons, vCands &tks,
                             vector<vector<LVector> > &sys_jets,
@@ -421,7 +414,7 @@ vector<LVector> bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
   baby.nbdl() = 0; baby.nbdm() = 0;  baby.nbdt() = 0;
   baby.nbdfl() = 0; baby.nbdfm() = 0;  baby.nbdft() = 0;
   baby.ht() = 0.; baby.st() = 0.; baby.ht_hlt() = 0.;
-  baby.njets_ra2() = 0; baby.njets_clean() = 0; baby.nbm_ra2() = 0; baby.ht_ra2() = 0.; baby.ht_clean() = 0.; 
+  baby.njets_ra2() = 0; baby.njets_clean() = 0; baby.nbm_ra2() = 0; baby.ht_ra2() = 0.; baby.ht_clean() = 0.;baby.ht_ejets() = 0; 
   baby.pass_jets() = true; baby.pass_jets_nohf() = true; baby.pass_jets_tight() = true; 
   baby.pass_jets_ra2() = true; baby.pass_jets_tight_ra2() = true; baby.pass_fsjets()=true;
   if (doSystematics) {
@@ -438,20 +431,16 @@ vector<LVector> bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
 
     LVector jetp4(jetTool->corrJet[ijet]);
     float csv(jet.bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags"));
-    float csvd(-999.), csvdf(-999.);
-    TString cmssw_rel = getenv("CMSSW_BASE");
-    if (cmssw_rel.Contains("CMSSW_8"))
-      csvd = jet.bDiscriminator("deepFlavourJetTags:probb")+jet.bDiscriminator("deepFlavourJetTags:probbb");
-    else {
-      csvd = jet.bDiscriminator("pfDeepCSVJetTags:probb")+jet.bDiscriminator("pfDeepCSVJetTags:probbb");
-      csvdf = jet.bDiscriminator("pfDeepFlavourJetTags:probb")+jet.bDiscriminator("pfDeepFlavourJetTags:problepb")
-             +jet.bDiscriminator("pfDeepFlavourJetTags:probbb");
-    }
+    float csvd = jet.bDiscriminator("pfDeepCSVJetTags:probb")+jet.bDiscriminator("pfDeepCSVJetTags:probbb");
+    float csvdf = jet.bDiscriminator("pfDeepFlavourJetTags:probb")+jet.bDiscriminator("pfDeepFlavourJetTags:problepb")
+                 +jet.bDiscriminator("pfDeepFlavourJetTags:probbb");
+    
 
     bool isLep = jetTool->leptonInJet(jet, sig_leps);
-    bool looseID = jetTool->idJet(jet, (is80Xreco ? jetTool->kLoose : jetTool->kTight));
-    bool tightID = jetTool->idJet(jet, (is80Xreco ? jetTool->kTight : jetTool->kLoose));
-    bool goodPtEta = jetp4.pt() > jetTool->JetPtCut && fabs(jet.eta()) <= jetTool->JetEtaCut;
+    bool looseID = jetTool->idJet(jet, outname);
+    bool tightID = jetTool->idJet(jet, "RunIIFall17");
+    bool goodPtEta =  jetp4.pt() > jetTool->JetPtCut && fabs(jet.eta()) <= jetTool->JetEtaCut;
+    bool goodPtEta5 = jetp4.pt() > jetTool->JetPtCut && fabs(jet.eta()) > jetTool->JetEtaCut && fabs(jet.eta()) <= 5;
     if(isFastSim){
       if(jetp4.pt() > 20. && fabs(jet.eta()) < 2.5 && !jetTool->matchesGenJet(jet,genjets) && jet.chargedHadronEnergyFraction() < 0.1) baby.pass_fsjets()=false;
     }
@@ -484,11 +473,18 @@ vector<LVector> bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
       baby.jets_csv().push_back(csv);
       baby.jets_csvd().push_back(csvd);
       baby.jets_csvdf().push_back(csvdf);
+      baby.jets_nhf().push_back(jet.neutralHadronEnergyFraction());
+      baby.jets_chf().push_back(jet.chargedHadronEnergyFraction());
+      baby.jets_nemf().push_back(jet.neutralEmEnergyFraction());
+      baby.jets_cemf().push_back(jet.chargedEmEnergyFraction());
+      baby.jets_npm().push_back(jet.neutralMultiplicity());
+      baby.jets_cpm().push_back(jet.chargedMultiplicity());
  
-      if(!isLep && goodPtEta){
+      if(!isLep){
         jetsys_p4 += jet.p4();
         baby.njets()++;
         baby.ht() += jetp4.pt();
+        baby.ht_ejets() += jetp4.pt();
         baby.st() += jetp4.pt();
         if(csv > jetTool->CSVLoose)  baby.nbl()++;
         if(csv > jetTool->CSVMedium) baby.nbm()++;
@@ -504,6 +500,21 @@ vector<LVector> bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
         if(csvdf > jetTool->DeepFlavourTight)  baby.nbdft()++;
       }
     } 
+    if(looseID && goodPtEta5) {
+      baby.ejets_pt().push_back(jetp4.pt());
+      baby.ejets_eta().push_back(jet.eta());
+      baby.ejets_phi().push_back(jet.phi());
+      baby.ejets_m().push_back(jetp4.mass());
+      baby.ejets_nhf().push_back(jet.neutralHadronEnergyFraction());
+      baby.ejets_chf().push_back(jet.chargedHadronEnergyFraction());
+      baby.ejets_nemf().push_back(jet.neutralEmEnergyFraction());
+      baby.ejets_cemf().push_back(jet.chargedEmEnergyFraction());
+      baby.ejets_npm().push_back(jet.neutralMultiplicity());
+      baby.ejets_cpm().push_back(jet.chargedMultiplicity());
+      if(!isLep)
+        baby.ht_ejets() += jetp4.pt();
+    }
+      
     
     //    HLT HT definition
     //----------------------------
@@ -605,8 +616,8 @@ vector<LVector> bmaker_full::writeJets(edm::Handle<pat::JetCollection> alljets,
 } // writeJets
 
 void bmaker_full::writeBTagWeights(edm::Handle<pat::JetCollection> alljets,
-		      std::vector<reco::Candidate::LorentzVector>  &all_baby_jets,
-		      std::vector<unsigned> &all_baby_jet_idx){
+                                   std::vector<reco::Candidate::LorentzVector>  &all_baby_jets,
+                                   std::vector<unsigned> &all_baby_jet_idx){
 
   baby.w_btag_deep() = baby.w_btag_loose_deep() = baby.w_btag_tight_deep() = baby.w_bhig_deep() = 1.;
 
@@ -811,8 +822,8 @@ void bmaker_full::writeBBVars(std::vector<reco::Candidate::LorentzVector>  &all_
                         jet2.mass(), jet2.pt(), jet2.phi(),
                         hypot(px, py), atan2(py, px));
     baby.mt2_0mass() = getMT2(0., jet1.pt(), jet1.phi(),
-			      0., jet2.pt(), jet2.phi(),
-			      hypot(px, py), atan2(py, px));
+                              0., jet2.pt(), jet2.phi(),
+                              hypot(px, py), atan2(py, px));
   }else{
     baby.mt2() = -1.;
   }
@@ -932,7 +943,7 @@ vCands bmaker_full::writeMuons(edm::Handle<pat::MuonCollection> muons,
     //userInt has old value of isPFMuon()
 
     if(!outname.Contains("Run2017") && !outname.Contains("Run2018"))
-    	if(isData && !lep.isPFMuon() && lep.userInt("muonsCleaned:oldPF")) demoted = true;
+      if(isData && !lep.isPFMuon() && lep.userInt("muonsCleaned:oldPF")) demoted = true;
 
     bool isBadMu(false), isBadDuplMu(false);
     if (badmu_idx.find(ilep)!=badmu_idx.end()) isBadMu = true;
@@ -1260,7 +1271,7 @@ bool bmaker_full::writeTriggers(const edm::TriggerNames &names,
   vector<TString> trigs_met({"HLT_PFHT500_PFMET100_PFMHT100_IDTight_v",
                              "HLT_PFMET120_PFMHT120_IDTight_v",
                              "HLT_PFMET120_PFMHT120_IDTight_PFHT60_v",
-		                     "HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_v",
+                             "HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_v",
                              "HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60_v"});
   vector<TString> trigs_vvvl({"HLT_Mu15_IsoVVVL_PFHT350_v",
                               "HLT_Mu15_IsoVVVL_PFHT400_v",
@@ -1517,7 +1528,8 @@ void bmaker_full::writeGenInfo(edm::Handle<LHEEventProduct> lhe_info){
         px1 = px; py1 = py;
       } else if (nme_leps==1){
         px2 = px; py2 = py;
-      } else cout<<"Found more than two leptons in ME"<<endl;
+      } 
+//    else cout<<"Found more than two leptons in ME"<<endl;
       nme_leps++;
     }
   } // Loop over generator particles
@@ -1525,23 +1537,23 @@ void bmaker_full::writeGenInfo(edm::Handle<LHEEventProduct> lhe_info){
     baby.ptll_me() = sqrt(pow(px1+px2,2)+pow(py1+py2,2));
   }
 
-  if (outname.Contains("SMS-") && outname.Contains("PUSpring16Fast")){ //Get mgluino and mlsp
-    typedef std::vector<std::string>::const_iterator comments_const_iterator;
+//   if (outname.Contains("SMS-") && outname.Contains("Fast")){ //Get mgluino and mlsp
+//     typedef std::vector<std::string>::const_iterator comments_const_iterator;
     
-    comments_const_iterator c_begin = lhe_info->comments_begin();
-    comments_const_iterator c_end = lhe_info->comments_end();
+//     comments_const_iterator c_begin = lhe_info->comments_begin();
+//     comments_const_iterator c_end = lhe_info->comments_end();
     
-    TString model_params;
-    for(comments_const_iterator cit=c_begin; cit!=c_end; ++cit) {
-      size_t found = (*cit).find("model");
-      if(found != std::string::npos)   {
-	//        std::cout <<"BABYMAKER: "<< *cit <<"end"<< std::endl;  
-        model_params = *cit;
-      }
-    }
+//     TString model_params;
+//     for(comments_const_iterator cit=c_begin; cit!=c_end; ++cit) {
+//       size_t found = (*cit).find("model");
+//       if(found != std::string::npos)   {
+// //        std::cout <<"BABYMAKER: "<< *cit <<"end"<< std::endl;  
+//         model_params = *cit;
+//       }
+//     }
 
-    mcTool->getMassPoints(model_params,baby.mgluino(),baby.mlsp());
-  }
+//     mcTool->getMassPoints(model_params,baby.mgluino(),baby.mlsp());
+//   }
 } // writeGenInfo
 
 void bmaker_full::writeIFSR(edm::Handle<reco::GenParticleCollection> genParticles, 
@@ -1636,13 +1648,13 @@ void bmaker_full::writeMC(edm::Handle<reco::GenParticleCollection> genParticles,
     //isLast is not safe, since 21 -> -4,4,21 fails isLast but yields 4s that pass isFromGSP
     if(id==21){
       for(size_t idau(0); idau < mc.numberOfDaughters(); idau++) {
-	int dauid(abs(mc.daughter(idau)->pdgId()));
-	if(dauid == 4 || dauid==5) { 
-	  if(mcTool->isFromGSP(mc.daughter(idau))){ 
-	    from_gs=true; 
-	    break;
-	  }
-	}
+        int dauid(abs(mc.daughter(idau)->pdgId()));
+        if(dauid == 4 || dauid==5) { 
+          if(mcTool->isFromGSP(mc.daughter(idau))){ 
+            from_gs=true; 
+            break;
+          }
+        }
       }
     }
 
@@ -1659,12 +1671,12 @@ void bmaker_full::writeMC(edm::Handle<reco::GenParticleCollection> genParticles,
       double mind=999.;
       int minjetidx=-1;
       for(size_t ind(0); ind < baby.jets_pt().size(); ind++) {
-	double dr = dR(baby.jets_phi()[ind],mc.phi(),baby.jets_eta()[ind],mc.eta());
-	double dij = pow(max(baby.jets_pt()[ind],static_cast<float>(mc.pt())),-2)*dr*pow(0.4,-2);
-	if(dij<mind && dr < 0.4){
-	  mind=dij;
-	  minjetidx=ind;
-	}
+        double dr = dR(baby.jets_phi()[ind],mc.phi(),baby.jets_eta()[ind],mc.eta());
+        double dij = pow(max(baby.jets_pt()[ind],static_cast<float>(mc.pt())),-2)*dr*pow(0.4,-2);
+        if(dij<mind && dr < 0.4){
+          mind=dij;
+          minjetidx=ind;
+        }
       }
 
       baby.mc_status().push_back(mc.status());
@@ -1689,9 +1701,9 @@ void bmaker_full::writeMC(edm::Handle<reco::GenParticleCollection> genParticles,
 
       //Store some convenient info in jets collection
       if(minjetidx>=0){
-	if(id==5) baby.jets_ntrub()[minjetidx]++;
-	if(id==4) baby.jets_ntruc()[minjetidx]++; 
-	if(from_gs && (id==4||id==5)) baby.jets_gs_index()[minjetidx]= baby.mc_momidx().back();
+        if(id==5) baby.jets_ntrub()[minjetidx]++;
+        if(id==4) baby.jets_ntruc()[minjetidx]++; 
+        if(from_gs && (id==4||id==5)) baby.jets_gs_index()[minjetidx]= baby.mc_momidx().back();
       }
 
 
@@ -1850,7 +1862,7 @@ void bmaker_full::writeMC(edm::Handle<reco::GenParticleCollection> genParticles,
       //Found gluon that splits to bb or cc. Now find daughter quarks, and store their index
       vector<int> q_pair_idx;
       for(size_t indd(0); indd < baby.mc_pt().size(); indd++) {
-	if(static_cast<size_t>(baby.mc_momidx()[indd])==ind) q_pair_idx.push_back(indd);
+        if(static_cast<size_t>(baby.mc_momidx()[indd])==ind) q_pair_idx.push_back(indd);
       }
       if(q_pair_idx.size()!=2) continue;
 
@@ -1870,14 +1882,13 @@ void bmaker_full::writeMC(edm::Handle<reco::GenParticleCollection> genParticles,
       else if(baby.mc_jetidx()[q_pair_idx[0]]<0 || baby.mc_jetidx()[q_pair_idx[1]]<0) baby.mc_gs_dau_jetmatch()[ind]=1;
       else if(baby.mc_jetidx()[q_pair_idx[0]] == baby.mc_jetidx()[q_pair_idx[1]] ) baby.mc_gs_dau_jetmatch()[ind]=2;
       else baby.mc_gs_dau_jetmatch()[ind]=3;
-					   
       //loop over deep bb pairs, to fill truth info
       for(size_t indbb(0);indbb<baby.dr_bb_deep().size();indbb++){
-	//if quark1 matches jet1 and q2 matches jet2, or vice versa, fill bb_idx and bb_gs_flavor
+        //if quark1 matches jet1 and q2 matches jet2, or vice versa, fill bb_idx and bb_gs_flavor
         if(((baby.mc_jetidx()[q_pair_idx[0]]==baby.bb_jet_idx1_deep()[indbb]) && (baby.mc_jetidx()[q_pair_idx[1]]==baby.bb_jet_idx2_deep()[indbb])) ||((baby.mc_jetidx()[q_pair_idx[0]]==baby.bb_jet_idx2_deep()[indbb]) && (baby.mc_jetidx()[q_pair_idx[1]]==baby.bb_jet_idx1_deep()[indbb]))){
           baby.bb_gs_idx_deep()[indbb]=ind; //using gluon index
           baby.bb_gs_flavor_deep()[indbb]=baby.mc_id()[q_pair_idx[0]];
-	}
+        }
       }
     }
   }
@@ -1995,14 +2006,16 @@ void bmaker_full::writeWeights(const vCands &sig_leps, edm::Handle<GenEventInfoP
   // L1 Prefire weight
   edm::Handle<double> prefweight;
   edm::Handle<double> prefweightup, prefweightdown;
-  iEvent.getByToken(tok_prefweight_,     prefweight);
-  iEvent.getByToken(tok_prefweightup_,   prefweightup);
-  iEvent.getByToken(tok_prefweightdown_, prefweightdown);
-  baby.w_prefire() = *prefweight;
   baby.sys_prefire().resize(2,1.);
-  // prefweightdown(up) is upper(lower) value
-  baby.sys_prefire()[0] = *prefweightdown;
-  baby.sys_prefire()[1] = *prefweightup;
+  if(outname.Contains("RunIISummer16") || outname.Contains("RunIIFall17")) {
+    iEvent.getByToken(tok_prefweight_,     prefweight);
+    iEvent.getByToken(tok_prefweightup_,   prefweightup);
+    iEvent.getByToken(tok_prefweightdown_, prefweightdown);
+    baby.w_prefire() = *prefweight;
+    // prefweightdown(up) is upper(lower) value
+    baby.sys_prefire()[0] = *prefweightdown;
+    baby.sys_prefire()[1] = *prefweightup;
+  }
 
   // VVVL trigger efficiency
   baby.eff_trig() = weightTool->triggerEfficiency(baby.nmus(), baby.nels(), baby.met(), baby.sys_trig());
@@ -2036,12 +2049,12 @@ void bmaker_full::writeWeights(const vCands &sig_leps, edm::Handle<GenEventInfoP
     const float isr_norm_tt = 1.117;
     float isr_wgt = -999.;
     if (baby.nisr()==0)      isr_wgt = 1.; 
-    else if (baby.nisr()==1) isr_wgt = 0.882; 
-    else if (baby.nisr()==2) isr_wgt = 0.792; 
-    else if (baby.nisr()==3) isr_wgt = 0.702; 
-    else if (baby.nisr()==4) isr_wgt = 0.648; 
-    else if (baby.nisr()==5) isr_wgt = 0.601; 
-    else if (baby.nisr()>=6) isr_wgt = 0.515; 
+    else if (baby.nisr()==1) isr_wgt = 0.920; 
+    else if (baby.nisr()==2) isr_wgt = 0.821; 
+    else if (baby.nisr()==3) isr_wgt = 0.715; 
+    else if (baby.nisr()==4) isr_wgt = 0.662; 
+    else if (baby.nisr()==5) isr_wgt = 0.561; 
+    else if (baby.nisr()>=6) isr_wgt = 0.511; 
     baby.w_isr() = isr_wgt*isr_norm_tt;
     //assign relative unc = 50% of the deviation from flat
     float absolute_unc = (1-isr_wgt)/2.;
@@ -2109,7 +2122,7 @@ bmaker_full::bmaker_full(const edm::ParameterSet& iConfig):
   tok_genJets_(consumes<edm::View<reco::GenJet> >(edm::InputTag("slimmedGenJets"))),
   tok_met_(consumes<pat::METCollection>(met_label)),
   tok_met_noHF_(consumes<pat::METCollection>(met_nohf_label)),
-  tok_met_Puppi_(consumes<pat::METCollection>(edm::InputTag("slimmedMETsPuppi"))),
+  tok_met_mini_(consumes<pat::METCollection>(edm::InputTag("slimmedMETs"))),
   tok_HBHENoiseFilter_(consumes<bool>(edm::InputTag("HBHENoiseFilterResultProducer","HBHENoiseFilterResult"))),
   tok_HBHEIsoNoiseFilter_(consumes<bool>(edm::InputTag("HBHENoiseFilterResultProducer","HBHEIsoNoiseFilterResult"))),
   tok_trigResults_reco_(consumes<edm::TriggerResults>(edm::InputTag("TriggerResults","","RECO"))),
@@ -2207,14 +2220,14 @@ bmaker_full::bmaker_full(const edm::ParameterSet& iConfig):
       trig_name.push_back("HLT_Ele35_WPTight_Gsf_v");                                  // 23
       trig_name.push_back("HLT_Ele115_CaloIdVT_GsfTrkIdT_v");                          // 24
       trig_name.push_back("HLT_Ele300_CaloIdVT_GsfTrkIdT_v");                          // 25
-      trig_name.push_back("HLT_Ele27_WPTight_Gsf_v");				       // 26
+      trig_name.push_back("HLT_Ele27_WPTight_Gsf_v");                                  // 26
       trig_name.push_back("HLT_Ele28_eta2p1_WPTight_Gsf_HT150_v");                     // 27
       trig_name.push_back("HLT_Ele30_eta2p1_WPTight_Gsf_CentralPFJet35_EleCleaned_v"); // 28
       trig_name.push_back("HLT_Ele38_WPTight_Gsf_v");                                  // 29
       trig_name.push_back("HLT_Ele50_IsoVVVL_PFHT450_v");                              // 30
 
       trig_name.push_back("HLT_Photon200_v");                                          // 31
-      trig_name.push_back("HLT_Photon300_NoHE_v");				       // 32
+      trig_name.push_back("HLT_Photon300_NoHE_v");                                     // 32
       trig_name.push_back("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8_v");            // 33
       trig_name.push_back("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v");              // 34
       trig_name.push_back("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v");                 // 35
@@ -2233,9 +2246,9 @@ bmaker_full::bmaker_full(const edm::ParameterSet& iConfig):
       trig_name.push_back("HLT_PFJet260_v");                                           // 47
       trig_name.push_back("HLT_PFJet500_v");                                           // 48
       trig_name.push_back("HLT_AK8PFJet500_v");                                        // 49
-      trig_name.push_back("HLT_AK8PFJet360_TrimMass30_v");			       // 50
+      trig_name.push_back("HLT_AK8PFJet360_TrimMass30_v");                             // 50
 
-      trig_name.push_back("HLT_PFMET250_HBHECleaned_v");			       // 51
+      trig_name.push_back("HLT_PFMET250_HBHECleaned_v");                               // 51
     } else if(outname.Contains("Run2016")){
       trig_name.push_back("HLT_PFHT300_PFMET100_v");                            // 0 
       trig_name.push_back("HLT_Mu15_IsoVVVL_PFHT350_PFMET50_v");                // 1 
@@ -2254,10 +2267,10 @@ bmaker_full::bmaker_full(const edm::ParameterSet& iConfig):
       trig_name.push_back("HLT_PFMET100_PFMHT100_IDTight_v");                   // 13
       trig_name.push_back("HLT_PFMET110_PFMHT110_IDTight_v");                   // 14
       trig_name.push_back("HLT_PFMETNoMu110_PFMHTNoMu110_IDTight_v");           // 15
-      trig_name.push_back("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v");		// 16
+      trig_name.push_back("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v");                // 16
       trig_name.push_back("HLT_Mu45_eta2p1_v");                                 // 17
       trig_name.push_back("HLT_IsoMu18_v");                                     // 18
-      trig_name.push_back("HLT_IsoMu24_v");					// 19
+      trig_name.push_back("HLT_IsoMu24_v");                                     // 19
       trig_name.push_back("HLT_IsoMu27_v");                                     // 20
 
       trig_name.push_back("HLT_Mu50_v");                                        // 21
@@ -2265,41 +2278,41 @@ bmaker_full::bmaker_full(const edm::ParameterSet& iConfig):
       trig_name.push_back("HLT_Ele25_eta2p1_WPTight_Gsf_v");                    // 23
       trig_name.push_back("HLT_Ele105_CaloIdVT_GsfTrkIdT_v");                   // 24
       trig_name.push_back("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v");       // 25
-      trig_name.push_back("HLT_Photon175_v");					// 26
+      trig_name.push_back("HLT_Photon175_v");                                   // 26
       trig_name.push_back("HLT_Photon90_CaloIdL_PFHT500_v");                    // 27
-      trig_name.push_back("HLT_PFMET90_PFMHT90_IDTight_v");			// 28
-      trig_name.push_back("HLT_Ele23_WPLoose_Gsf_v");			        // 29
+      trig_name.push_back("HLT_PFMET90_PFMHT90_IDTight_v");                     // 28
+      trig_name.push_back("HLT_Ele23_WPLoose_Gsf_v");                           // 29
       trig_name.push_back("HLT_PFMET120_PFMHT120_IDTight_v");                   // 30
 
       trig_name.push_back("HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_v");           // 31
-      trig_name.push_back("HLT_IsoMu22_v");					// 32
+      trig_name.push_back("HLT_IsoMu22_v");                                     // 32
       trig_name.push_back("HLT_PFMETNoMu100_PFMHTNoMu100_IDTight_v");           // 33
       trig_name.push_back("HLT_Mu50_IsoVVVL_PFHT400_v");                        // 34
       trig_name.push_back("HLT_Mu15_IsoVVVL_BTagCSV_p067_PFHT400_v");           // 35
       trig_name.push_back("HLT_Ele50_IsoVVVL_PFHT400_v");                       // 36
       trig_name.push_back("HLT_Ele15_IsoVVVL_BTagCSV_p067_PFHT400_v");          // 37
       trig_name.push_back("HLT_Mu15_IsoVVVL_PFHT400_PFMET50_v");                // 38 
-      trig_name.push_back("HLT_Ele15_IsoVVVL_PFHT400_PFMET50_v");		// 39
-      trig_name.push_back("HLT_Ele27_WPTight_Gsf_v");				// 40
+      trig_name.push_back("HLT_Ele15_IsoVVVL_PFHT400_PFMET50_v");               // 39
+      trig_name.push_back("HLT_Ele27_WPTight_Gsf_v");                           // 40
 
-      trig_name.push_back("HLT_Ele115_CaloIdVT_GsfTrkIdT_v");			// 41
-      trig_name.push_back("HLT_IsoMu22_eta2p1_v");				// 42
-      trig_name.push_back("HLT_PFHT300_PFMET110_v");				// 43 
-      trig_name.push_back("HLT_PFHT200_DiPFJetAve90_PFAlphaT0p63_v");		// 44
-      trig_name.push_back("HLT_PFHT250_DiPFJetAve90_PFAlphaT0p58_v");		// 45
-      trig_name.push_back("HLT_PFHT300_DiPFJetAve90_PFAlphaT0p54_v");		// 46
-      trig_name.push_back("HLT_PFHT200_v");					// 47
-      trig_name.push_back("HLT_PFHT250_v");					// 48
-      trig_name.push_back("HLT_PFHT300_v");					// 49
-      trig_name.push_back("HLT_PFHT350_v");					// 50
+      trig_name.push_back("HLT_Ele115_CaloIdVT_GsfTrkIdT_v");                   // 41
+      trig_name.push_back("HLT_IsoMu22_eta2p1_v");                              // 42
+      trig_name.push_back("HLT_PFHT300_PFMET110_v");                            // 43 
+      trig_name.push_back("HLT_PFHT200_DiPFJetAve90_PFAlphaT0p63_v");           // 44
+      trig_name.push_back("HLT_PFHT250_DiPFJetAve90_PFAlphaT0p58_v");           // 45
+      trig_name.push_back("HLT_PFHT300_DiPFJetAve90_PFAlphaT0p54_v");           // 46
+      trig_name.push_back("HLT_PFHT200_v");                                     // 47
+      trig_name.push_back("HLT_PFHT250_v");                                     // 48
+      trig_name.push_back("HLT_PFHT300_v");                                     // 49
+      trig_name.push_back("HLT_PFHT350_v");                                     // 50
 
-      trig_name.push_back("HLT_PFHT400_v");					// 51
-      trig_name.push_back("HLT_PFHT600_v");					// 52
-      trig_name.push_back("HLT_PFHT650_v");					// 53
-      trig_name.push_back("HLT_PFHT900_v");					// 54
-      trig_name.push_back("HLT_IsoTkMu24_v");					// 55
-      trig_name.push_back("HLT_PFJet450_v");					// 56
-      trig_name.push_back("HLT_AK8PFJet450_v");				        // 57
+      trig_name.push_back("HLT_PFHT400_v");                                     // 51
+      trig_name.push_back("HLT_PFHT600_v");                                     // 52
+      trig_name.push_back("HLT_PFHT650_v");                                     // 53
+      trig_name.push_back("HLT_PFHT900_v");                                     // 54
+      trig_name.push_back("HLT_IsoTkMu24_v");                                   // 55
+      trig_name.push_back("HLT_PFJet450_v");                                    // 56
+      trig_name.push_back("HLT_AK8PFJet450_v");                                 // 57
     } else {
       trig_name.push_back("HLT_PFHT350_PFMET100_");                               // 0 
       trig_name.push_back("HLT_Mu15_IsoVVVL_PFHT350_PFMET50_v");                  // 1 
@@ -2473,9 +2486,9 @@ void bmaker_full::endJob() {
 // ------------ method called when starting to processes a luminosity block  ------------
 
 void bmaker_full::beginLuminosityBlock(edm::LuminosityBlock const& iLumi, edm::EventSetup const& iEvent){
-  if (outname.Contains("PUSpring16Fast") && outname.Contains("SMS-")){
+  if (outname.Contains("Fast") && outname.Contains("SMS-")){
     edm::Handle<GenLumiInfoHeader> gen_header;
-//    iLumi.getByToken(tok_genlumiheader_, gen_header);  
+    iLumi.getByToken(tok_genlumiheader_, gen_header);  
     string model = gen_header->configDescription();
     mcTool->getMassPoints(model, mprod_, mlsp_);
   }
