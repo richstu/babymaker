@@ -49,7 +49,7 @@ else: fastsim = False
 
     
 ## JECs must be undone and reapplied when rerunning b-tagging
-doJEC = True 
+doJEC = False 
 doDeepFlavour = False
 if doJEC: 
     # met_label = "slimmedMETs" #fixme
@@ -96,8 +96,6 @@ else:
 # because FastSim naming for JECs variables inside db and txt files is really truly messed up...
 jecCorrLabel = jecFileLabel
 jecBmakerLabel = jecFileLabel
-# if "RunIIFall17" in outName: jecBmakerLabel = 'Fall17_17Nov2017_V32_MC'
-if "RunIIFall17" in outName: jecBmakerLabel = 'onthefly_Fall17_17Nov2017_V32_MC'
 if fastsim: 
   jecLevels = ['L1FastJet', 'L2Relative', 'L3Absolute']
   if "RunIIFall17" in outName or "RunIIAutumn18" in outName:

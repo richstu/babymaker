@@ -240,6 +240,11 @@ float weight_tools::isrWeight(float isrpt){
 }
 
 float weight_tools::theoryWeight(weight_tools::variationType variation){
+  // cout<<"Printing theory weights, size = "<<theoryWeights.size()<<endl;
+  // cout<<"Nom weight = "<<theoryWeights.at(nominal).wgt<<endl;
+  // for (unsigned i(0); i< theoryWeights.size(); i++){
+  //   cout<<"Weight "<<i<<" = "<<theoryWeights.at(i).wgt<<endl;
+  // }
   if(theoryWeights.size()!=0) {
     return theoryWeights.at(variation).wgt/theoryWeights.at(nominal).wgt;
   }
