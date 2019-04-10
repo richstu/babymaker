@@ -75,9 +75,9 @@ command
 ### MC
 
 1. If one is processing signal scans, separate the mass points. This
-is done with the script below after setting the proper `infolder` and `outfolder` and `outname`
+is done with the script below, giving the proper `infolder` as an argument. 
 
-        ./run/send_split_scan.py 
+        python python/send_skim_scan.py -i /net/cms2/babymaker/babies/2019_04_18/T1tttt/unprocessed/
 
 
 2. Renormalize the weights so that the cross section is kept constant. This is done in the groomer repository.
