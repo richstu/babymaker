@@ -12,9 +12,11 @@ keep is201*
 
 ## Hadronic
 keep ht
+keep ht_ejets
 keep st
 keep htx
 keep mht
+keep dphi*
 keep low_dphi
 keep met*
 keep njets

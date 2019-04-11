@@ -51,10 +51,10 @@ int main(int argc, char *argv[]){
   if(cuts=="nl1met200ht500") cuts="nleps>=1&&ht>500&&met>200";
   if(cuts=="stdnj5") cuts="nleps>=1 && st>500 && met>100 && njets>=5";
   if(cuts=="stdnj5mj250nb1") cuts="nleps>=1 && st>500 && met>100 && njets>=5 && mj14>250 && nbdm>=1";
-  if(cuts=="abcd") cuts="nleps==1&&st>500&&met>200&&njets>=6&&nbdm>=1&&mj14>250&&nveto==0";
+  if(cuts=="abcd") cuts="nleps==1&&nveto==0&&st>500&&met>200&&njets>=6&&nbdm>=1&&mj14>250";
   if(cuts=="baseline") cuts="nleps==1&&st>500&&met>200&&njets>=6&&nbdm>=1";
   if(cuts=="sys_abcd") 
-    cuts = "nleps==1&&max(st,Max$(sys_st))>500&&max(met,Max$(sys_met))>200&&max(njets,Max$(sys_njets))>=6&&max(nbdm,Max$(sys_nbdm))>=1&&max(mj14,Max$(sys_mj14))>250";
+    cuts = "nleps==1&&nveto==0&&max(st,Max$(sys_st))>500&&max(met,Max$(sys_met))>200&&max(njets,Max$(sys_njets))>=6&&max(nbdm,Max$(sys_nbdm))>=1&&max(mj14,Max$(sys_mj14))>250";
   if(cuts=="zcandnb0")
     cuts = "nleps==2&&nbdm==0&&Max$(leps_pt)>40&&((elel_m>80&&elel_m<100)||(mumu_m>80&&mumu_m<100))";
   if(cuts=="dy_ht300")
