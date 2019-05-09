@@ -14,8 +14,6 @@ taskname = taskname.replace('RunIISummer16MiniAODv3-PUSummer16v3Fast_94X_mcRun2_
 taskname = taskname.replace('RunIIFall17MiniAODv2-PUFall17Fast_94X_mc2017_realistic_v15-v1','RunIIFall17MiniAODv2Fast')
 taskname = taskname.replace('RunIIFall17MiniAODv2-PUFall17Fast_lhe_94X_mc2017_realistic_v15-v1','RunIIFall17MiniAODv2Fast')
 taskname = taskname.replace('RunIIFall17MiniAODv2-PUFall17Fast_pilot_94X_mc2017_realistic_v15-v3','RunIIFall17MiniAODv2Fast')
-taskname = taskname.replace('RunIIFall17MiniAODv2-PUFall17Fast_pilot_94X_mc2017_realistic_v15_ext1-v1','RunIIAutumn18MiniAODFastFake')
-taskname = taskname.replace('RunIIFall17MiniAODv2-PUFall17Fast_94X_mc2017_realistic_v15_ext1-v1','RunIIAutumn18MiniAODFastFake')
 taskname = taskname.replace(':','___')
 
 if(len(taskname)>100): taskname = taskname[0:99]

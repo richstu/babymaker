@@ -19,8 +19,11 @@ outName=fullbaby_Run2017F_MET_31Mar2018_v1.root
 inFile=/hadoop/cms/store/user/ana/test/SMS-T1tttt_TuneCP2_13TeV-madgraphMLM-pythia8_RunIIFall17MiniAODv2_PUFall17Fast_pilot_94X_mc2017_realistic_v15.root
 outName=fullbaby_SMS-T1tttt_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIIFall17MiniAODv2Fast.root
 
-# inFile=/home/users/ana/SMS-T1tttt_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISummer16MiniAODv3_PUSummer16v3Fast_94X_mcRun2_asymptotic_v3.root
-# outName=fullbaby_SMS-T1tttt_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIIAutumn18MiniAODFastFake.root
+# inFile=/hadoop/cms/store/user/ana/test/SMS-T1tttt_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISummer16MiniAODv3_PUSummer16v3Fast_94X_mcRun2_asymptotic_v3.root
+# outName=fullbaby_SMS-T1tttt_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISummer16MiniAODv3_PUSummer16v3Fast.root
+
+inFile=/hadoop/cms/store/user/ana/test/SMS-T1tttt_TuneCP2_13TeV-madgraphMLM-pythia8_RunIIAutumn18MiniAOD_PUFall18Fast_102X_upgrade2018_realistic_v15.root
+outName=fullbaby_SMS-T1tttt_TuneCP2_13TeV-madgraphMLM-pythia8_RunIIAutumn18MiniAOD_PUFall18Fast_102X.root
 
 nEvents="1000"
 

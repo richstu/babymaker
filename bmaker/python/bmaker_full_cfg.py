@@ -49,7 +49,7 @@ else: fastsim = False
 
     
 ## JECs must be undone and reapplied when rerunning b-tagging
-doJEC = False 
+doJEC = True 
 doDeepFlavour = False
 if doJEC: 
     # met_label = "slimmedMETs" #fixme
@@ -63,51 +63,52 @@ else:
     met_label = "slimmedMETs"
 
 # to apply JECs with txt files in babymaker, 
-# prefix jecFileLabel with "onthefly_", e.g. onthefly_Spring16_25nsV6_MC
+# prefix jecDBFile with "onthefly_", e.g. onthefly_Spring16_25nsV6_MC
 # systematics will also be calculated using this tag, even if JECs are not re-applied
 # N.B. B-tagging WPs are also selected based on this label
-jecFileLabel = 'onthefly_Spring16_23Sep2016V2_MC'
+jecDBFile = 'onthefly_Spring16_23Sep2016V2_MC'
 jecLevels = ['L1FastJet', 'L2Relative', 'L3Absolute', 'L2L3Residual']
 if "Run201" in outName:
     isData = True
     processRECO = "RECO"
     if "Run2016" in outName:
       globalTag = '94X_dataRun2_v10'
-      jecFileLabel  = 'Summer16_07Aug2017All_V11_DATA'
+      jecDBFile  = 'Summer16_07Aug2017All_V11_DATA'
     if "Run2017" in outName:
       globalTag = '102X_dataRun2_v8'
-      jecFileLabel  = 'Fall17_17Nov2017_V32_102X_DATA'
+      jecDBFile  = 'Fall17_17Nov2017_V32_102X_DATA'
     if "Run2018" in outName:
       globalTag = '102X_dataRun2_v8'
-      jecFileLabel  = 'Autumn18_RunABCD_V8_DATA'
+      jecDBFile  = 'Autumn18_RunABCD_V8_DATA'
 else:
     isData = False
     processRECO = "PAT"
     if "RunIISummer16" in outName:
       globalTag = '94X_mcRun2_asymptotic_v3'
-      jecFileLabel  = 'Summer16_07Aug2017_V11_MC'
+      jecDBFile  = 'Summer16_07Aug2017_V11_MC'
     if "RunIIFall17" in outName:
       globalTag = '94X_mc2017_realistic_v14'
-      jecFileLabel  = 'Fall17_17Nov2017_V32_102X_MC'
+      jecDBFile  = 'Fall17_17Nov2017_V32_102X_MC'
     if "RunIIAutumn18" in outName:
       globalTag = '102X_upgrade2018_realistic_v15'
-      jecFileLabel  = 'Autumn18_V8_MC'
+      jecDBFile  = 'Autumn18_V8_MC'
 
-# because FastSim naming for JECs variables inside db and txt files is really truly messed up...
-jecCorrLabel = jecFileLabel
-jecBmakerLabel = jecFileLabel
+# some special gymnastics around the FastSim JEC file naming...
+jecTXTFile = jecDBFile
 if fastsim: 
   jecLevels = ['L1FastJet', 'L2Relative', 'L3Absolute']
-  if "RunIIFall17" in outName or "RunIIAutumn18" in outName:
-    jecFileLabel = 'Fall17_FastsimV1_MC'
-    jecCorrLabel = 'Fall17_FastsimV1_MC'
-    if (doJEC): jecBmakerLabel = 'Fall17_FastsimV1_MC'
-    else: jecBmakerLabel = 'onthefly_Fall17_FastsimV1_MC'
+  if "RunIIFall17" in outName:
+    jecDBFile = 'Fall17_25nsFastSim_V1_MC'
+    jecTXTFile = 'Fall17_FastsimV1_MC'
+  elif "RunIIAutumn18" in outName:
+    jecDBFile = 'Autumn18_FastsimV1_MC'
+    jecTXTFile = 'Autumn18_FastsimV1_MC'
   else:
-    jecFileLabel = 'Spring16_25nsFastSimV1_MC'
-    jecCorrLabel = 'Spring16_25nsFastSimMC_V1'
-    if (doJEC): jecBmakerLabel = 'Spring16_FastSimV1_MC'
-    else: jecBmakerLabel = 'onthefly_Spring16_FastSimV1_MC'
+    jecDBFile = 'Summer16_25nsFastSimMC_V1'
+    jecTXTFile = 'Spring16_FastSimV1_MC'
+  # to instruct babymaker to apply JECs instead via the txt files, add 'onthefly_'
+  if not doJEC:
+    jecTXTFile = 'onthefly_'+jecTXTFile
 
 ###### Defining Baby process, input and output files 
 process = cms.Process("Baby")
@@ -140,7 +141,7 @@ process.baby_full = cms.EDAnalyzer('bmaker_full',
                                     outputFile = cms.string(outName),
                                     inputFiles = cms.vstring(options.inputFiles),
                                     json = cms.string(options.json),
-                                    jec = cms.string(jecBmakerLabel),
+                                    jec = cms.string(jecTXTFile),
                                     met = cms.InputTag(met_label),
                                     met_nohf = cms.InputTag("slimmedMETsNoHF"),
                                     jets = cms.InputTag(jets_label),
@@ -189,11 +190,11 @@ if doJEC:
     process.load("CondCore.DBCommon.CondDBCommon_cfi")
     from CondCore.DBCommon.CondDBSetup_cfi import CondDBSetup
     process.jec = cms.ESSource("PoolDBESSource",CondDBSetup,
-                               connect = cms.string('sqlite_fip:babymaker/data/jec/'+jecFileLabel+'.db'),
+                               connect = cms.string('sqlite_fip:babymaker/data/jec/'+jecDBFile+'.db'),
                                toGet   = cms.VPSet(
                                    cms.PSet(
                                        record = cms.string("JetCorrectionsRecord"),
-                                       tag    = cms.string("JetCorrectorParametersCollection_"+jecCorrLabel+"_AK4PFchs"),
+                                       tag    = cms.string("JetCorrectorParametersCollection_"+jecDBFile+"_AK4PFchs"),
                                        label  = cms.untracked.string("AK4PFchs")
                                    )
                 )
