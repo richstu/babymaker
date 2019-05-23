@@ -1537,23 +1537,6 @@ void bmaker_full::writeGenInfo(edm::Handle<LHEEventProduct> lhe_info){
     baby.ptll_me() = sqrt(pow(px1+px2,2)+pow(py1+py2,2));
   }
 
-//   if (outname.Contains("SMS-") && outname.Contains("Fast")){ //Get mgluino and mlsp
-//     typedef std::vector<std::string>::const_iterator comments_const_iterator;
-    
-//     comments_const_iterator c_begin = lhe_info->comments_begin();
-//     comments_const_iterator c_end = lhe_info->comments_end();
-    
-//     TString model_params;
-//     for(comments_const_iterator cit=c_begin; cit!=c_end; ++cit) {
-//       size_t found = (*cit).find("model");
-//       if(found != std::string::npos)   {
-// //        std::cout <<"BABYMAKER: "<< *cit <<"end"<< std::endl;  
-//         model_params = *cit;
-//       }
-//     }
-
-//     mcTool->getMassPoints(model_params,baby.mgluino(),baby.mlsp());
-//   }
 } // writeGenInfo
 
 void bmaker_full::writeIFSR(edm::Handle<reco::GenParticleCollection> genParticles, 
@@ -2032,7 +2015,7 @@ void bmaker_full::writeWeights(const vCands &sig_leps, edm::Handle<GenEventInfoP
     * baby.w_pu() * baby.eff_jetid();
 
   /////// Systematics that do not change central value /////////
-  if(lhe_info.isValid()) weightTool->getTheoryWeights(lhe_info);
+  if(gen_event_info.isValid()) weightTool->getTheoryWeights(gen_event_info);
   // Renormalization and Factorization scales
   baby.sys_mur().push_back(weightTool->theoryWeight(weight_tools::muRup));
   baby.sys_mur().push_back(weightTool->theoryWeight(weight_tools::muRdown));
@@ -2040,6 +2023,8 @@ void bmaker_full::writeWeights(const vCands &sig_leps, edm::Handle<GenEventInfoP
   baby.sys_muf().push_back(weightTool->theoryWeight(weight_tools::muFdown));
   baby.sys_murf().push_back(weightTool->theoryWeight(weight_tools::muRup_muFup));
   baby.sys_murf().push_back(weightTool->theoryWeight(weight_tools::muRdown_muFdown));
+  baby.sys_murf().push_back(weightTool->theoryWeight(weight_tools::muRup_muFdown));
+  baby.sys_murf().push_back(weightTool->theoryWeight(weight_tools::muRdown_muFup));
   // PDF variations
   weightTool->getPDFWeights(baby.sys_pdf(), baby.w_pdf());
 

@@ -4,11 +4,12 @@
 #define H_WEIGHT_TOOLS
 
 #include "SimDataFormats/GeneratorProducts/interface/LHERunInfoProduct.h"
+#include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
 
 class weight_tools{
 
 private:
-  std::vector<gen::WeightsInfo> theoryWeights;
+  std::vector<double> theoryWeights;
   std::vector<double> w_pu_up;
   std::vector<double> w_pu_nom;
   std::vector<double> w_pu_down;
@@ -18,19 +19,19 @@ private:
 public:
   // the enum index corresponds to the index of the variation
   enum variationType {
-    nominal=0,
-    muFup=1,
-    muFdown=2,
-    muRup=3,
-    muRup_muFup=4,
-    muRup_muFdown=5,
-    muRdown=6,
-    muRdown_muFup=7,
-    muRdown_muFdown=8
+    nominal=1,
+    muFup=2,
+    muFdown=3,
+    muRup=4,
+    muRup_muFup=5,
+    muRup_muFdown=6,
+    muRdown=7,
+    muRdown_muFup=8,
+    muRdown_muFdown=9
   };
 
   float theoryWeight(variationType variation);
-  void getTheoryWeights(edm::Handle<LHEEventProduct> lhe_info);
+  void getTheoryWeights(edm::Handle<GenEventInfoProduct> gen_event_info);
   float pileupWeight(unsigned int ntrupv_mean, int type);
   float triggerEfficiency(int &nmus, int &nels, float &met, std::vector<float> &sys_trig);
   float topPtWeight(float top_pt1,float top_pt2);

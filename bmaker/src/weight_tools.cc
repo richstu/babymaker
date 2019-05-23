@@ -240,20 +240,16 @@ float weight_tools::isrWeight(float isrpt){
 }
 
 float weight_tools::theoryWeight(weight_tools::variationType variation){
-  // cout<<"Printing theory weights, size = "<<theoryWeights.size()<<endl;
-  // cout<<"Nom weight = "<<theoryWeights.at(nominal).wgt<<endl;
-  // for (unsigned i(0); i< theoryWeights.size(); i++){
-  //   cout<<"Weight "<<i<<" = "<<theoryWeights.at(i).wgt<<endl;
-  // }
   if(theoryWeights.size()!=0) {
-    return theoryWeights.at(variation).wgt/theoryWeights.at(nominal).wgt;
+    return theoryWeights.at(variation)/theoryWeights.at(nominal);
+  } else {
+    return 1.0;
   }
-  else return 1.0;
 }
 
-void weight_tools::getTheoryWeights(edm::Handle<LHEEventProduct> lhe_info){
+void weight_tools::getTheoryWeights(edm::Handle<GenEventInfoProduct> gen_event_info){
   theoryWeights.clear();
-  theoryWeights = lhe_info->weights();
+  theoryWeights = gen_event_info->weights();
 }
 
 void weight_tools::getPDFWeights(vector<float> &sys_pdf, vector<float> &w_pdf){
@@ -261,7 +257,7 @@ void weight_tools::getPDFWeights(vector<float> &sys_pdf, vector<float> &w_pdf){
     unsigned ind(10), nweights(100); //index of the first pdf weight and number of replicas
     vector<double> pdfwgt = vector<double>(nweights,1.);
     for (unsigned i(0); i<nweights; i++){
-      double ipdfw = theoryWeights[i+ind].wgt/theoryWeights[nominal].wgt;
+      double ipdfw = theoryWeights[i+ind]/theoryWeights[nominal];
       w_pdf.push_back(ipdfw);
       pdfwgt[i] = ipdfw;
     }

@@ -98,11 +98,11 @@ jecTXTFile = jecDBFile
 if fastsim: 
   jecLevels = ['L1FastJet', 'L2Relative', 'L3Absolute']
   if "RunIIFall17" in outName:
-    jecDBFile = 'Fall17_25nsFastSim_V1_MC'
-    jecTXTFile = 'Fall17_FastsimV1_MC'
+    jecDBFile = 'Fall17_FastSimV1_MC'
+    jecTXTFile = 'Fall17_FastSimV1_MC'
   elif "RunIIAutumn18" in outName:
-    jecDBFile = 'Autumn18_FastsimV1_MC'
-    jecTXTFile = 'Autumn18_FastsimV1_MC'
+    jecDBFile = 'Autumn18_FastSimV1_MC'
+    jecTXTFile = 'Autumn18_FastSimV1_MC'
   else:
     jecDBFile = 'Summer16_25nsFastSimMC_V1'
     jecTXTFile = 'Spring16_FastSimV1_MC'
