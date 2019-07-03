@@ -247,57 +247,68 @@ void jet_met_tools::getMETRaw(edm::Handle<pat::METCollection> mets, float &metRa
 }
 
 void jet_met_tools::getMETWithJEC(edm::Handle<pat::METCollection> mets, float &met, float &metPhi, unsigned isys){
-  if(!doJEC && (!doSystematics || isys==kSysLast)) {
-    met = mets->at(0).pt();
-    metPhi = mets->at(0).phi();
-    return;
-  }
-
-  float metRaw, metRawPhi;
-  getMETRaw(mets, metRaw, metRawPhi);
-  float metx(metRaw*cos(metRawPhi)), mety(metRaw*sin(metRawPhi));
-
-  // Code to skip muons and EM from
-  // https://github.com/cms-sw/cmssw/blob/8d582ad580a446865fc58675d16f6cdf2dae3605/JetMETCorrections/Type1MET/interface/PFJetMETcorrInputProducerT.h#L173-L184
-  StringCutObjectSelector<reco::Candidate> skipMuonSelection("isGlobalMuon | isStandAloneMuon",true);
-  for (size_t ijet(0); ijet < alljets_->size(); ijet++) {
-    const pat::Jet &jet = (*alljets_)[ijet];
-
-    double emEnergyFraction = jet.chargedEmEnergyFraction() + jet.neutralEmEnergyFraction();
-    if(emEnergyFraction > 0.90 || fabs(jet.eta()) > 9.9) continue;
-    
-    reco::Candidate::LorentzVector rawJetP4 = jet.p4()*jet.jecFactor("Uncorrected");
-    float totCorr(jetTotCorrections[ijet]), l1Corr(jetL1Corrections[ijet]);
-    const std::vector<reco::CandidatePtr> & cands = jet.daughterPtrVector();
-    for ( std::vector<reco::CandidatePtr>::const_iterator cand = cands.begin();
-          cand != cands.end(); ++cand ) {
-      const reco::PFCandidate *pfcand = dynamic_cast<const reco::PFCandidate *>(cand->get());
-      const reco::Candidate *mu = (pfcand != 0 ? ( pfcand->muonRef().isNonnull() ? pfcand->muonRef().get() : 0) : cand->get());
-      if ( mu != 0 && skipMuonSelection(*mu) ) {
-        reco::Candidate::LorentzVector muonP4 = (*cand)->p4();
-        rawJetP4 -= muonP4;
-        jetValues.setJetPt(rawJetP4.pt());
-        jetValues.setJetEta(rawJetP4.eta());
-        jetValues.setJetA(jet.jetArea());
-        jetValues.setRho(rhoEvent_);
-        vector<float> corr_vals = jetCorrector->getSubCorrections(jetValues);
-        totCorr = corr_vals.at(corr_vals.size()-1); // All corrections
-        l1Corr = corr_vals.at(0);      // L1 PU correction (offset)
-      }
+  if(!doJEC) { // if not doing JECs with TXT files on the fly
+    if (!doSystematics || isys==kSysLast) {
+      met = mets->at(0).pt();
+      metPhi = mets->at(0).phi();
+    } else {
+      if (isys==kSysJECUp){
+        met = mets->at(0).shiftedPt(pat::MET::METUncertainty::JetEnUp);
+        metPhi = mets->at(0).shiftedPhi(pat::MET::METUncertainty::JetEnUp);
+      } else if (isys==kSysJECDn){
+        met = mets->at(0).shiftedPt(pat::MET::METUncertainty::JetEnDown);
+        metPhi = mets->at(0).shiftedPhi(pat::MET::METUncertainty::JetEnDown);
+      } else {
+        met = mets->at(0).shiftedPt(pat::MET::METUncertainty::JetResUp);
+        metPhi = mets->at(0).shiftedPhi(pat::MET::METUncertainty::JetResUp);
+      } 
     }
-    
-    if (isys == kSysJER) totCorr *= 1+jerUnc[ijet];
-    else if (isys == kSysJECUp) totCorr *= 1+jecUnc[ijet];
-    else if (isys == kSysJECDn) totCorr *= 1-jecUnc[ijet];
+  } else {
+    float metRaw, metRawPhi;
+    getMETRaw(mets, metRaw, metRawPhi);
+    float metx(metRaw*cos(metRawPhi)), mety(metRaw*sin(metRawPhi));
 
-    if((rawJetP4.pt()*totCorr) <= 15.) continue;
-    metx -= rawJetP4.px()*(totCorr - l1Corr);
-    mety -= rawJetP4.py()*(totCorr - l1Corr);
-  } // Loop over alljets_
+    // Code to skip muons and EM from
+    // https://github.com/cms-sw/cmssw/blob/8d582ad580a446865fc58675d16f6cdf2dae3605/JetMETCorrections/Type1MET/interface/PFJetMETcorrInputProducerT.h#L173-L184
+    StringCutObjectSelector<reco::Candidate> skipMuonSelection("isGlobalMuon | isStandAloneMuon",true);
+    for (size_t ijet(0); ijet < alljets_->size(); ijet++) {
+      const pat::Jet &jet = (*alljets_)[ijet];
 
-  met = hypot(metx,mety);
-  metPhi = atan2(mety,metx);
+      double emEnergyFraction = jet.chargedEmEnergyFraction() + jet.neutralEmEnergyFraction();
+      if(emEnergyFraction > 0.90 || fabs(jet.eta()) > 9.9) continue;
+      
+      reco::Candidate::LorentzVector rawJetP4 = jet.p4()*jet.jecFactor("Uncorrected");
+      float totCorr(jetTotCorrections[ijet]), l1Corr(jetL1Corrections[ijet]);
+      const std::vector<reco::CandidatePtr> & cands = jet.daughterPtrVector();
+      for ( std::vector<reco::CandidatePtr>::const_iterator cand = cands.begin();
+            cand != cands.end(); ++cand ) {
+        const reco::PFCandidate *pfcand = dynamic_cast<const reco::PFCandidate *>(cand->get());
+        const reco::Candidate *mu = (pfcand != 0 ? ( pfcand->muonRef().isNonnull() ? pfcand->muonRef().get() : 0) : cand->get());
+        if ( mu != 0 && skipMuonSelection(*mu) ) {
+          reco::Candidate::LorentzVector muonP4 = (*cand)->p4();
+          rawJetP4 -= muonP4;
+          jetValues.setJetPt(rawJetP4.pt());
+          jetValues.setJetEta(rawJetP4.eta());
+          jetValues.setJetA(jet.jetArea());
+          jetValues.setRho(rhoEvent_);
+          vector<float> corr_vals = jetCorrector->getSubCorrections(jetValues);
+          totCorr = corr_vals.at(corr_vals.size()-1); // All corrections
+          l1Corr = corr_vals.at(0);      // L1 PU correction (offset)
+        }
+      }
+      
+      if (isys == kSysJER) totCorr *= 1+jerUnc[ijet];
+      else if (isys == kSysJECUp) totCorr *= 1+jecUnc[ijet];
+      else if (isys == kSysJECDn) totCorr *= 1-jecUnc[ijet];
 
+      if((rawJetP4.pt()*totCorr) <= 15.) continue;
+      metx -= rawJetP4.px()*(totCorr - l1Corr);
+      mety -= rawJetP4.py()*(totCorr - l1Corr);
+    } // Loop over alljets_
+
+    met = hypot(metx,mety);
+    metPhi = atan2(mety,metx);
+  }
 }
 
 float jet_met_tools::jetBTagWeight(const pat::Jet &jet, const LVector &jetp4, 
@@ -897,7 +908,7 @@ jet_met_tools::jet_met_tools(TString ijecName, bool doSys, bool fastSim, TString
   // only add b-tagging weights if requested
   string scaleFactorFile_deep(getenv("CMSSW_BASE"));
   // set btag working points
-  if (jecName.Contains("Summer16")){ // 80X WPs
+  if (jecName.Contains("Summer16") || jecName.Contains("Spring16")){ // 80X WPs
     DeepCSVLoose  = 0.2219;
     DeepCSVMedium = 0.6324;
     DeepCSVTight  = 0.8958;
