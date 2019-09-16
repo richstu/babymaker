@@ -57,9 +57,9 @@ int main(int argc, char *argv[]){
   }
   TChain tree("tree");
 	int nfiles(0);
-  nfiles = tree.Add(infiles+"/unsplit/*.root");
+  nfiles = tree.Add(infiles+"/*.root");
   TChain treeglobal("treeglobal");
-  treeglobal.Add(infiles+"/unsplit/*.root");  
+  treeglobal.Add(infiles+"/*.root");  
   //long nentries(tree.GetEntries());
 
   TString outfolder = outpath;

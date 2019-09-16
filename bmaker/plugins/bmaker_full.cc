@@ -77,6 +77,10 @@ void bmaker_full::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
     return;
   }
 
+  if (outname.Contains("T2tt") && (mprod_-mlsp_)!=174 && (mprod_-mlsp_)!=175) {
+    reportTime(iEvent);
+    return;
+  } 
   ////////////////////// Primary vertices /////////////////////
   if (debug) cout<<"BABYMAKER:: Writing vertices..."<<endl;
   edm::Handle<reco::VertexCollection> vtx;
