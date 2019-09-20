@@ -8,7 +8,7 @@
 # every time:
 #    - go to lxplus, generate proxy by running voms-proxy-init, it will be stored in some folder /tmp/x509..., remember the lxplus node
 #    - copy the file x509... to the computer where you want to run the dasgoclient
-#    - export X509_USER_PROXY=<wherever you put the file>
+#    - export X509_USER_PROXY=/tmp/x509up_u31582
 #    - test it, e.g.:
 #         ./dasgoclient -query="parent dataset=/TTJets_SingleLeptFromTbar_genMET-150_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v2/MINIAODSIM"
 
@@ -19,6 +19,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-y', '--year', type=int, default=2016)
 parser.add_argument('--mc', action='store_true')
 parser.add_argument('--data', action='store_true')
+parser.add_argument('--nano', action='store_true')
 args = parser.parse_args()
 
 if not args.mc and not args.data:
@@ -28,12 +29,12 @@ def print_dataset_line(datasets):
     nds = len(datasets)
     for i, ds in enumerate(datasets):
         if i==0:
-            if nds==1: print '  datasets.append(["'+ds+'"])'
-            else:      print '  datasets.append(["'+ds+'",'
+            if nds==1: print('  datasets.append(["'+ds+'"])')
+            else:      print('  datasets.append(["'+ds+'",')
         elif i==nds-1:
-            print '                   "'+ds+'"])'
+            print('                   "'+ds+'"])')
         else:
-            print '                   "'+ds+'",'
+            print('                   "'+ds+'",')
     return 
 
 names = [
@@ -70,10 +71,17 @@ elif args.year==2018: tag = 'RunIIAutumn18MiniAOD'
 
 data_tier = 'MINIAODSIM'
 
+if args.nano: 
+    tag = tag.split("Mini")[0]
+    tag += "NanoAODv5"
+    data_tier = 'NANOAODSIM'
+
+
 # ------------- Monte Carlo samples ------------------
 if args.mc:
     for name in names:
-        output = subprocess.check_output(['./dasgoclient', '-query="dataset dataset=/'+name+'*/'+tag+'*/'+data_tier+' status=PRODUCTION"'])
+        output = subprocess.check_output('dasgoclient -query="dataset dataset=/'+name+'*/'+tag+'*/'+data_tier+'"', 
+            shell=True, universal_newlines=True)
         miniAODs = output.split()
         if args.year==2017:
             found = False
@@ -85,7 +93,7 @@ if args.mc:
                 elif 'TuneCP5Down' in mini: continue
                 elif 'TuneCP5Up' in mini: continue
                 elif 'DoubleScattering' in mini: continue
-                parent = subprocess.check_output('./dasgoclient -query="parent dataset='+mini+'"', shell=True)
+                parent = subprocess.run('./dasgoclient -query="parent dataset='+mini+'"', shell=True)
                 if 'PU2017' in parent:
                     found = True
                     datasets.append(mini)
@@ -93,11 +101,11 @@ if args.mc:
                     datasets_badpu.append(mini)
             if not found: 
                 if len(miniAODs)==0:
-                    print '# missing dataset: ',name
+                    print('# missing dataset: ',name)
                 elif len(datasets_badpu)==1:
-                    print '  datasets.append(["'+datasets_badpu[0]+'"]) # BAD PU!!! Alternative not available.'
+                    print('  datasets.append(["'+datasets_badpu[0]+'"]) # BAD PU!!! Alternative not available.')
                 else:
-                    print '**** Found multiple (bad) options:',[imini+'/n' for imini in miniAODs]
+                    print('**** Found multiple (bad) options:',[imini+'/n' for imini in miniAODs])
             else:
                 print_dataset_line(datasets)
         else:
@@ -111,7 +119,7 @@ if args.mc:
                 elif 'FlatPU' in mini: continue
                 datasets.append(mini)
             if len(datasets)==0:
-                print '# missing dataset: ',name
+                print('# missing dataset: '+name)
             else:
                 print_dataset_line(datasets)
 
@@ -144,19 +152,19 @@ if args.data:
             output = subprocess.check_output(['./dasgoclient', '-query=dataset=/'+stream+'/Run'+str(args.year)+run+'*'+reco_tag+'*/'+data_tier])
             miniAODs = output.split()
             if len(miniAODs)==0:
-                print '# missing dataset: /'+stream+'/Run'+str(args.year)+run+'*'+reco_tag+'*/'+data_tier
+                print('# missing dataset: /'+stream+'/Run'+str(args.year)+run+'*'+reco_tag+'*/'+data_tier)
             for mini in miniAODs:
-                print '  datasets.append(["'+mini+'"])'
+                print('  datasets.append(["'+mini+'"])')
 
-print '\033[91m********************* CAUTION ****************************\033[0m'
-print 'Before copying datasets to generate_crab_cfg.py, check for'
-print 'undesired datasets that were accidentally selected or missing items!'
-print 'e.g. MC: same dataset may be available in multiple generators'
-print 'or with special generator options/phase spae, etc.'
-print 'e.g. Data: same dataset may be available in multiple versions.'
-print 'It seems for Re-reco those with different "ver" number are non-overlapping, while'
-print 'those with different "-v" number are repeats. On the contrary, for PromptReco'
-print 'different "-v" are non-overlapping. To be sure, please check'
-print 'run list as follows:'
-print './dasgoclient -query="run dataset=/MET/Run2016B-17Jul2018_ver1-v1/MINIAOD"'
+print('\033[91m********************* CAUTION ****************************\033[0m')
+print('Before copying datasets to generate_crab_cfg.py, check for')
+print('undesired datasets that were accidentally selected or missing items!')
+print('e.g. MC: same dataset may be available in multiple generators')
+print('or with special generator options/phase spae, etc.')
+print('e.g. Data: same dataset may be available in multiple versions.')
+print('It seems for Re-reco those with different "ver" number are non-overlapping, while')
+print('those with different "-v" number are repeats. On the contrary, for PromptReco')
+print('different "-v" are non-overlapping. To be sure, please check')
+print('run list as follows:')
+print('./dasgoclient -query="run dataset=/MET/Run2016B-17Jul2018_ver1-v1/MINIAOD"')
 
