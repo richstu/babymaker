@@ -93,12 +93,17 @@ if args.mc:
                 elif 'TuneCP5Down' in mini: continue
                 elif 'TuneCP5Up' in mini: continue
                 elif 'DoubleScattering' in mini: continue
-                parent = subprocess.run('./dasgoclient -query="parent dataset='+mini+'"', shell=True)
-                if 'PU2017' in parent:
-                    found = True
+                if args.nano:
                     datasets.append(mini)
+                    found = True
                 else:
-                    datasets_badpu.append(mini)
+                    # some MiniAOD datasets have wrong pile-up so we check whether we have the correct dataset by searching for the string 'PU2017' in the parent AOD dataset name
+                    parent = subprocess.run('dasgoclient -query="parent dataset='+mini+'"', shell=True)
+                    if 'PU2017' in parent:
+                        found = True
+                        datasets.append(mini)
+                    else:
+                        datasets_badpu.append(mini)
             if not found: 
                 if len(miniAODs)==0:
                     print('# missing dataset: ',name)
